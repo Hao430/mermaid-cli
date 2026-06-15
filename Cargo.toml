@@ -1,0 +1,30 @@
+[package]
+name = "mermaid-cli"
+version = "0.1.0-alpha"
+edition = "2021"
+authors = ["Hao430"]
+description = "High-performance Mermaid CLI tool written in Rust"
+license = "MIT"
+repository = "https://github.com/yourusername/mermaid-cli"
+
+[dependencies]
+# 暂时使用最少的依赖进行开发
+# clap = { version = "4.4", features = ["derive"] }
+# serde = { version = "1.0", features = ["derive"] }
+# serde_json = "1.0"
+
+[dev-dependencies]
+# tempfile = "3.8"
+
+[[bin]]
+name = "mermaid-cli"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 1

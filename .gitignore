@@ -1,0 +1,5 @@
+/target
+.claude/
+output.svg
+output2.svg
+test_diagram.mmd
