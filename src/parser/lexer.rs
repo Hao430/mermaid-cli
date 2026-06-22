@@ -13,6 +13,7 @@ pub enum TokenType {
     RightBrace,
     Semicolon,
     Pipe,
+    GreaterThan,
     String(String),
 }
 
@@ -30,6 +31,7 @@ impl fmt::Display for TokenType {
             TokenType::RightBrace => write!(f, "}}"),
             TokenType::Semicolon => write!(f, ";"),
             TokenType::Pipe => write!(f, "|"),
+            TokenType::GreaterThan => write!(f, ">"),
             TokenType::String(s) => write!(f, "\"{}\"", s),
         }
     }
@@ -150,6 +152,14 @@ impl Lexer {
                     column: start_column,
                 }
             }
+            '>' => {
+                self.advance();
+                Token {
+                    token_type: TokenType::GreaterThan,
+                    line: start_line,
+                    column: start_column,
+                }
+            }
             '-' | '=' => self.read_arrow_or_minus(),
             '"' | '\'' => self.read_string(),
             _ if ch.is_alphabetic() || ch == '_' => self.read_identifier(),
@@ -163,6 +173,8 @@ impl Lexer {
     fn read_arrow_or_minus(&mut self) -> Token {
         let start_line = self.line;
         let start_column = self.column;
+        // 安全：此函数仅由 next_token() 在匹配 '-' 或 '=' 时调用，
+        // 且 next_token() 会在调用前确保 !self.is_at_end()，因此 current_char() 始终有值
         let ch = self.current_char().unwrap();
 
         self.advance();
@@ -195,6 +207,8 @@ impl Lexer {
     fn read_string(&mut self) -> Token {
         let start_line = self.line;
         let start_column = self.column;
+        // 安全：此函数仅由 next_token() 在匹配 '"' 或 '\'' 时调用，
+        // 且 next_token() 会在调用前确保 !self.is_at_end()，因此 current_char() 始终有值
         let quote = self.current_char().unwrap();
         self.advance();
 

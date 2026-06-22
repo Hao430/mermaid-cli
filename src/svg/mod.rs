@@ -29,6 +29,14 @@ impl SvgBuilder {
         self.elements.push(element);
     }
 
+    pub fn add_ellipse(&mut self, cx: f32, cy: f32, rx: f32, ry: f32, style: &str) {
+        let element = format!(
+            r#"  <ellipse cx="{}" cy="{}" rx="{}" ry="{}" style="{}"/>"#,
+            cx, cy, rx, ry, style
+        );
+        self.elements.push(element);
+    }
+
     pub fn add_line(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, style: &str) {
         let element = format!(
             r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" style="{}"/>"#,
@@ -133,6 +141,67 @@ mod tests {
 
         assert!(result.contains("&amp;"));
         assert!(result.contains("&lt;"));
+    }
+
+    #[test]
+    fn test_svg_builder_empty() {
+        let svg = SvgBuilder::new(800, 600);
+        let result = svg.build();
+
+        assert!(result.contains("<svg"));
+        assert!(result.contains("</svg>"));
+        assert!(result.contains("800"));
+        assert!(result.contains("600"));
+        assert!(result.contains("xmlns"));
+    }
+
+    #[test]
+    fn test_svg_ellipse_element() {
+        let mut svg = SvgBuilder::new(800, 600);
+        svg.add_ellipse(100.0, 100.0, 50.0, 30.0, "fill:blue");
+        let result = svg.build();
+
+        assert!(result.contains("<ellipse"));
+        assert!(result.contains("cx=\"100\""));
+        assert!(result.contains("cy=\"100\""));
+        assert!(result.contains("rx=\"50\""));
+        assert!(result.contains("ry=\"30\""));
+    }
+
+    #[test]
+    fn test_svg_arrow_element() {
+        let mut svg = SvgBuilder::new(800, 600);
+        svg.add_arrow(100.0, 100.0);
+        let result = svg.build();
+
+        assert!(result.contains("<polygon"));
+        assert!(result.contains("fill:black"));
+    }
+
+    #[test]
+    fn test_svg_path_element() {
+        let mut svg = SvgBuilder::new(800, 600);
+        svg.add_path("M10 10 L100 100", "fill:none;stroke:black");
+        let result = svg.build();
+
+        assert!(result.contains("<path"));
+        assert!(result.contains("M10 10 L100 100"));
+    }
+
+    #[test]
+    fn test_svg_element_order() {
+        let mut svg = SvgBuilder::new(800, 600);
+        svg.add_rect(10.0, 10.0, 50.0, 50.0, "");
+        svg.add_circle(100.0, 100.0, 20.0, "");
+        svg.add_text(10.0, 10.0, "Order", "");
+        let result = svg.build();
+
+        let rect_pos = result.find("<rect").unwrap();
+        let circle_pos = result.find("<circle").unwrap();
+        let text_pos = result.find("Order").unwrap();
+
+        assert!(rect_pos < circle_pos, "rect should come before circle");
+        assert!(circle_pos < text_pos, "circle should come before text");
     }
 
     #[test]

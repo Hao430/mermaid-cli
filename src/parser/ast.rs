@@ -10,6 +10,15 @@ pub enum DiagramType {
 pub struct Diagram {
     pub diagram_type: DiagramType,
     pub statements: Vec<Statement>,
+    pub direction: Option<String>,
+    pub subgraphs: Vec<Subgraph>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Subgraph {
+    pub id: String,
+    pub title: Option<String>,
+    pub statements: Vec<Statement>,
 }
 
 #[derive(Debug, Clone)]
@@ -28,12 +37,14 @@ pub enum Statement {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum NodeShape {
-    Rect,        // []
-    Circle,      // ()
-    Diamond,     // {}
-    Rounded,     // [()]
-    RoundedRect, // [[]]
-    Named(String),
+    Rect,         // [text]
+    Circle,       // (text) → 圆角矩形
+    Diamond,      // {text} → 菱形
+    Rounded,      // ([text]) → 大圆角矩形
+    Subroutine,   // [[text]] → 双线矩形
+    Cylinder,     // [(text)] → 圆柱
+    DoubleCircle, // ((text)) → 双圆
+    Flag,         // >text] → 旗帜
 }
 
 impl fmt::Display for NodeShape {
@@ -43,8 +54,10 @@ impl fmt::Display for NodeShape {
             NodeShape::Circle => write!(f, "circle"),
             NodeShape::Diamond => write!(f, "diamond"),
             NodeShape::Rounded => write!(f, "rounded"),
-            NodeShape::RoundedRect => write!(f, "roundedRect"),
-            NodeShape::Named(s) => write!(f, "{}", s),
+            NodeShape::Subroutine => write!(f, "subroutine"),
+            NodeShape::Cylinder => write!(f, "cylinder"),
+            NodeShape::DoubleCircle => write!(f, "doubleCircle"),
+            NodeShape::Flag => write!(f, "flag"),
         }
     }
 }
@@ -66,11 +79,41 @@ impl Diagram {
         nodes.into_iter().collect()
     }
 
+    /// Returns nodes with their display labels.
+    /// Uses label if available, falls back to node ID.
+    pub fn get_node_labels(&self) -> Vec<(String, String)> {
+        let mut node_map = std::collections::HashMap::new();
+        for stmt in &self.statements {
+            match stmt {
+                Statement::NodeDef { id, label, .. } => {
+                    let display = label.clone().unwrap_or_else(|| id.clone());
+                    node_map.insert(id.clone(), display);
+                }
+                Statement::EdgeDef { from, to, .. } => {
+                    node_map.entry(from.clone()).or_insert_with(|| from.clone());
+                    node_map.entry(to.clone()).or_insert_with(|| to.clone());
+                }
+            }
+        }
+        node_map.into_iter().collect()
+    }
+
     pub fn get_edges(&self) -> Vec<(String, String)> {
         let mut edges = Vec::new();
         for stmt in &self.statements {
             if let Statement::EdgeDef { from, to, .. } = stmt {
                 edges.push((from.clone(), to.clone()));
+            }
+        }
+        edges
+    }
+
+    /// Returns all edges with their labels (if any).
+    pub fn get_edges_with_labels(&self) -> Vec<(String, String, Option<String>)> {
+        let mut edges = Vec::new();
+        for stmt in &self.statements {
+            if let Statement::EdgeDef { from, to, label } = stmt {
+                edges.push((from.clone(), to.clone(), label.clone()));
             }
         }
         edges
@@ -102,6 +145,8 @@ mod tests {
                     label: None,
                 },
             ],
+            direction: None,
+            subgraphs: vec![],
         };
 
         assert_eq!(diagram.diagram_type, DiagramType::Flowchart);
@@ -124,10 +169,31 @@ mod tests {
                     shape: NodeShape::Rect,
                 },
             ],
+            direction: None,
+            subgraphs: vec![],
         };
 
         let mut nodes = diagram.get_nodes();
         nodes.sort();
         assert_eq!(nodes, vec!["A", "B"]);
+    }
+
+    #[test]
+    fn test_node_shape_display() {
+        assert_eq!(NodeShape::Rect.to_string(), "rect");
+        assert_eq!(NodeShape::Circle.to_string(), "circle");
+        assert_eq!(NodeShape::Diamond.to_string(), "diamond");
+        assert_eq!(NodeShape::Rounded.to_string(), "rounded");
+        assert_eq!(NodeShape::Subroutine.to_string(), "subroutine");
+        assert_eq!(NodeShape::Cylinder.to_string(), "cylinder");
+        assert_eq!(NodeShape::DoubleCircle.to_string(), "doubleCircle");
+        assert_eq!(NodeShape::Flag.to_string(), "flag");
+    }
+
+    #[test]
+    fn test_node_shape_equality() {
+        assert_eq!(NodeShape::Rect, NodeShape::Rect);
+        assert_ne!(NodeShape::Rect, NodeShape::Diamond);
+        assert_eq!(NodeShape::Cylinder, NodeShape::Cylinder);
     }
 }

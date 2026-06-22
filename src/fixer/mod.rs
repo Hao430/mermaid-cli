@@ -59,4 +59,60 @@ mod tests {
         assert!(fixed.trim().ends_with("end"));
         assert!(!fixes.is_empty());
     }
+
+    #[test]
+    fn test_fixer_arrow_typos() {
+        let fixer = Fixer::new();
+        let (fixed, fixes) = fixer.fix("graph TD\nA-->>B");
+        assert!(!fixed.contains("-->>"), "Arrow typo should be fixed");
+        assert!(fixed.contains("-->"), "Should contain correct arrow");
+        assert!(!fixes.is_empty());
+
+        let (fixed2, fixes2) = fixer.fix("graph TD\nA=>B");
+        assert!(!fixed2.contains("=>"), "Arrow typo '=>' should be fixed");
+        assert!(fixed2.contains("->"), "Should contain corrected arrow");
+        assert!(!fixes2.is_empty());
+    }
+
+    #[test]
+    fn test_fixer_all_typos() {
+        let fixer = Fixer::new();
+        let code = "flowchrat TD\nA-->>B\nC=>D";
+        let (fixed, fixes) = fixer.fix(code);
+
+        assert!(fixed.contains("flowchart"), "flowchrat should be fixed");
+        assert!(!fixed.contains("-->>"), "-->> should be fixed to -->");
+        assert!(!fixed.contains("=>"), "=> should be fixed to ->");
+        assert!(fixed.trim().ends_with("end"), "Should end with 'end'");
+
+        // Should have at least 3 fix records (typo + arrow + arrow + end)
+        assert!(fixes.len() >= 3, "Should have multiple fix records");
+    }
+
+    #[test]
+    fn test_fixer_valid_input_unchanged() {
+        let fixer = Fixer::new();
+        let code = "graph TD\nA-->B";
+        let (fixed, _fixes) = fixer.fix(code);
+
+        // Core content should be preserved
+        assert!(
+            fixed.contains("graph TD"),
+            "Graph declaration should be preserved"
+        );
+        assert!(
+            fixed.contains("A-->B"),
+            "Edge definition should be preserved"
+        );
+        assert!(fixed.trim().ends_with("end"), "Should end with 'end'");
+    }
+
+    #[test]
+    fn test_fixer_empty_input() {
+        let fixer = Fixer::new();
+        let (fixed, fixes) = fixer.fix("");
+
+        assert!(fixed.is_empty(), "Empty input should produce empty output");
+        assert!(fixes.is_empty(), "Empty input should have no fixes");
+    }
 }
