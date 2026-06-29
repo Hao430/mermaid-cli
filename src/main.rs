@@ -173,7 +173,8 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
     };
 
     // 检测是否为 Markdown 文件 (.md / .markdown)
-    let is_markdown = input_path.extension()
+    let is_markdown = input_path
+        .extension()
         .and_then(|ext| ext.to_str())
         .map(|ext| ext == "md" || ext == "markdown")
         .unwrap_or(false);
@@ -182,12 +183,18 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
     let code = if is_markdown {
         let blocks = extract_mermaid_blocks(&code);
         if blocks.is_empty() {
-            eprintln!("Error: No mermaid code blocks found in {}", input_path.display());
+            eprintln!(
+                "Error: No mermaid code blocks found in {}",
+                input_path.display()
+            );
             std::process::exit(1);
         }
         // 渲染第一个代码块，如果有多个则提示
         if blocks.len() > 1 {
-            eprintln!("Note: {} mermaid blocks found, rendering the first one", blocks.len());
+            eprintln!(
+                "Note: {} mermaid blocks found, rendering the first one",
+                blocks.len()
+            );
         }
         blocks.into_iter().next().unwrap()
     } else {
@@ -213,7 +220,9 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
 
     if let Some(ref css_path) = css_file {
         match fs::read_to_string(css_path) {
-            Ok(css) => { renderer = renderer.with_custom_css(&css); }
+            Ok(css) => {
+                renderer = renderer.with_custom_css(&css);
+            }
             Err(e) => {
                 eprintln!("Error reading CSS file {}: {}", css_path, e);
                 std::process::exit(1);
@@ -230,9 +239,10 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
     };
 
     // 检测输出格式
-    let fmt = output_format.as_deref().or_else(|| {
-        output_path.as_ref().and_then(|p| p.extension()?.to_str())
-    }).unwrap_or("svg");
+    let fmt = output_format
+        .as_deref()
+        .or_else(|| output_path.as_ref().and_then(|p| p.extension()?.to_str()))
+        .unwrap_or("svg");
 
     if fmt == "png" {
         #[cfg(feature = "png")]
@@ -241,17 +251,29 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
                 Ok(png_bytes) => {
                     if let Some(output) = output_path {
                         match fs::write(&output, &png_bytes) {
-                            Ok(_) => { if !quiet { println!("✓ Rendered PNG to: {}", output.display()); } }
-                            Err(e) => { eprintln!("Error writing PNG: {}", e); std::process::exit(1); }
+                            Ok(_) => {
+                                if !quiet {
+                                    println!("✓ Rendered PNG to: {}", output.display());
+                                }
+                            }
+                            Err(e) => {
+                                eprintln!("Error writing PNG: {}", e);
+                                std::process::exit(1);
+                            }
                         }
                     }
                 }
-                Err(e) => { eprintln!("Error rendering PNG: {}", e); std::process::exit(1); }
+                Err(e) => {
+                    eprintln!("Error rendering PNG: {}", e);
+                    std::process::exit(1);
+                }
             }
         }
         #[cfg(not(feature = "png"))]
         {
-            eprintln!("PNG output requires building with --features png. Use SVG output or rebuild.");
+            eprintln!(
+                "PNG output requires building with --features png. Use SVG output or rebuild."
+            );
             std::process::exit(1);
         }
     } else {
@@ -262,14 +284,24 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
                 }
                 if let Some(output) = output_path {
                     match fs::write(&output, &svg) {
-                        Ok(_) => { if !quiet { println!("✓ Rendered to: {}", output.display()); } }
-                        Err(e) => { eprintln!("Error writing to {}: {}", output.display(), e); std::process::exit(1); }
+                        Ok(_) => {
+                            if !quiet {
+                                println!("✓ Rendered to: {}", output.display());
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error writing to {}: {}", output.display(), e);
+                            std::process::exit(1);
+                        }
                     }
                 } else {
                     print!("{}", svg);
                 }
             }
-            Err(e) => { eprintln!("Error rendering: {}", e); std::process::exit(1); }
+            Err(e) => {
+                eprintln!("Error rendering: {}", e);
+                std::process::exit(1);
+            }
         }
     }
 }
@@ -385,7 +417,10 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
             std::process::exit(1);
         }
         if blocks.len() > 1 {
-            eprintln!("Note: {} mermaid blocks found, rendering the first one", blocks.len());
+            eprintln!(
+                "Note: {} mermaid blocks found, rendering the first one",
+                blocks.len()
+            );
         }
         code = blocks.into_iter().next().unwrap();
     }
@@ -409,7 +444,9 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
 
     if let Some(ref css_path) = css_file {
         match fs::read_to_string(css_path) {
-            Ok(css) => { renderer = renderer.with_custom_css(&css); }
+            Ok(css) => {
+                renderer = renderer.with_custom_css(&css);
+            }
             Err(e) => {
                 eprintln!("Error reading CSS file {}: {}", css_path, e);
                 std::process::exit(1);
@@ -426,9 +463,10 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
     };
 
     // 检测输出格式
-    let fmt = output_format.as_deref().or_else(|| {
-        output_path.as_ref().and_then(|p| p.extension()?.to_str())
-    }).unwrap_or("svg");
+    let fmt = output_format
+        .as_deref()
+        .or_else(|| output_path.as_ref().and_then(|p| p.extension()?.to_str()))
+        .unwrap_or("svg");
 
     if fmt == "png" {
         #[cfg(feature = "png")]
@@ -437,17 +475,29 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
                 Ok(png_bytes) => {
                     if let Some(output) = output_path {
                         match fs::write(&output, &png_bytes) {
-                            Ok(_) => { if !quiet { println!("✓ Rendered PNG to: {}", output.display()); } }
-                            Err(e) => { eprintln!("Error writing PNG: {}", e); std::process::exit(1); }
+                            Ok(_) => {
+                                if !quiet {
+                                    println!("✓ Rendered PNG to: {}", output.display());
+                                }
+                            }
+                            Err(e) => {
+                                eprintln!("Error writing PNG: {}", e);
+                                std::process::exit(1);
+                            }
                         }
                     }
                 }
-                Err(e) => { eprintln!("Error rendering PNG: {}", e); std::process::exit(1); }
+                Err(e) => {
+                    eprintln!("Error rendering PNG: {}", e);
+                    std::process::exit(1);
+                }
             }
         }
         #[cfg(not(feature = "png"))]
         {
-            eprintln!("PNG output requires building with --features png. Use SVG output or rebuild.");
+            eprintln!(
+                "PNG output requires building with --features png. Use SVG output or rebuild."
+            );
             std::process::exit(1);
         }
     } else {
@@ -458,14 +508,24 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
                 }
                 if let Some(output) = output_path {
                     match fs::write(&output, &svg) {
-                        Ok(_) => { if !quiet { println!("✓ Rendered to: {}", output.display()); } }
-                        Err(e) => { eprintln!("Error writing to {}: {}", output.display(), e); std::process::exit(1); }
+                        Ok(_) => {
+                            if !quiet {
+                                println!("✓ Rendered to: {}", output.display());
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error writing to {}: {}", output.display(), e);
+                            std::process::exit(1);
+                        }
                     }
                 } else {
                     print!("{}", svg);
                 }
             }
-            Err(e) => { eprintln!("Error rendering: {}", e); std::process::exit(1); }
+            Err(e) => {
+                eprintln!("Error rendering: {}", e);
+                std::process::exit(1);
+            }
         }
     }
 }
@@ -493,7 +553,10 @@ fn filter_svg_by_id(svg: &str, id: &str) -> String {
         if trimmed.contains(&format!("id=\"{}\"", id)) || trimmed.contains(&format!("#{}", id)) {
             result.push_str(line);
             result.push('\n');
-        } else if trimmed.starts_with('<') && !trimmed.starts_with("</") && !trimmed.starts_with("<?") {
+        } else if trimmed.starts_with('<')
+            && !trimmed.starts_with("</")
+            && !trimmed.starts_with("<?")
+        {
             current_element.push_str(line);
             current_element.push('\n');
         }
@@ -669,7 +732,8 @@ fn render_files_parallel(
                         if let Err(e) = fs::write(out_path, &svg) {
                             let _ = tx.send(format!("Write error {}: {}", out_path.display(), e));
                         } else if !quiet {
-                            let _ = tx.send(format!("✓ {} -> {}", file.display(), out_path.display()));
+                            let _ =
+                                tx.send(format!("✓ {} -> {}", file.display(), out_path.display()));
                         }
                     }
                     Err(e) => {

@@ -311,10 +311,18 @@ fn test_cli_sequence_from_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "Sequence diagram should render successfully");
+    assert!(
+        result.status.success(),
+        "Sequence diagram should render successfully"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_seq.svg").unwrap();
     assert!(svg.contains("Alice"));
     assert!(svg.contains("Bob"));
@@ -353,7 +361,10 @@ fn test_cli_sequence_with_blocks() {
         .arg("/tmp/test_cli_seq_blocks.svg")
         .output()
         .expect("Failed to run CLI");
-    assert!(output.status.success(), "Should render sequence with blocks");
+    assert!(
+        output.status.success(),
+        "Should render sequence with blocks"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_seq_blocks.svg").unwrap();
     assert!(svg.contains("yes"));
     assert!(svg.contains("no"));
@@ -376,7 +387,10 @@ fn test_cli_sequence_with_note() {
     assert!(output.status.success(), "Should render sequence with note");
     let svg = fs::read_to_string("/tmp/test_cli_seq_note.svg").unwrap();
     assert!(svg.contains("This is a note"));
-    assert!(svg.contains("#fffde7"), "Note should have yellow background");
+    assert!(
+        svg.contains("#fffde7"),
+        "Note should have yellow background"
+    );
     cleanup(&[&input]);
     let _ = fs::remove_file("/tmp/test_cli_seq_note.svg");
 }
@@ -393,7 +407,10 @@ fn test_cli_sequence_with_activation() {
         .arg("/tmp/test_cli_seq_activation.svg")
         .output()
         .expect("Failed to run CLI");
-    assert!(output.status.success(), "Should render sequence with activation");
+    assert!(
+        output.status.success(),
+        "Should render sequence with activation"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_seq_activation.svg").unwrap();
     assert!(svg.contains("Alice"));
     assert!(svg.contains("Hello"));
@@ -438,10 +455,18 @@ fn test_cli_pie_from_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "Pie chart should render from stdin");
+    assert!(
+        result.status.success(),
+        "Pie chart should render from stdin"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_pie_stdin.svg").unwrap();
     assert!(svg.contains("Sales"), "Should contain title");
     assert!(svg.contains("Q1"), "Should contain slice label");
@@ -450,10 +475,7 @@ fn test_cli_pie_from_stdin() {
 
 #[test]
 fn test_cli_pie_check() {
-    let input = create_test_mmd(
-        "pie title Test\n\"A\" : 50\n\"B\" : 50",
-        "pie_check.mmd",
-    );
+    let input = create_test_mmd("pie title Test\n\"A\" : 50\n\"B\" : 50", "pie_check.mmd");
     let result = Command::new(binary_path())
         .arg("check")
         .arg(input.to_str().unwrap())
@@ -479,7 +501,10 @@ fn test_cli_class_from_file() {
         .arg("/tmp/test_cli_class.svg")
         .output()
         .expect("Failed to run CLI");
-    assert!(output.status.success(), "Should render class diagram from file");
+    assert!(
+        output.status.success(),
+        "Should render class diagram from file"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_class.svg").unwrap();
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     assert!(svg.contains("Animal"), "Should contain class name");
@@ -499,10 +524,18 @@ fn test_cli_class_from_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "Class diagram should render from stdin");
+    assert!(
+        result.status.success(),
+        "Class diagram should render from stdin"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_class_stdin.svg").unwrap();
     assert!(svg.contains("Dog"), "Should contain class name");
     let _ = fs::remove_file("/tmp/test_cli_class_stdin.svg");
@@ -510,16 +543,16 @@ fn test_cli_class_from_stdin() {
 
 #[test]
 fn test_cli_class_check() {
-    let input = create_test_mmd(
-        "classDiagram\nclass Animal",
-        "class_check.mmd",
-    );
+    let input = create_test_mmd("classDiagram\nclass Animal", "class_check.mmd");
     let result = Command::new(binary_path())
         .arg("check")
         .arg(input.to_str().unwrap())
         .output()
         .expect("Failed to run CLI");
-    assert!(result.status.success(), "Valid class diagram should pass check");
+    assert!(
+        result.status.success(),
+        "Valid class diagram should pass check"
+    );
     cleanup(&[&input]);
 }
 
@@ -539,7 +572,10 @@ fn test_cli_state_from_file() {
         .arg("/tmp/test_cli_state.svg")
         .output()
         .expect("Failed to run CLI");
-    assert!(output.status.success(), "Should render state diagram from file");
+    assert!(
+        output.status.success(),
+        "Should render state diagram from file"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_state.svg").unwrap();
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     assert!(svg.contains("Still"), "Should contain state name");
@@ -559,10 +595,18 @@ fn test_cli_state_from_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "State diagram should render from stdin");
+    assert!(
+        result.status.success(),
+        "State diagram should render from stdin"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_state_stdin.svg").unwrap();
     assert!(svg.contains("A"), "Should contain state name");
     let _ = fs::remove_file("/tmp/test_cli_state_stdin.svg");
@@ -570,16 +614,16 @@ fn test_cli_state_from_stdin() {
 
 #[test]
 fn test_cli_state_check() {
-    let input = create_test_mmd(
-        "stateDiagram-v2\n[*] --> A\nA --> [*]",
-        "state_check.mmd",
-    );
+    let input = create_test_mmd("stateDiagram-v2\n[*] --> A\nA --> [*]", "state_check.mmd");
     let result = Command::new(binary_path())
         .arg("check")
         .arg(input.to_str().unwrap())
         .output()
         .expect("Failed to run CLI");
-    assert!(result.status.success(), "Valid state diagram should pass check");
+    assert!(
+        result.status.success(),
+        "Valid state diagram should pass check"
+    );
     cleanup(&[&input]);
 }
 
@@ -599,7 +643,10 @@ fn test_cli_er_from_file() {
         .arg("/tmp/test_cli_er.svg")
         .output()
         .expect("Failed to run CLI");
-    assert!(output.status.success(), "Should render ER diagram from file");
+    assert!(
+        output.status.success(),
+        "Should render ER diagram from file"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_er.svg").unwrap();
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     assert!(svg.contains("CUSTOMER"), "Should contain entity name");
@@ -619,10 +666,18 @@ fn test_cli_er_from_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "ER diagram should render from stdin");
+    assert!(
+        result.status.success(),
+        "ER diagram should render from stdin"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_er_stdin.svg").unwrap();
     assert!(svg.contains("CUSTOMER"), "Should contain entity name");
     let _ = fs::remove_file("/tmp/test_cli_er_stdin.svg");
@@ -630,16 +685,16 @@ fn test_cli_er_from_stdin() {
 
 #[test]
 fn test_cli_er_check() {
-    let input = create_test_mmd(
-        "erDiagram\nCUSTOMER ||--o{ ORDER : places",
-        "er_check.mmd",
-    );
+    let input = create_test_mmd("erDiagram\nCUSTOMER ||--o{ ORDER : places", "er_check.mmd");
     let result = Command::new(binary_path())
         .arg("check")
         .arg(input.to_str().unwrap())
         .output()
         .expect("Failed to run CLI");
-    assert!(result.status.success(), "Valid ER diagram should pass check");
+    assert!(
+        result.status.success(),
+        "Valid ER diagram should pass check"
+    );
     cleanup(&[&input]);
 }
 
@@ -659,7 +714,10 @@ fn test_cli_gantt_from_file() {
         .arg("/tmp/test_cli_gantt.svg")
         .output()
         .expect("Failed to run CLI");
-    assert!(output.status.success(), "Should render Gantt chart from file");
+    assert!(
+        output.status.success(),
+        "Should render Gantt chart from file"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_gantt.svg").unwrap();
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     assert!(svg.contains("Task 1"), "Should contain task name");
@@ -685,8 +743,15 @@ fn test_cli_quiet_mode_from_file() {
     assert!(result.status.success(), "CLI should succeed with --quiet");
     // stdout should be empty in quiet mode
     let stdout = String::from_utf8_lossy(&result.stdout);
-    assert!(stdout.is_empty(), "Quiet mode should produce no stdout: {:?}", stdout);
-    assert!(output.exists(), "Output file should be created even in quiet mode");
+    assert!(
+        stdout.is_empty(),
+        "Quiet mode should produce no stdout: {:?}",
+        stdout
+    );
+    assert!(
+        output.exists(),
+        "Output file should be created even in quiet mode"
+    );
 
     cleanup(&[&input, &output]);
 }
@@ -716,10 +781,18 @@ fn test_cli_gantt_from_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "Gantt chart should render from stdin");
+    assert!(
+        result.status.success(),
+        "Gantt chart should render from stdin"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_gantt_stdin.svg").unwrap();
     assert!(svg.contains("Task"), "Should contain task name");
     let _ = fs::remove_file("/tmp/test_cli_gantt_stdin.svg");
@@ -727,16 +800,16 @@ fn test_cli_gantt_from_stdin() {
 
 #[test]
 fn test_cli_gantt_check() {
-    let input = create_test_mmd(
-        "gantt\n    Task :t1, 1, 5d",
-        "gantt_check.mmd",
-    );
+    let input = create_test_mmd("gantt\n    Task :t1, 1, 5d", "gantt_check.mmd");
     let result = Command::new(binary_path())
         .arg("check")
         .arg(input.to_str().unwrap())
         .output()
         .expect("Failed to run CLI");
-    assert!(result.status.success(), "Valid Gantt chart should pass check");
+    assert!(
+        result.status.success(),
+        "Valid Gantt chart should pass check"
+    );
     cleanup(&[&input]);
 }
 
@@ -770,7 +843,10 @@ fn test_cli_css_file() {
     assert!(result.status.success(), "CLI should succeed with --cssFile");
     assert!(output.exists(), "Output SVG should exist");
     let svg_content = fs::read_to_string(&output).expect("Failed to read SVG");
-    assert!(svg_content.contains("Custom CSS"), "SVG should contain custom CSS");
+    assert!(
+        svg_content.contains("Custom CSS"),
+        "SVG should contain custom CSS"
+    );
 
     cleanup(&[&input, &css_path, &output]);
 }
@@ -786,7 +862,10 @@ fn test_cli_css_file_not_found() {
         .output()
         .expect("Failed to run CLI");
 
-    assert!(!result.status.success(), "CLI should fail with missing CSS file");
+    assert!(
+        !result.status.success(),
+        "CLI should fail with missing CSS file"
+    );
     cleanup(&[&input]);
 }
 
@@ -829,7 +908,10 @@ fn test_cli_jobs_default_value() {
         .output()
         .expect("Failed to run CLI");
 
-    assert!(!result.status.success(), "--jobs without argument should fail");
+    assert!(
+        !result.status.success(),
+        "--jobs without argument should fail"
+    );
     cleanup(&[&input]);
 }
 
@@ -839,7 +921,8 @@ fn test_cli_jobs_default_value() {
 
 #[test]
 fn test_cli_render_from_markdown() {
-    let md_content = "# Project Diagram\n\n```mermaid\ngraph TD\nA[Start]-->B[End]\n```\n\nMore text";
+    let md_content =
+        "# Project Diagram\n\n```mermaid\ngraph TD\nA[Start]-->B[End]\n```\n\nMore text";
     let input = create_test_mmd(md_content, "test_markdown.md");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
@@ -855,8 +938,14 @@ fn test_cli_render_from_markdown() {
     assert!(result.status.success(), "CLI should render from .md file");
     assert!(output.exists(), "Output SVG file was not created");
     let svg_content = fs::read_to_string(&output).expect("Failed to read output SVG");
-    assert!(svg_content.contains("<svg"), "Output should contain SVG tag");
-    assert!(svg_content.contains("Start"), "Should contain diagram content");
+    assert!(
+        svg_content.contains("<svg"),
+        "Output should contain SVG tag"
+    );
+    assert!(
+        svg_content.contains("Start"),
+        "Should contain diagram content"
+    );
 
     cleanup(&[&input, &output]);
 }
@@ -873,10 +962,18 @@ fn test_cli_render_from_markdown_stdin() {
         .expect("Failed to spawn CLI");
 
     use std::io::Write;
-    child.stdin.as_mut().unwrap().write_all(stdin_data.as_bytes()).unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(stdin_data.as_bytes())
+        .unwrap();
     let result = child.wait_with_output().unwrap();
 
-    assert!(result.status.success(), "Markdown with mermaid block should render from stdin");
+    assert!(
+        result.status.success(),
+        "Markdown with mermaid block should render from stdin"
+    );
     let svg = fs::read_to_string("/tmp/test_cli_md_stdin.svg").unwrap();
     assert!(svg.contains("<svg"), "Output should be valid SVG");
     let _ = fs::remove_file("/tmp/test_cli_md_stdin.svg");
@@ -897,7 +994,10 @@ fn test_cli_render_from_markdown_sequence() {
         .output()
         .expect("Failed to run CLI");
 
-    assert!(result.status.success(), "Should render sequence from markdown");
+    assert!(
+        result.status.success(),
+        "Should render sequence from markdown"
+    );
     let svg = fs::read_to_string(&output).expect("Failed to read SVG");
     assert!(svg.contains("Hello"), "Should contain message content");
 
@@ -987,7 +1087,10 @@ fn test_cli_render_with_background_color() {
     assert!(result.status.success(), "Background color flag should work");
     assert!(output.exists());
     let svg = fs::read_to_string(&output).expect("Failed to read SVG");
-    assert!(svg.contains("lightyellow"), "SVG should contain background color");
+    assert!(
+        svg.contains("lightyellow"),
+        "SVG should contain background color"
+    );
     cleanup(&[&input, &output]);
 }
 
@@ -1002,9 +1105,11 @@ fn test_cli_show_fixes_output() {
         .expect("Failed to run CLI");
 
     // --show-fixes may fail parsing after fixes, but should still output something
-    let all_output = format!("{}{}",
+    let all_output = format!(
+        "{}{}",
         String::from_utf8_lossy(&result.stdout),
-        String::from_utf8_lossy(&result.stderr));
+        String::from_utf8_lossy(&result.stderr)
+    );
     assert!(!all_output.is_empty(), "Should produce some output");
     cleanup(&[&input]);
 }
@@ -1099,7 +1204,10 @@ fn test_cli_fix_output() {
 
     assert!(result.status.success(), "Fix should work");
     let fixed_content = fs::read_to_string(&output).expect("Failed to read fixed file");
-    assert!(fixed_content.contains("graph"), "Fixed content should contain graph");
+    assert!(
+        fixed_content.contains("graph"),
+        "Fixed content should contain graph"
+    );
     cleanup(&[&input, &output]);
 }
 use std::io::Write;
@@ -1142,10 +1250,7 @@ fn test_cli_theme_forest() {
 
 #[test]
 fn test_cli_theme_neutral() {
-    let input = create_test_mmd(
-        "graph LR; X-->Y; Y-->Z",
-        "test_theme_neutral.mmd",
-    );
+    let input = create_test_mmd("graph LR; X-->Y; Y-->Z", "test_theme_neutral.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("test_theme_neutral_output.svg");
@@ -1206,10 +1311,7 @@ fn test_cli_theme_default() {
 
 #[test]
 fn test_cli_svgid_filter() {
-    let input = create_test_mmd(
-        "graph TD; A-->B",
-        "test_svgid_filter.mmd",
-    );
+    let input = create_test_mmd("graph TD; A-->B", "test_svgid_filter.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("test_svgid_filter_output.svg");
@@ -1238,10 +1340,7 @@ fn test_cli_svgid_filter() {
 
 #[test]
 fn test_cli_output_format_svg() {
-    let input = create_test_mmd(
-        "graph TD; A-->B",
-        "test_output_format_svg.mmd",
-    );
+    let input = create_test_mmd("graph TD; A-->B", "test_output_format_svg.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("test_output_format_svg_output.svg");
@@ -1445,10 +1544,7 @@ fn test_cli_combined_flags() {
 
 #[test]
 fn test_cli_background_color_hex() {
-    let input = create_test_mmd(
-        "graph TD; A[Hello]-->B[World]",
-        "test_background_hex.mmd",
-    );
+    let input = create_test_mmd("graph TD; A[Hello]-->B[World]", "test_background_hex.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("test_background_hex_output.svg");
@@ -1507,10 +1603,7 @@ fn test_cli_empty_file_input() {
 
 #[test]
 fn test_cli_nonexistent_output_dir() {
-    let input = create_test_mmd(
-        "graph TD; A-->B",
-        "test_nonexistent_dir.mmd",
-    );
+    let input = create_test_mmd("graph TD; A-->B", "test_nonexistent_dir.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("nonexistent_subdir_xyz")
@@ -1539,10 +1632,7 @@ fn test_cli_nonexistent_output_dir() {
 #[test]
 fn test_cli_very_long_file_path() {
     let long_name = format!("test_long_{}.mmd", "a".repeat(180));
-    let input = create_test_mmd(
-        "graph TD; A-->B",
-        &long_name,
-    );
+    let input = create_test_mmd("graph TD; A-->B", &long_name);
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join(format!("test_long_output_{}.svg", "b".repeat(180)));
@@ -1592,10 +1682,7 @@ fn test_cli_check_sequence_diagram() {
 
 #[test]
 fn test_cli_check_pie_diagram() {
-    let input = create_test_mmd(
-        "pie\n\"Alpha\" : 30\n\"Beta\" : 70",
-        "test_check_pie.mmd",
-    );
+    let input = create_test_mmd("pie\n\"Alpha\" : 30\n\"Beta\" : 70", "test_check_pie.mmd");
 
     let result = Command::new(binary_path())
         .arg("check")
@@ -1619,10 +1706,7 @@ fn test_cli_check_pie_diagram() {
 
 #[test]
 fn test_cli_check_class_diagram() {
-    let input = create_test_mmd(
-        "classDiagram\nclass Vehicle {\n}\n",
-        "test_check_class.mmd",
-    );
+    let input = create_test_mmd("classDiagram\nclass Vehicle {\n}\n", "test_check_class.mmd");
 
     let result = Command::new(binary_path())
         .arg("check")
@@ -1673,10 +1757,7 @@ fn test_cli_check_state_diagram() {
 
 #[test]
 fn test_cli_check_er_diagram() {
-    let input = create_test_mmd(
-        "erDiagram\nCAR ||--o{ PART : contains",
-        "test_check_er.mmd",
-    );
+    let input = create_test_mmd("erDiagram\nCAR ||--o{ PART : contains", "test_check_er.mmd");
 
     let result = Command::new(binary_path())
         .arg("check")
@@ -1727,10 +1808,7 @@ fn test_cli_check_gantt_diagram() {
 
 #[test]
 fn test_cli_fix_sequnce_typo() {
-    let input = create_test_mmd(
-        "sequnceDiagram\nAlice->>Bob: Hello",
-        "test_fix_sequnce.mmd",
-    );
+    let input = create_test_mmd("sequnceDiagram\nAlice->>Bob: Hello", "test_fix_sequnce.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("test_fix_sequnce_output.mmd");
@@ -1862,14 +1940,8 @@ fn test_cli_quiet_combined_stdin() {
 
 #[test]
 fn test_cli_jobs_multiple_files() {
-    let input1 = create_test_mmd(
-        "graph TD; A-->B",
-        "test_jobs_file1.mmd",
-    );
-    let input2 = create_test_mmd(
-        "graph LR; X-->Y",
-        "test_jobs_file2.mmd",
-    );
+    let input1 = create_test_mmd("graph TD; A-->B", "test_jobs_file1.mmd");
+    let input2 = create_test_mmd("graph LR; X-->Y", "test_jobs_file2.mmd");
     let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("test_jobs_output.svg");
@@ -1892,8 +1964,14 @@ fn test_cli_jobs_multiple_files() {
     );
     assert!(output.exists(), "Output SVG should be created");
     let svg = fs::read_to_string(&output).expect("Failed to read SVG");
-    assert!(svg.contains("A"), "SVG should contain node A from first file");
-    assert!(svg.contains("B"), "SVG should contain node B from first file");
+    assert!(
+        svg.contains("A"),
+        "SVG should contain node A from first file"
+    );
+    assert!(
+        svg.contains("B"),
+        "SVG should contain node B from first file"
+    );
     cleanup(&[&input1, &input2, &output]);
 }
 
@@ -1965,7 +2043,6 @@ fn test_cli_invalid_theme_as_file() {
     );
 }
 
-
 // ============================================================
 // GitGraph CLI 测试
 // ============================================================
@@ -2018,7 +2095,6 @@ fn test_cli_gitgraph_from_stdin() {
     cleanup(&[&output]);
 }
 
-
 // ============================================================
 // 新增图表 CLI 测试
 // ============================================================
@@ -2026,90 +2102,174 @@ fn test_cli_gitgraph_from_stdin() {
 #[test]
 fn test_cli_mindmap_from_file() {
     let input = create_test_mmd("mindmap\n  Root\n    Branch\n      Leaf", "cli_mindmap.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_mindmap_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_mindmap_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Mindmap should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_timeline_from_file() {
     let input = create_test_mmd("timeline\n  2020: Event", "cli_timeline.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_timeline_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_timeline_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Timeline should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_journey_from_file() {
     let input = create_test_mmd("journey\n  section S\n  T:1:U", "cli_journey.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_journey_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_journey_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Journey should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_venn_from_file() {
     let input = create_test_mmd("venn\n  a : A\n  b : B", "cli_venn.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_venn_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_venn_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Venn should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_packet_from_file() {
     let input = create_test_mmd("packet\n  0-7: Header", "cli_packet.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_packet_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_packet_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Packet should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_radar_from_file() {
     let input = create_test_mmd("radar\n  Speed: 50\n  Power: 80", "cli_radar.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_radar_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_radar_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Radar should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_architecture_from_file() {
     let input = create_test_mmd("architecture\n  service api(API)", "cli_arch.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_arch_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_arch_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Architecture should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_block_from_file() {
     let input = create_test_mmd("block\n  A\n    B", "cli_block.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_block_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_block_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Block should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_ishikawa_from_file() {
-    let input = create_test_mmd("ishikawa\n  root R\n  category C\n    cause", "cli_ishi.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_ishi_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let input = create_test_mmd(
+        "ishikawa\n  root R\n  category C\n    cause",
+        "cli_ishi.mmd",
+    );
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_ishi_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success(), "Ishikawa should render");
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
@@ -2120,99 +2280,203 @@ fn test_cli_ishikawa_from_file() {
 #[test]
 fn test_cli_sankey_from_file() {
     let input = create_test_mmd("sankey\n  A -> B: 100", "cli_sankey.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_sankey_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_sankey_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_quadrant_from_file() {
-    let input = create_test_mmd("quadrantChart\n  title T\n  x-axis X\n  y-axis Y\n  P: [0.5,0.5]", "cli_quad.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_quad_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let input = create_test_mmd(
+        "quadrantChart\n  title T\n  x-axis X\n  y-axis Y\n  P: [0.5,0.5]",
+        "cli_quad.mmd",
+    );
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_quad_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_c4_from_file() {
     let input = create_test_mmd("C4Context\n  Person(u, \"User\", \"\")", "cli_c4.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_c4_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_c4_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_requirement_from_file() {
     let input = create_test_mmd("requirementDiagram\n  requirement R {\n    id: 1\n    text: test\n    risk: high\n    verifymethod: test\n  }", "cli_req.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_req_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_req_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_zenuml_from_file() {
     let input = create_test_mmd("zenuml\n  Alice->Bob: Hello", "cli_zenuml.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_zenuml_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_zenuml_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_dark_theme_sequence() {
     let input = create_test_mmd("sequenceDiagram\n  A->B: Hi", "cli_dark_seq.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_dark_seq_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-t").arg("dark").arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_dark_seq_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-t")
+        .arg("dark")
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_forest_theme_pie() {
     let input = create_test_mmd("pie\n  \"A\": 50\n  \"B\": 50", "cli_forest_pie.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_forest_pie_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-t").arg("forest").arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_forest_pie_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-t")
+        .arg("forest")
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_width_height_sequence() {
     let input = create_test_mmd("sequenceDiagram\n  A->B: Hi", "cli_wh_seq.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_wh_seq_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-w").arg("1200").arg("-H").arg("800").arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_wh_seq_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-w")
+        .arg("1200")
+        .arg("-H")
+        .arg("800")
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_background_class() {
     let input = create_test_mmd("classDiagram\n  class A", "cli_bg_class.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_bg_class_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-b").arg("lightblue").arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_bg_class_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-b")
+        .arg("lightblue")
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }
 
 #[test]
 fn test_cli_quiet_gantt() {
     let input = create_test_mmd("gantt\n  Task: t1, 1, 5d", "cli_quiet_gantt.mmd");
-    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests").join("cli_quiet_gantt_output.svg");
-    let result = Command::new(binary_path()).arg(input.to_str().unwrap()).arg("-q").arg("-o").arg(output.to_str().unwrap()).output().expect("Failed to run CLI");
+    let output = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("cli_quiet_gantt_output.svg");
+    let result = Command::new(binary_path())
+        .arg(input.to_str().unwrap())
+        .arg("-q")
+        .arg("-o")
+        .arg(output.to_str().unwrap())
+        .output()
+        .expect("Failed to run CLI");
     assert!(result.status.success());
-    if output.exists() { let _ = fs::remove_file(&output); }
+    if output.exists() {
+        let _ = fs::remove_file(&output);
+    }
     cleanup(&[&input]);
 }

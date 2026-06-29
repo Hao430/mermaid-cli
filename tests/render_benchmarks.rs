@@ -60,23 +60,35 @@ fn test_benchmarks() {
         total_parse += parse_avg;
         total_render += render_avg;
 
-        println!("║ {:<28}│ {:>7}│ {:>9}│ {:>10}│ {:>12}║",
-            name, count, parse_avg, render_avg, combined);
+        println!(
+            "║ {:<28}│ {:>7}│ {:>9}│ {:>10}│ {:>12}║",
+            name, count, parse_avg, render_avg, combined
+        );
     }
 
     println!("╠══════════════════════════╪═════════╪══════════╪════════════╪══════════════╣");
-    println!("║ {:<28}│ {:>7}│ {:>9}│ {:>10}│ {:>12}║",
-        "AVERAGE", "",
+    println!(
+        "║ {:<28}│ {:>7}│ {:>9}│ {:>10}│ {:>12}║",
+        "AVERAGE",
+        "",
         total_parse / cases.len() as u64,
-        if cases.is_empty() { 0 } else { total_render / cases.len() as u64 },
-        (total_parse + total_render) / cases.len() as u64);
+        if cases.is_empty() {
+            0
+        } else {
+            total_render / cases.len() as u64
+        },
+        (total_parse + total_render) / cases.len() as u64
+    );
     println!("╚══════════════════════════╧═════════╧══════════╧════════════╧══════════════╝");
 
     // Verify all diagram types can be parsed and rendered
     for (name, code, _) in &cases {
         let parsed = parse(code);
-        assert!(parsed.is_ok() || name == &"Invalid syntax",
-            "Should parse valid diagram: {}", name);
+        assert!(
+            parsed.is_ok() || name == &"Invalid syntax",
+            "Should parse valid diagram: {}",
+            name
+        );
     }
 
     println!("\n✓ All diagram types parse successfully");

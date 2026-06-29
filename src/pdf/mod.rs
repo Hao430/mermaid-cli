@@ -67,7 +67,8 @@ impl PdfWriter {
              stream\n\
              {}endstream\n\
              endobj\n",
-            width, height,
+            width,
+            height,
             clean_svg.len(),
             clean_svg
         ));
@@ -127,10 +128,7 @@ mod tests {
     fn test_pdf_ends_with_eof_marker() {
         let svg = "<svg></svg>";
         let pdf = PdfWriter::render_svg(svg, 400, 300);
-        assert!(
-            pdf.ends_with("%%EOF\n"),
-            "PDF should end with %%EOF"
-        );
+        assert!(pdf.ends_with("%%EOF\n"), "PDF should end with %%EOF");
     }
 
     #[test]
@@ -173,7 +171,10 @@ mod tests {
     fn test_clean_svg_removes_xml_declaration() {
         let input = "<?xml version=\"1.0\"?>\n<svg>...</svg>";
         let cleaned = PdfWriter::clean_svg(input);
-        assert!(!cleaned.starts_with("<?xml"), "XML declaration should be removed");
+        assert!(
+            !cleaned.starts_with("<?xml"),
+            "XML declaration should be removed"
+        );
         assert!(cleaned.starts_with("<svg"), "Should start with <svg");
     }
 
@@ -181,6 +182,9 @@ mod tests {
     fn test_clean_svg_no_declaration() {
         let input = "<svg>...</svg>";
         let cleaned = PdfWriter::clean_svg(input);
-        assert_eq!(cleaned, input, "Without declaration, SVG should pass through unchanged");
+        assert_eq!(
+            cleaned, input,
+            "Without declaration, SVG should pass through unchanged"
+        );
     }
 }

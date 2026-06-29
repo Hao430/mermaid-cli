@@ -140,9 +140,7 @@ impl SvgBuilder {
         for &(x, y) in points {
             self.track_bounds(x, y);
         }
-        let points_str: Vec<String> = points.iter()
-            .map(|(x, y)| format!("{},{}", x, y))
-            .collect();
+        let points_str: Vec<String> = points.iter().map(|(x, y)| format!("{},{}", x, y)).collect();
         let element = format!(
             r#"  <polygon points="{}" style="{}"/>"#,
             points_str.join(" "),
@@ -305,35 +303,40 @@ mod tests {
 
     #[test]
     fn test_svg_builder_background_color() {
-        let svg = SvgBuilder::new(800, 600)
-            .with_background_color("#f0f0f0");
+        let svg = SvgBuilder::new(800, 600).with_background_color("#f0f0f0");
         let result = svg.build();
-        assert!(result.contains("#f0f0f0"), "Should include background color");
+        assert!(
+            result.contains("#f0f0f0"),
+            "Should include background color"
+        );
     }
 
     #[test]
     fn test_svg_builder_custom_css() {
-        let svg = SvgBuilder::new(800, 600)
-            .with_custom_css(".highlight { fill: red; }");
+        let svg = SvgBuilder::new(800, 600).with_custom_css(".highlight { fill: red; }");
         let result = svg.build();
-        assert!(result.contains("Custom CSS"), "Should include custom CSS section");
+        assert!(
+            result.contains("Custom CSS"),
+            "Should include custom CSS section"
+        );
         assert!(result.contains(".highlight"), "Should include CSS content");
     }
 
     #[test]
     fn test_svg_builder_custom_css_if() {
-        let svg = SvgBuilder::new(800, 600)
-            .with_custom_css_if(Some(".test { }"));
+        let svg = SvgBuilder::new(800, 600).with_custom_css_if(Some(".test { }"));
         let result = svg.build();
         assert!(result.contains(".test"), "Should include conditional CSS");
     }
 
     #[test]
     fn test_svg_builder_custom_css_if_none() {
-        let svg = SvgBuilder::new(800, 600)
-            .with_custom_css_if(None);
+        let svg = SvgBuilder::new(800, 600).with_custom_css_if(None);
         let result = svg.build();
-        assert!(!result.contains("Custom CSS"), "Should not include CSS section when None");
+        assert!(
+            !result.contains("Custom CSS"),
+            "Should not include CSS section when None"
+        );
     }
 
     #[test]
@@ -344,14 +347,19 @@ mod tests {
         }
         let result = svg.build();
         let rect_count = result.matches("<rect").count();
-        assert_eq!(rect_count, 51, "Should have 50 added rects + 1 background rect");
+        assert_eq!(
+            rect_count, 51,
+            "Should have 50 added rects + 1 background rect"
+        );
     }
 
     #[test]
     fn test_svg_builder_polyline_with_points() {
         let mut svg = SvgBuilder::new(800, 600);
-        svg.add_polyline(&[(10.0, 10.0), (100.0, 100.0), (200.0, 50.0)],
-            "stroke:black;fill:none");
+        svg.add_polyline(
+            &[(10.0, 10.0), (100.0, 100.0), (200.0, 50.0)],
+            "stroke:black;fill:none",
+        );
         let result = svg.build();
         assert!(result.contains("<polyline"), "Should have polyline element");
     }
@@ -362,15 +370,24 @@ mod tests {
         svg.add_rect(0.0, 0.0, 500.0, 400.0, "");
         let result = svg.build();
         // Should auto-expand to fit content
-        assert!(result.contains("width=\"520\""), "Width should expand for content");
-        assert!(result.contains("height=\"420\""), "Height should expand for content");
+        assert!(
+            result.contains("width=\"520\""),
+            "Width should expand for content"
+        );
+        assert!(
+            result.contains("height=\"420\""),
+            "Height should expand for content"
+        );
     }
 
     #[test]
     fn test_svg_builder_xml_declaration() {
         let svg = SvgBuilder::new(800, 600);
         let result = svg.build();
-        assert!(result.starts_with("<?xml"), "SVG should start with XML declaration");
+        assert!(
+            result.starts_with("<?xml"),
+            "SVG should start with XML declaration"
+        );
     }
 
     #[test]
@@ -449,6 +466,9 @@ mod tests {
         }
         let result = svg.build();
         let rect_count = result.matches("<rect").count();
-        assert_eq!(rect_count, 31, "Should have 30 rect elements plus background rect");
+        assert_eq!(
+            rect_count, 31,
+            "Should have 30 rect elements plus background rect"
+        );
     }
 }

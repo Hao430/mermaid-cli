@@ -12,10 +12,17 @@ impl Fixer {
         // === Universal keyword fix (all diagram types, 50+ patterns) ===
         let all_typos: Vec<(&str, &str)> = vec![
             // Flowchart keywords
-            ("grpah", "graph"), ("grahp", "graph"), ("garph", "graph"),
-            ("flochart", "flowchart"), ("flowchat", "flowchart"), ("flowhcart", "flowchart"),
-            ("flowchrat", "flowchart"), ("flochrat", "flowchart"),
-            ("subgrah", "subgraph"), ("subgrap", "subgraph"), ("subgrahp", "subgraph"),
+            ("grpah", "graph"),
+            ("grahp", "graph"),
+            ("garph", "graph"),
+            ("flochart", "flowchart"),
+            ("flowchat", "flowchart"),
+            ("flowhcart", "flowchart"),
+            ("flowchrat", "flowchart"),
+            ("flochrat", "flowchart"),
+            ("subgrah", "subgraph"),
+            ("subgrap", "subgraph"),
+            ("subgrahp", "subgraph"),
             // Sequence keywords
             ("sequnceDiagram", "sequenceDiagram"),
             ("sequanceDiagram", "sequenceDiagram"),
@@ -43,26 +50,41 @@ impl Fixer {
             ("erDiagrm", "erDiagram"),
             ("er_diagram", "erDiagram"),
             // Gantt keywords
-            ("gant", "gantt"), ("gantt", "gantt"),
-            ("dateFormat", "dateFormat"), ("dataFormat", "dateFormat"),
+            ("gant", "gantt"),
+            ("gantt", "gantt"),
+            ("dateFormat", "dateFormat"),
+            ("dataFormat", "dateFormat"),
             // Pie keywords
             ("pei", "pie"),
             // Mindmap
-            ("mindmap", "mindmap"), ("mindMap", "mindmap"),
+            ("mindmap", "mindmap"),
+            ("mindMap", "mindmap"),
             // GitGraph
-            ("gitgraph", "gitGraph"), ("Gitgraph", "gitGraph"),
+            ("gitgraph", "gitGraph"),
+            ("Gitgraph", "gitGraph"),
             // Timeline
-            ("timeling", "timeline"), ("timline", "timeline"),
+            ("timeling", "timeline"),
+            ("timline", "timeline"),
             // Journey
-            ("journy", "journey"), ("journe", "journey"),
+            ("journy", "journey"),
+            ("journe", "journey"),
             // Kanban
-            ("kanban", "kanban"), ("kanbam", "kanban"),
+            ("kanban", "kanban"),
+            ("kanbam", "kanban"),
             // Arrow typos
-            ("-->>", "-->"), ("==>", "==>"), ("=>", "->"),
-            ("-->", "-->"), ("- ->", "->"), ("- ->>", "-->>"),
+            ("-->>", "-->"),
+            ("==>", "==>"),
+            ("=>", "->"),
+            ("-->", "-->"),
+            ("- ->", "->"),
+            ("- ->>", "-->>"),
             // Direction typos
-            ("T-D", "TD"), ("L-R", "LR"), ("R-L", "RL"), ("B-T", "BT"),
-            ("BT-D", "TD"), ("LR-D", "LR"),
+            ("T-D", "TD"),
+            ("L-R", "LR"),
+            ("R-L", "RL"),
+            ("B-T", "BT"),
+            ("BT-D", "TD"),
+            ("LR-D", "LR"),
             // Note typos
             ("Note rigth", "Note right"),
             ("Note left", "Note left"),
@@ -115,8 +137,10 @@ impl Fixer {
 
     fn fix_flowchart(&self, fixed: &mut String, fixes: &mut Vec<String>) {
         // Ensure ends with 'end' for flowchart if not present
-        if !fixed.trim().ends_with("end") && !fixed.trim().is_empty()
-            && !fixed.trim().ends_with("}\n") && !fixed.trim().ends_with('}')
+        if !fixed.trim().ends_with("end")
+            && !fixed.trim().is_empty()
+            && !fixed.trim().ends_with("}\n")
+            && !fixed.trim().ends_with('}')
             && !fixed.contains("end\n")
         {
             fixed.push_str("\nend");
@@ -131,9 +155,10 @@ impl Fixer {
         for line in fixed.lines() {
             let trimmed = line.trim();
             for kw in &block_keywords {
-                if trimmed.starts_with(kw) && (trimmed.len() == kw.len()
-                    || trimmed.as_bytes().get(kw.len()) == Some(&b' ')
-                    || trimmed.as_bytes().get(kw.len()) == Some(&b':'))
+                if trimmed.starts_with(kw)
+                    && (trimmed.len() == kw.len()
+                        || trimmed.as_bytes().get(kw.len()) == Some(&b' ')
+                        || trimmed.as_bytes().get(kw.len()) == Some(&b':'))
                 {
                     open_count += 1;
                 }
@@ -260,7 +285,10 @@ mod tests {
         let fixer = Fixer::new();
         let code = "sequenceDiagram\nAlice->Bob: Hello\nloop retry\nAlice->Bob: ping";
         let (fixed, fixes) = fixer.fix(code);
-        assert!(fixed.trim().ends_with("end"), "Should add missing end for loop block");
+        assert!(
+            fixed.trim().ends_with("end"),
+            "Should add missing end for loop block"
+        );
         assert!(!fixes.is_empty());
     }
 
@@ -278,7 +306,10 @@ mod tests {
         let fixer = Fixer::new();
         let code = "sequnceDiagram\npartcipant Alice\nAlice-->>Bob: Hello";
         let (fixed, fixes) = fixer.fix(code);
-        assert!(fixed.contains("sequenceDiagram"), "Should fix sequnceDiagram");
+        assert!(
+            fixed.contains("sequenceDiagram"),
+            "Should fix sequnceDiagram"
+        );
         assert!(fixed.contains("participant"), "Should fix participant");
         assert!(!fixes.is_empty());
     }
@@ -380,7 +411,11 @@ mod tests {
         assert!(lines.len() >= 4, "Should have multiple lines");
         for line in &lines[1..] {
             if line.contains("-->") {
-                assert!(line.starts_with("    "), "Indentation preserved in: {:?}", line);
+                assert!(
+                    line.starts_with("    "),
+                    "Indentation preserved in: {:?}",
+                    line
+                );
             }
         }
     }
@@ -390,7 +425,10 @@ mod tests {
         let fixer = Fixer::new();
         let code = "classDiagram\nclass Animal {\n+String name\n+int age\n}";
         let (fixed, _fixes) = fixer.fix(code);
-        assert!(fixed.contains("classDiagram"), "Class diagram keyword preserved");
+        assert!(
+            fixed.contains("classDiagram"),
+            "Class diagram keyword preserved"
+        );
         assert!(fixed.contains("Animal"), "Class name preserved");
         assert!(fixed.contains("String"), "Member type preserved");
     }

@@ -1,6 +1,6 @@
 pub mod fixer;
-pub mod pdf;
 pub mod parser;
+pub mod pdf;
 pub mod renderer;
 pub mod svg;
 
@@ -162,8 +162,7 @@ pub fn check_json(code: &str) -> Result<String, String> {
     match parser.parse() {
         Ok(_) => Ok(r#"{"valid":true,"errors":[]}"#.to_string()),
         Err(e) => {
-            let error_json = serde_json::to_string_pretty(&e)
-                .map_err(|e| e.to_string())?;
+            let error_json = serde_json::to_string_pretty(&e).map_err(|e| e.to_string())?;
             Ok(format!(r#"{{"valid":false,"errors":[{}]}}"#, error_json))
         }
     }

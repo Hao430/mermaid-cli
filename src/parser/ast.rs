@@ -240,26 +240,76 @@ pub enum Statement {
         children: Vec<Statement>,
     },
     // Treemap
-    TreemapItem { label: String, value: f64 },
+    TreemapItem {
+        label: String,
+        value: f64,
+    },
     // Sankey
-    SankeyLink { source: String, target: String, value: f64 },
+    SankeyLink {
+        source: String,
+        target: String,
+        value: f64,
+    },
     // XY Chart
     XyTitle(String),
-    XyXAxis { label: String, categories: Vec<String> },
-    XyYAxis { label: String, min: f64, max: f64 },
-    XyBar { data: Vec<f64> },
-    XyLine { data: Vec<f64> },
+    XyXAxis {
+        label: String,
+        categories: Vec<String>,
+    },
+    XyYAxis {
+        label: String,
+        min: f64,
+        max: f64,
+    },
+    XyBar {
+        data: Vec<f64>,
+    },
+    XyLine {
+        data: Vec<f64>,
+    },
     // Architecture
-    ArchService { id: String, label: String },
-    ArchDatabase { id: String, label: String },
-    ArchQueue { id: String, label: String },
-    ArchRelation { from: String, to: String },
+    ArchService {
+        id: String,
+        label: String,
+    },
+    ArchDatabase {
+        id: String,
+        label: String,
+    },
+    ArchQueue {
+        id: String,
+        label: String,
+    },
+    ArchRelation {
+        from: String,
+        to: String,
+    },
     // C4
-    C4Person { alias: String, label: String, description: String },
-    C4System { alias: String, label: String, description: String },
-    C4Container { alias: String, label: String, description: String },
-    C4Component { alias: String, label: String, description: String },
-    C4Rel { from: String, to: String, label: String },
+    C4Person {
+        alias: String,
+        label: String,
+        description: String,
+    },
+    C4System {
+        alias: String,
+        label: String,
+        description: String,
+    },
+    C4Container {
+        alias: String,
+        label: String,
+        description: String,
+    },
+    C4Component {
+        alias: String,
+        label: String,
+        description: String,
+    },
+    C4Rel {
+        from: String,
+        to: String,
+        label: String,
+    },
     // Requirement Diagram
     RequirementDef {
         name: String,
@@ -325,30 +375,30 @@ pub enum ClassVisibility {
 #[cfg_attr(feature = "json", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum ClassRelationType {
-    Inheritance,   // <|--
-    Composition,   // *--
-    Aggregation,   // o--
-    Association,   // -->
-    Dependency,    // ..>
-    Realization,   // ..|>
-    Link,          // --
+    Inheritance, // <|--
+    Composition, // *--
+    Aggregation, // o--
+    Association, // -->
+    Dependency,  // ..>
+    Realization, // ..|>
+    Link,        // --
 }
 
 #[cfg_attr(feature = "json", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum ErCardinality {
-    ZeroOrOne,     // |o or o|
-    OneOrMore,     // }| or |{
-    ZeroOrMore,    // }o or o{
-    ExactlyOne,    // || or ||
+    ZeroOrOne,  // |o or o|
+    OneOrMore,  // }| or |{
+    ZeroOrMore, // }o or o{
+    ExactlyOne, // || or ||
 }
 
 #[cfg_attr(feature = "json", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum GanttStatus {
-    Done,       // done
-    Active,     // active
-    Critical,   // crit
+    Done,     // done
+    Active,   // active
+    Critical, // crit
     Default,
 }
 
@@ -502,10 +552,14 @@ impl Diagram {
                 Statement::RadarAxis { label, .. } => {
                     nodes.insert(label.clone());
                 }
-                Statement::IshikawaRoot { label } | Statement::IshikawaCategory { label } | Statement::IshikawaCause { label } => {
+                Statement::IshikawaRoot { label }
+                | Statement::IshikawaCategory { label }
+                | Statement::IshikawaCause { label } => {
                     nodes.insert(label.clone());
                 }
-                Statement::QuadrantTitle(t) | Statement::QuadrantXAxis(t) | Statement::QuadrantYAxis(t) => {
+                Statement::QuadrantTitle(t)
+                | Statement::QuadrantXAxis(t)
+                | Statement::QuadrantYAxis(t) => {
                     nodes.insert(t.clone());
                 }
                 Statement::QuadrantLabel { label, .. } | Statement::QuadrantPoint { label, .. } => {
@@ -513,20 +567,57 @@ impl Diagram {
                 }
                 Statement::BlockNode { id, children, .. } => {
                     nodes.insert(id.clone());
-                    let nested = Diagram { diagram_type: DiagramType::Flowchart, statements: children.clone(), direction: None, subgraphs: vec![], title: None };
+                    let nested = Diagram {
+                        diagram_type: DiagramType::Flowchart,
+                        statements: children.clone(),
+                        direction: None,
+                        subgraphs: vec![],
+                        title: None,
+                    };
                     nodes.extend(nested.get_nodes());
                 }
-                Statement::TreemapItem { label, .. } => { nodes.insert(label.clone()); }
-                Statement::SankeyLink { source, target, .. } => { nodes.insert(source.clone()); nodes.insert(target.clone()); }
-                Statement::XyTitle(t) | Statement::XyXAxis { label: t, .. } | Statement::XyYAxis { label: t, .. } => { nodes.insert(t.clone()); }
+                Statement::TreemapItem { label, .. } => {
+                    nodes.insert(label.clone());
+                }
+                Statement::SankeyLink { source, target, .. } => {
+                    nodes.insert(source.clone());
+                    nodes.insert(target.clone());
+                }
+                Statement::XyTitle(t)
+                | Statement::XyXAxis { label: t, .. }
+                | Statement::XyYAxis { label: t, .. } => {
+                    nodes.insert(t.clone());
+                }
                 Statement::XyBar { .. } | Statement::XyLine { .. } => {}
-                Statement::ArchService { id, .. } | Statement::ArchDatabase { id, .. } | Statement::ArchQueue { id, .. } => { nodes.insert(id.clone()); }
-                Statement::ArchRelation { from, to } => { nodes.insert(from.clone()); nodes.insert(to.clone()); }
-                Statement::C4Person { alias, .. } | Statement::C4System { alias, .. } | Statement::C4Container { alias, .. } | Statement::C4Component { alias, .. } => { nodes.insert(alias.clone()); }
-                Statement::C4Rel { from, to, .. } => { nodes.insert(from.clone()); nodes.insert(to.clone()); }
-                Statement::RequirementDef { name, .. } => { nodes.insert(name.clone()); }
-                Statement::RequirementElement { name, .. } => { nodes.insert(name.clone()); }
-                Statement::RequirementRelation { from, to, .. } => { nodes.insert(from.clone()); nodes.insert(to.clone()); }
+                Statement::ArchService { id, .. }
+                | Statement::ArchDatabase { id, .. }
+                | Statement::ArchQueue { id, .. } => {
+                    nodes.insert(id.clone());
+                }
+                Statement::ArchRelation { from, to } => {
+                    nodes.insert(from.clone());
+                    nodes.insert(to.clone());
+                }
+                Statement::C4Person { alias, .. }
+                | Statement::C4System { alias, .. }
+                | Statement::C4Container { alias, .. }
+                | Statement::C4Component { alias, .. } => {
+                    nodes.insert(alias.clone());
+                }
+                Statement::C4Rel { from, to, .. } => {
+                    nodes.insert(from.clone());
+                    nodes.insert(to.clone());
+                }
+                Statement::RequirementDef { name, .. } => {
+                    nodes.insert(name.clone());
+                }
+                Statement::RequirementElement { name, .. } => {
+                    nodes.insert(name.clone());
+                }
+                Statement::RequirementRelation { from, to, .. } => {
+                    nodes.insert(from.clone());
+                    nodes.insert(to.clone());
+                }
             }
         }
         nodes.into_iter().collect()
@@ -555,7 +646,9 @@ impl Diagram {
                     node_map.entry(to.clone()).or_insert_with(|| to.clone());
                 }
                 Statement::Note { target, .. } => {
-                    node_map.entry(target.clone()).or_insert_with(|| target.clone());
+                    node_map
+                        .entry(target.clone())
+                        .or_insert_with(|| target.clone());
                 }
                 Statement::Block { .. } => {}
                 Statement::Activate { participant } | Statement::Deactivate { participant } => {
@@ -568,7 +661,9 @@ impl Diagram {
                     node_map.entry(name.clone()).or_insert_with(|| name.clone());
                 }
                 Statement::ClassMember { class_name, .. } => {
-                    node_map.entry(class_name.clone()).or_insert_with(|| class_name.clone());
+                    node_map
+                        .entry(class_name.clone())
+                        .or_insert_with(|| class_name.clone());
                 }
                 Statement::ClassRelation { from, to, .. } => {
                     node_map.entry(from.clone()).or_insert_with(|| from.clone());
@@ -586,7 +681,9 @@ impl Diagram {
                     node_map.entry(name.clone()).or_insert_with(|| name.clone());
                 }
                 Statement::ErAttribute { entity, .. } => {
-                    node_map.entry(entity.clone()).or_insert_with(|| entity.clone());
+                    node_map
+                        .entry(entity.clone())
+                        .or_insert_with(|| entity.clone());
                 }
                 Statement::ErRelation { from, to, .. } => {
                     node_map.entry(from.clone()).or_insert_with(|| from.clone());
@@ -598,7 +695,11 @@ impl Diagram {
                 Statement::GanttTask { name, .. } => {
                     node_map.entry(name.clone()).or_insert_with(|| name.clone());
                 }
-                Statement::MindmapNode { id, label, children } => {
+                Statement::MindmapNode {
+                    id,
+                    label,
+                    children,
+                } => {
                     node_map.insert(id.clone(), label.clone());
                     for child in children {
                         if let Statement::MindmapNode { id, .. } = child {
@@ -608,7 +709,9 @@ impl Diagram {
                 }
                 Statement::GitCommit { id, .. } => {
                     if let Some(id_str) = id {
-                        node_map.entry(id_str.clone()).or_insert_with(|| id_str.clone());
+                        node_map
+                            .entry(id_str.clone())
+                            .or_insert_with(|| id_str.clone());
                     }
                 }
                 Statement::GitBranch { name } => {
@@ -618,7 +721,9 @@ impl Diagram {
                     node_map.entry(name.clone()).or_insert_with(|| name.clone());
                 }
                 Statement::GitMerge { branch, .. } => {
-                    node_map.entry(branch.clone()).or_insert_with(|| branch.clone());
+                    node_map
+                        .entry(branch.clone())
+                        .or_insert_with(|| branch.clone());
                 }
                 Statement::TimelineSection { name } => {
                     node_map.entry(name.clone()).or_insert_with(|| name.clone());
@@ -642,21 +747,37 @@ impl Diagram {
                     node_map.insert(id.clone(), label.clone());
                 }
                 Statement::PacketField { label, .. } => {
-                    node_map.entry(label.clone()).or_insert_with(|| label.clone());
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| label.clone());
                 }
                 Statement::RadarAxis { label, value } => {
-                    node_map.entry(label.clone()).or_insert_with(|| format!("{} ({})", label, value));
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| format!("{} ({})", label, value));
                 }
-                Statement::IshikawaRoot { label } | Statement::IshikawaCategory { label } | Statement::IshikawaCause { label } => {
-                    node_map.entry(label.clone()).or_insert_with(|| label.clone());
+                Statement::IshikawaRoot { label }
+                | Statement::IshikawaCategory { label }
+                | Statement::IshikawaCause { label } => {
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| label.clone());
                 }
-                Statement::QuadrantTitle(t) | Statement::QuadrantXAxis(t) | Statement::QuadrantYAxis(t) => {
+                Statement::QuadrantTitle(t)
+                | Statement::QuadrantXAxis(t)
+                | Statement::QuadrantYAxis(t) => {
                     node_map.entry(t.clone()).or_insert_with(|| t.clone());
                 }
                 Statement::QuadrantLabel { label, .. } | Statement::QuadrantPoint { label, .. } => {
-                    node_map.entry(label.clone()).or_insert_with(|| label.clone());
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| label.clone());
                 }
-                Statement::BlockNode { id, label, children } => {
+                Statement::BlockNode {
+                    id,
+                    label,
+                    children,
+                } => {
                     node_map.insert(id.clone(), label.clone());
                     for child in children {
                         if let Statement::BlockNode { id, .. } = child {
@@ -664,19 +785,65 @@ impl Diagram {
                         }
                     }
                 }
-                Statement::TreemapItem { label, .. } => { node_map.entry(label.clone()).or_insert_with(|| label.clone()); }
-                Statement::SankeyLink { source, target, .. } => { node_map.entry(source.clone()).or_insert_with(|| source.clone()); node_map.entry(target.clone()).or_insert_with(|| target.clone()); }
-                Statement::XyTitle(t) => { node_map.entry(t.clone()).or_insert_with(|| t.clone()); }
-                Statement::XyXAxis { label, categories } => { for c in categories { node_map.entry(c.clone()).or_insert_with(|| c.clone()); } node_map.entry(label.clone()).or_insert_with(|| label.clone()); }
-                Statement::XyYAxis { label, .. } => { node_map.entry(label.clone()).or_insert_with(|| label.clone()); }
+                Statement::TreemapItem { label, .. } => {
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| label.clone());
+                }
+                Statement::SankeyLink { source, target, .. } => {
+                    node_map
+                        .entry(source.clone())
+                        .or_insert_with(|| source.clone());
+                    node_map
+                        .entry(target.clone())
+                        .or_insert_with(|| target.clone());
+                }
+                Statement::XyTitle(t) => {
+                    node_map.entry(t.clone()).or_insert_with(|| t.clone());
+                }
+                Statement::XyXAxis { label, categories } => {
+                    for c in categories {
+                        node_map.entry(c.clone()).or_insert_with(|| c.clone());
+                    }
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| label.clone());
+                }
+                Statement::XyYAxis { label, .. } => {
+                    node_map
+                        .entry(label.clone())
+                        .or_insert_with(|| label.clone());
+                }
                 Statement::XyBar { .. } | Statement::XyLine { .. } => {}
-                Statement::ArchService { id, label } | Statement::ArchDatabase { id, label } | Statement::ArchQueue { id, label } => { node_map.insert(id.clone(), label.clone()); }
-                Statement::ArchRelation { from, to } => { node_map.entry(from.clone()).or_insert_with(|| from.clone()); node_map.entry(to.clone()).or_insert_with(|| to.clone()); }
-                Statement::C4Person { alias, label, .. } | Statement::C4System { alias, label, .. } | Statement::C4Container { alias, label, .. } | Statement::C4Component { alias, label, .. } => { node_map.insert(alias.clone(), label.clone()); }
-                Statement::C4Rel { from, to, .. } => { node_map.entry(from.clone()).or_insert_with(|| from.clone()); node_map.entry(to.clone()).or_insert_with(|| to.clone()); }
-                Statement::RequirementDef { name, .. } => { node_map.entry(name.clone()).or_insert_with(|| name.clone()); }
-                Statement::RequirementElement { name, .. } => { node_map.entry(name.clone()).or_insert_with(|| name.clone()); }
-                Statement::RequirementRelation { from, to, .. } => { node_map.entry(from.clone()).or_insert_with(|| from.clone()); node_map.entry(to.clone()).or_insert_with(|| to.clone()); }
+                Statement::ArchService { id, label }
+                | Statement::ArchDatabase { id, label }
+                | Statement::ArchQueue { id, label } => {
+                    node_map.insert(id.clone(), label.clone());
+                }
+                Statement::ArchRelation { from, to } => {
+                    node_map.entry(from.clone()).or_insert_with(|| from.clone());
+                    node_map.entry(to.clone()).or_insert_with(|| to.clone());
+                }
+                Statement::C4Person { alias, label, .. }
+                | Statement::C4System { alias, label, .. }
+                | Statement::C4Container { alias, label, .. }
+                | Statement::C4Component { alias, label, .. } => {
+                    node_map.insert(alias.clone(), label.clone());
+                }
+                Statement::C4Rel { from, to, .. } => {
+                    node_map.entry(from.clone()).or_insert_with(|| from.clone());
+                    node_map.entry(to.clone()).or_insert_with(|| to.clone());
+                }
+                Statement::RequirementDef { name, .. } => {
+                    node_map.entry(name.clone()).or_insert_with(|| name.clone());
+                }
+                Statement::RequirementElement { name, .. } => {
+                    node_map.entry(name.clone()).or_insert_with(|| name.clone());
+                }
+                Statement::RequirementRelation { from, to, .. } => {
+                    node_map.entry(from.clone()).or_insert_with(|| from.clone());
+                    node_map.entry(to.clone()).or_insert_with(|| to.clone());
+                }
             }
         }
         node_map.into_iter().collect()

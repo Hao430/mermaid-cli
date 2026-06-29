@@ -1,7 +1,10 @@
 pub mod ast;
 pub mod lexer;
 
-pub use ast::{ArrowType, ClassMemberType, ClassRelationType, ClassVisibility, Diagram, DiagramType, ErCardinality, GanttStatus, NodeShape, NotePosition, Statement, Subgraph};
+pub use ast::{
+    ArrowType, ClassMemberType, ClassRelationType, ClassVisibility, Diagram, DiagramType,
+    ErCardinality, GanttStatus, NodeShape, NotePosition, Statement, Subgraph,
+};
 pub use lexer::{Lexer, Token, TokenType};
 
 use std::fmt;
@@ -233,7 +236,9 @@ impl Parser {
                     title: None,
                 });
             }
-            TokenType::Keyword(ref k) if k == "C4Context" || k == "C4Container" || k == "C4Component" => {
+            TokenType::Keyword(ref k)
+                if k == "C4Context" || k == "C4Container" || k == "C4Component" =>
+            {
                 let _ = self.advance();
                 let statements = self.parse_c4()?;
                 return Ok(Diagram {
@@ -740,27 +745,37 @@ impl Parser {
                     if let TokenType::Keyword(ref kw) = next.token_type {
                         if kw == "as" {
                             let _ = self.advance(); // skip 'as'
-                            // read rest of line as label (no colon required)
+                                                    // read rest of line as label (no colon required)
                             let line = self.peek()?.line;
                             let mut text = String::new();
                             while !self.is_at_end() {
                                 let t = self.peek()?;
-                                if t.line != line { break; }
+                                if t.line != line {
+                                    break;
+                                }
                                 match &t.token_type {
                                     TokenType::Identifier(s) => {
-                                        if !text.is_empty() { text.push(' '); }
+                                        if !text.is_empty() {
+                                            text.push(' ');
+                                        }
                                         text.push_str(s);
                                         let _ = self.advance();
                                     }
                                     TokenType::Keyword(kw) => {
-                                        if !text.is_empty() { text.push(' '); }
+                                        if !text.is_empty() {
+                                            text.push(' ');
+                                        }
                                         text.push_str(kw);
                                         let _ = self.advance();
                                     }
                                     _ => break,
                                 }
                             }
-                            if text.is_empty() { None } else { Some(text) }
+                            if text.is_empty() {
+                                None
+                            } else {
+                                Some(text)
+                            }
                         } else {
                             None
                         }
@@ -797,9 +812,7 @@ impl Parser {
                 }))
             }
             // block keywords: alt, loop, opt, par
-            TokenType::Keyword(k)
-                if matches!(k.as_str(), "alt" | "loop" | "opt" | "par") =>
-            {
+            TokenType::Keyword(k) if matches!(k.as_str(), "alt" | "loop" | "opt" | "par") => {
                 let keyword = k.clone();
                 let _ = self.advance();
                 let condition = self.try_parse_sequence_rest_of_line();
@@ -863,9 +876,7 @@ impl Parser {
                     });
                 }
                 // nested block keywords
-                TokenType::Keyword(k)
-                    if matches!(k.as_str(), "alt" | "loop" | "opt" | "par") =>
-                {
+                TokenType::Keyword(k) if matches!(k.as_str(), "alt" | "loop" | "opt" | "par") => {
                     if let Some(stmt) = self.parse_sequence_statement()? {
                         nested.push(stmt);
                     }
@@ -1095,7 +1106,7 @@ impl Parser {
             if let TokenType::Keyword(ref k) = token.token_type {
                 if k == "title" {
                     let _ = self.advance(); // consume 'title'
-                    // read rest of line as title
+                                            // read rest of line as title
                     let title_line = self.peek()?.line;
                     let mut text = String::new();
                     while !self.is_at_end() {
@@ -1105,24 +1116,34 @@ impl Parser {
                         }
                         match &t.token_type {
                             TokenType::Identifier(s) => {
-                                if !text.is_empty() { text.push(' '); }
+                                if !text.is_empty() {
+                                    text.push(' ');
+                                }
                                 text.push_str(s);
                                 let _ = self.advance();
                             }
                             TokenType::Keyword(k) => {
-                                if !text.is_empty() { text.push(' '); }
+                                if !text.is_empty() {
+                                    text.push(' ');
+                                }
                                 text.push_str(k);
                                 let _ = self.advance();
                             }
                             TokenType::String(s) => {
-                                if !text.is_empty() { text.push(' '); }
+                                if !text.is_empty() {
+                                    text.push(' ');
+                                }
                                 text.push_str(s);
                                 let _ = self.advance();
                             }
                             _ => break,
                         }
                     }
-                    if text.is_empty() { None } else { Some(text) }
+                    if text.is_empty() {
+                        None
+                    } else {
+                        Some(text)
+                    }
                 } else {
                     None
                 }
@@ -1193,9 +1214,9 @@ impl Parser {
     fn parse_number(&mut self) -> Result<f64, ParseError> {
         let token = self.advance()?;
         match &token.token_type {
-            TokenType::Identifier(s) => {
-                s.parse::<f64>().map_err(|_| self.error("Expected numeric value"))
-            }
+            TokenType::Identifier(s) => s
+                .parse::<f64>()
+                .map_err(|_| self.error("Expected numeric value")),
             _ => Err(self.error("Expected numeric value")),
         }
     }
@@ -1279,7 +1300,7 @@ impl Parser {
                 if let Ok(token2) = self.peek() {
                     if matches!(token2.token_type, TokenType::LessThan) {
                         let _ = self.advance(); // consume second <
-                        // read identifier
+                                                // read identifier
                         let name = self.parse_node_id()?;
                         // consume >>
                         if let Ok(t) = self.peek() {
@@ -1345,7 +1366,7 @@ impl Parser {
                 if let Ok(token) = self.peek() {
                     if matches!(token.token_type, TokenType::LeftParen) {
                         let _ = self.advance(); // consume (
-                        // consume )
+                                                // consume )
                         if let Ok(t) = self.peek() {
                             if matches!(t.token_type, TokenType::RightParen) {
                                 let _ = self.advance();
@@ -1434,19 +1455,27 @@ impl Parser {
                         }
                         match &t.token_type {
                             TokenType::Identifier(s) => {
-                                if !text.is_empty() { text.push(' '); }
+                                if !text.is_empty() {
+                                    text.push(' ');
+                                }
                                 text.push_str(s);
                                 let _ = self.advance();
                             }
                             TokenType::Keyword(k) => {
-                                if !text.is_empty() { text.push(' '); }
+                                if !text.is_empty() {
+                                    text.push(' ');
+                                }
                                 text.push_str(k);
                                 let _ = self.advance();
                             }
                             _ => break,
                         }
                     }
-                    if text.is_empty() { None } else { Some(text) }
+                    if text.is_empty() {
+                        None
+                    } else {
+                        Some(text)
+                    }
                 } else {
                     None
                 }
@@ -1473,7 +1502,7 @@ impl Parser {
         if let Ok(token) = self.peek() {
             if matches!(token.token_type, TokenType::LessThan) {
                 let _ = self.advance(); // consume <
-                // expect |-- (could be Arrow or Identifier)
+                                        // expect |-- (could be Arrow or Identifier)
                 let next = self.advance()?;
                 match &next.token_type {
                     TokenType::Arrow => {
@@ -1496,13 +1525,11 @@ impl Parser {
 
         let token = self.advance()?;
         match &token.token_type {
-            TokenType::Arrow => {
-                match token.raw.as_str() {
-                    "-->" => Ok(ClassRelationType::Association),
-                    "--" => Ok(ClassRelationType::Link),
-                    _ => Ok(ClassRelationType::Association),
-                }
-            }
+            TokenType::Arrow => match token.raw.as_str() {
+                "-->" => Ok(ClassRelationType::Association),
+                "--" => Ok(ClassRelationType::Link),
+                _ => Ok(ClassRelationType::Association),
+            },
             TokenType::Identifier(s) => {
                 match s.as_str() {
                     "*" => {
@@ -1579,25 +1606,39 @@ impl Parser {
                             let mut text = String::new();
                             while !self.is_at_end() {
                                 let t = self.peek()?;
-                                if t.line != line { break; }
+                                if t.line != line {
+                                    break;
+                                }
                                 if let TokenType::Identifier(s) = &t.token_type {
-                                    if !text.is_empty() { text.push(' '); }
+                                    if !text.is_empty() {
+                                        text.push(' ');
+                                    }
                                     text.push_str(s);
                                     let _ = self.advance();
                                 } else {
                                     break;
                                 }
                             }
-                            if text.is_empty() { None } else { Some(text) }
-                        } else { None }
-                    } else { None }
-                } else { None };
+                            if text.is_empty() {
+                                None
+                            } else {
+                                Some(text)
+                            }
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
                 Ok(Some(vec![Statement::StateDef { id, label }]))
             }
             // [*] --> StateName (start transition)
             TokenType::LeftBracket => {
                 let _ = self.advance(); // consume [
-                // expect *
+                                        // expect *
                 if let Ok(t) = self.peek() {
                     if let TokenType::Identifier(ref id) = t.token_type {
                         if id == "*" {
@@ -1626,7 +1667,9 @@ impl Parser {
                 let from = self.parse_node_id()?;
                 // Check for arrow
                 if let Ok(t) = self.peek() {
-                    if matches!(t.token_type, TokenType::Arrow) || matches!(t.token_type, TokenType::Identifier(ref id) if id == "-") {
+                    if matches!(t.token_type, TokenType::Arrow)
+                        || matches!(t.token_type, TokenType::Identifier(ref id) if id == "-")
+                    {
                         self.parse_state_arrow()?;
                         // Check if target is [*]
                         if let Ok(t2) = self.peek() {
@@ -1637,13 +1680,16 @@ impl Parser {
                                         if id == "*" {
                                             let _ = self.advance();
                                             if let Ok(t4) = self.peek() {
-                                                if matches!(t4.token_type, TokenType::RightBracket) {
+                                                if matches!(t4.token_type, TokenType::RightBracket)
+                                                {
                                                     let _ = self.advance();
-                                                    return Ok(Some(vec![Statement::StateTransition {
-                                                        from,
-                                                        to: "[*]".to_string(),
-                                                        label: None,
-                                                    }]));
+                                                    return Ok(Some(vec![
+                                                        Statement::StateTransition {
+                                                            from,
+                                                            to: "[*]".to_string(),
+                                                            label: None,
+                                                        },
+                                                    ]));
                                                 }
                                             }
                                         }
@@ -1661,21 +1707,40 @@ impl Parser {
                                     let mut text = String::new();
                                     while !self.is_at_end() {
                                         let t = self.peek()?;
-                                        if t.line != line { break; }
+                                        if t.line != line {
+                                            break;
+                                        }
                                         if let TokenType::Identifier(s) = &t.token_type {
-                                            if !text.is_empty() { text.push(' '); }
+                                            if !text.is_empty() {
+                                                text.push(' ');
+                                            }
                                             text.push_str(s);
                                             let _ = self.advance();
-                                        } else { break; }
+                                        } else {
+                                            break;
+                                        }
                                     }
-                                    if text.is_empty() { None } else { Some(text) }
-                                } else { None }
-                            } else { None }
-                        } else { None };
+                                    if text.is_empty() {
+                                        None
+                                    } else {
+                                        Some(text)
+                                    }
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        };
                         return Ok(Some(vec![Statement::StateTransition { from, to, label }]));
                     }
                 }
-                Ok(Some(vec![Statement::StateDef { id: from, label: None }]))
+                Ok(Some(vec![Statement::StateDef {
+                    id: from,
+                    label: None,
+                }]))
             }
             TokenType::Semicolon => {
                 let _ = self.advance();
@@ -1775,7 +1840,9 @@ impl Parser {
                 }
 
                 // Otherwise, it's an entity definition with optional attributes
-                let mut stmts = vec![Statement::ErEntity { name: entity.clone() }];
+                let mut stmts = vec![Statement::ErEntity {
+                    name: entity.clone(),
+                }];
 
                 // Check for attribute block: { ... }
                 if let Ok(t) = self.peek() {
@@ -1813,7 +1880,9 @@ impl Parser {
         let t1 = self.advance()?;
         let c1 = match &t1.token_type {
             TokenType::Pipe => '|',
-            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => s.chars().next().unwrap(),
+            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => {
+                s.chars().next().unwrap()
+            }
             TokenType::RightBrace => '}',
             TokenType::LeftBrace => '{',
             _ => return Ok((ErCardinality::ExactlyOne, ErCardinality::ExactlyOne)),
@@ -1823,7 +1892,9 @@ impl Parser {
         let t2 = self.advance()?;
         let c2 = match &t2.token_type {
             TokenType::Pipe => '|',
-            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => s.chars().next().unwrap(),
+            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => {
+                s.chars().next().unwrap()
+            }
             TokenType::RightBrace => '}',
             TokenType::LeftBrace => '{',
             _ => return Ok((ErCardinality::ExactlyOne, ErCardinality::ExactlyOne)),
@@ -1836,7 +1907,9 @@ impl Parser {
         let t3 = self.advance()?;
         let c3 = match &t3.token_type {
             TokenType::Pipe => '|',
-            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => s.chars().next().unwrap(),
+            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => {
+                s.chars().next().unwrap()
+            }
             TokenType::RightBrace => '}',
             TokenType::LeftBrace => '{',
             _ => return Ok((ErCardinality::ExactlyOne, ErCardinality::ExactlyOne)),
@@ -1846,7 +1919,9 @@ impl Parser {
         let t4 = self.advance()?;
         let c4 = match &t4.token_type {
             TokenType::Pipe => '|',
-            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => s.chars().next().unwrap(),
+            TokenType::Identifier(s) if s == "o" || s == "}" || s == "{" => {
+                s.chars().next().unwrap()
+            }
             TokenType::RightBrace => '}',
             TokenType::LeftBrace => '{',
             _ => return Ok((ErCardinality::ExactlyOne, ErCardinality::ExactlyOne)),
@@ -1884,12 +1959,18 @@ impl Parser {
                     let mut text = String::new();
                     while !self.is_at_end() {
                         let t = self.peek()?;
-                        if t.line != line { break; }
+                        if t.line != line {
+                            break;
+                        }
                         if let TokenType::Identifier(s) = &t.token_type {
-                            if !text.is_empty() { text.push(' '); }
+                            if !text.is_empty() {
+                                text.push(' ');
+                            }
                             text.push_str(s);
                             let _ = self.advance();
-                        } else { break; }
+                        } else {
+                            break;
+                        }
                     }
                     return Ok(if text.is_empty() { None } else { Some(text) });
                 }
@@ -2012,7 +2093,9 @@ impl Parser {
 
     /// Parse a single Gantt chart statement.
     #[allow(clippy::type_complexity)]
-    fn parse_gantt_statement(&mut self) -> Result<Option<(Option<String>, Vec<Statement>)>, ParseError> {
+    fn parse_gantt_statement(
+        &mut self,
+    ) -> Result<Option<(Option<String>, Vec<Statement>)>, ParseError> {
         if self.is_at_end() {
             return Ok(None);
         }
@@ -2026,12 +2109,18 @@ impl Parser {
                 let mut text = String::new();
                 while !self.is_at_end() {
                     let t = self.peek()?;
-                    if t.line != line { break; }
+                    if t.line != line {
+                        break;
+                    }
                     if let TokenType::Identifier(s) = &t.token_type {
-                        if !text.is_empty() { text.push(' '); }
+                        if !text.is_empty() {
+                            text.push(' ');
+                        }
                         text.push_str(s);
                         let _ = self.advance();
-                    } else { break; }
+                    } else {
+                        break;
+                    }
                 }
                 Ok(Some((Some(text), vec![])))
             }
@@ -2042,7 +2131,9 @@ impl Parser {
                 let line = self.peek()?.line;
                 while !self.is_at_end() {
                     let t = self.peek()?;
-                    if t.line != line { break; }
+                    if t.line != line {
+                        break;
+                    }
                     let _ = self.advance();
                 }
                 Ok(Some((None, vec![])))
@@ -2054,12 +2145,18 @@ impl Parser {
                 let mut name = String::new();
                 while !self.is_at_end() {
                     let t = self.peek()?;
-                    if t.line != line { break; }
+                    if t.line != line {
+                        break;
+                    }
                     if let TokenType::Identifier(s) = &t.token_type {
-                        if !name.is_empty() { name.push(' '); }
+                        if !name.is_empty() {
+                            name.push(' ');
+                        }
                         name.push_str(s);
                         let _ = self.advance();
-                    } else { break; }
+                    } else {
+                        break;
+                    }
                 }
                 Ok(Some((None, vec![Statement::GanttSection { name }])))
             }
@@ -2071,11 +2168,15 @@ impl Parser {
                 // Read task name (until colon or comma)
                 while !self.is_at_end() {
                     let t = self.peek()?;
-                    if t.line != line { break; }
+                    if t.line != line {
+                        break;
+                    }
                     match &t.token_type {
                         TokenType::Keyword(k) if k == ":" => break,
                         TokenType::Identifier(s) => {
-                            if !task_name.is_empty() { task_name.push(' '); }
+                            if !task_name.is_empty() {
+                                task_name.push(' ');
+                            }
                             task_name.push_str(s);
                             let _ = self.advance();
                         }
@@ -2094,7 +2195,7 @@ impl Parser {
                     if let TokenType::Keyword(ref k) = t.token_type {
                         if k == ":" {
                             let _ = self.advance(); // consume :
-                            // Read id or status or start
+                                                    // Read id or status or start
                             let first = self.read_gantt_value()?;
 
                             // Check if it's a status keyword
@@ -2140,14 +2241,17 @@ impl Parser {
                     }
                 }
 
-                Ok(Some((None, vec![Statement::GanttTask {
-                    name: task_name,
-                    id: task_id,
-                    status,
-                    start,
-                    duration,
-                    after,
-                }])))
+                Ok(Some((
+                    None,
+                    vec![Statement::GanttTask {
+                        name: task_name,
+                        id: task_id,
+                        status,
+                        start,
+                        duration,
+                        after,
+                    }],
+                )))
             }
             TokenType::Semicolon => {
                 let _ = self.advance();
@@ -2171,7 +2275,9 @@ impl Parser {
                     break;
                 }
                 TokenType::Identifier(s) => {
-                    if !value.is_empty() { value.push(' '); }
+                    if !value.is_empty() {
+                        value.push(' ');
+                    }
                     value.push_str(s);
                     let _ = self.advance();
                 }
@@ -2211,7 +2317,11 @@ impl Parser {
             }
             let leading_spaces = line.len() - trimmed.len();
             // 2 spaces per indentation level
-            let level = if leading_spaces == 0 { 0 } else { leading_spaces / 2 };
+            let level = if leading_spaces == 0 {
+                0
+            } else {
+                leading_spaces / 2
+            };
             parsed_nodes.push((level, trimmed.to_string()));
         }
 
@@ -2339,16 +2449,25 @@ impl Parser {
                         }
                     }
 
-                    statements.push(Statement::GitCommit { id, tag, branch: None });
+                    statements.push(Statement::GitCommit {
+                        id,
+                        tag,
+                        branch: None,
+                    });
                 }
                 "branch" => {
-                    statements.push(Statement::GitBranch { name: rest.to_string() });
+                    statements.push(Statement::GitBranch {
+                        name: rest.to_string(),
+                    });
                 }
                 "checkout" => {
-                    statements.push(Statement::GitCheckout { name: rest.to_string() });
+                    statements.push(Statement::GitCheckout {
+                        name: rest.to_string(),
+                    });
                 }
                 "merge" => {
-                    let merge_parts: Vec<&str> = rest.splitn(3, |c: char| c.is_whitespace()).collect();
+                    let merge_parts: Vec<&str> =
+                        rest.splitn(3, |c: char| c.is_whitespace()).collect();
                     let branch_name = merge_parts[0].to_string();
                     let mut tag = None;
 
@@ -2449,7 +2568,11 @@ impl Parser {
                         .map(|a| a.trim().to_string())
                         .filter(|a| !a.is_empty())
                         .collect();
-                    statements.push(Statement::JourneyTask { name, score, actors });
+                    statements.push(Statement::JourneyTask {
+                        name,
+                        score,
+                        actors,
+                    });
                 }
             }
         }
@@ -2465,7 +2588,8 @@ impl Parser {
     fn parse_kanban(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "kanban")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2484,7 +2608,9 @@ impl Parser {
                 statements.push(Statement::KanbanTask { name, description });
             } else {
                 // Column name (no brackets)
-                statements.push(Statement::KanbanColumn { name: trimmed.to_string() });
+                statements.push(Statement::KanbanColumn {
+                    name: trimmed.to_string(),
+                });
             }
         }
 
@@ -2499,7 +2625,8 @@ impl Parser {
     fn parse_venn(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "venn")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2507,7 +2634,9 @@ impl Parser {
         let mut statements = Vec::new();
         for line in &lines[start_idx..] {
             let trimmed = line.trim();
-            if trimmed.is_empty() { continue; }
+            if trimmed.is_empty() {
+                continue;
+            }
             if let Some(pos) = trimmed.find(':') {
                 let id = trimmed[..pos].trim().to_string();
                 let label = trimmed[pos + 1..].trim().to_string();
@@ -2525,7 +2654,8 @@ impl Parser {
     fn parse_packet(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "packet" || l.trim().starts_with("packet"))
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2533,15 +2663,22 @@ impl Parser {
         let mut statements = Vec::new();
         for line in &lines[start_idx..] {
             let trimmed = line.trim();
-            if trimmed.is_empty() { continue; }
+            if trimmed.is_empty() {
+                continue;
+            }
             if let Some(colon_pos) = trimmed.find(':') {
                 let range_part = trimmed[..colon_pos].trim();
                 let label = trimmed[colon_pos + 1..].trim().to_string();
                 if let Some(dash_pos) = range_part.find('-') {
                     let start_str = range_part[..dash_pos].trim();
                     let end_str = range_part[dash_pos + 1..].trim();
-                    if let (Ok(start), Ok(end)) = (start_str.parse::<u32>(), end_str.parse::<u32>()) {
-                        statements.push(Statement::PacketField { start_bit: start, end_bit: end, label });
+                    if let (Ok(start), Ok(end)) = (start_str.parse::<u32>(), end_str.parse::<u32>())
+                    {
+                        statements.push(Statement::PacketField {
+                            start_bit: start,
+                            end_bit: end,
+                            label,
+                        });
                     }
                 }
             }
@@ -2557,7 +2694,8 @@ impl Parser {
     fn parse_radar(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "radar")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2565,7 +2703,9 @@ impl Parser {
         let mut statements = Vec::new();
         for line in &lines[start_idx..] {
             let trimmed = line.trim();
-            if trimmed.is_empty() { continue; }
+            if trimmed.is_empty() {
+                continue;
+            }
             if let Some(pos) = trimmed.find(':') {
                 let label = trimmed[..pos].trim().to_string();
                 let val_str = trimmed[pos + 1..].trim();
@@ -2584,7 +2724,8 @@ impl Parser {
     fn parse_ishikawa(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "ishikawa")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2594,15 +2735,23 @@ impl Parser {
 
         for line in &lines[start_idx..] {
             let trimmed = line.trim();
-            if trimmed.is_empty() || trimmed.starts_with("title") { continue; }
+            if trimmed.is_empty() || trimmed.starts_with("title") {
+                continue;
+            }
             if trimmed.starts_with("root ") {
-                statements.push(Statement::IshikawaRoot { label: trimmed[5..].trim().to_string() });
+                statements.push(Statement::IshikawaRoot {
+                    label: trimmed[5..].trim().to_string(),
+                });
                 in_category = false;
             } else if trimmed.starts_with("category ") {
-                statements.push(Statement::IshikawaCategory { label: trimmed[9..].trim().to_string() });
+                statements.push(Statement::IshikawaCategory {
+                    label: trimmed[9..].trim().to_string(),
+                });
                 in_category = true;
             } else if in_category && !trimmed.is_empty() {
-                statements.push(Statement::IshikawaCause { label: trimmed.to_string() });
+                statements.push(Statement::IshikawaCause {
+                    label: trimmed.to_string(),
+                });
             }
         }
         Ok(statements)
@@ -2616,7 +2765,8 @@ impl Parser {
     fn parse_quadrant(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "quadrantChart")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2624,7 +2774,9 @@ impl Parser {
         let mut statements = Vec::new();
         for line in &lines[start_idx..] {
             let trimmed = line.trim();
-            if trimmed.is_empty() { continue; }
+            if trimmed.is_empty() {
+                continue;
+            }
             if let Some(title) = trimmed.strip_prefix("title ") {
                 statements.push(Statement::QuadrantTitle(title.trim().to_string()));
             } else if let Some(x_axis) = trimmed.strip_prefix("x-axis ") {
@@ -2634,11 +2786,21 @@ impl Parser {
             } else if let Some(rest) = trimmed.strip_prefix("quadrant-") {
                 let parts: Vec<&str> = rest.splitn(2, |c: char| c.is_whitespace()).collect();
                 if let Ok(num) = parts[0].parse::<u32>() {
-                    let label = if parts.len() > 1 { parts[1].trim().to_string() } else { String::new() };
-                    statements.push(Statement::QuadrantLabel { quadrant: num, label });
+                    let label = if parts.len() > 1 {
+                        parts[1].trim().to_string()
+                    } else {
+                        String::new()
+                    };
+                    statements.push(Statement::QuadrantLabel {
+                        quadrant: num,
+                        label,
+                    });
                 }
             } else if let Some(bracket_pos) = trimmed.find('[') {
-                let label = trimmed[..bracket_pos].trim().trim_end_matches(':').to_string();
+                let label = trimmed[..bracket_pos]
+                    .trim()
+                    .trim_end_matches(':')
+                    .to_string();
                 let coords = trimmed[bracket_pos..].trim_matches('[').trim_matches(']');
                 if let Some(comma_pos) = coords.find(',') {
                     let x = coords[..comma_pos].trim().parse::<f64>().unwrap_or(0.5);
@@ -2658,7 +2820,8 @@ impl Parser {
     fn parse_requirement(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start = lines.iter()
+        let start = lines
+            .iter()
             .position(|l| l.trim() == "requirementDiagram")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2674,7 +2837,9 @@ impl Parser {
 
         for line in &lines[start..] {
             let t = line.trim();
-            if t.is_empty() { continue; }
+            if t.is_empty() {
+                continue;
+            }
 
             if t == "}" && in_block {
                 if is_req {
@@ -2691,14 +2856,25 @@ impl Parser {
             }
 
             if t.starts_with("requirement ") {
-                in_block = true; is_req = true;
-                cur_name = t["requirement ".len()..].trim_end_matches('{').trim().to_string();
-                cur_id.clear(); cur_text.clear(); cur_risk.clear(); cur_vm.clear();
+                in_block = true;
+                is_req = true;
+                cur_name = t["requirement ".len()..]
+                    .trim_end_matches('{')
+                    .trim()
+                    .to_string();
+                cur_id.clear();
+                cur_text.clear();
+                cur_risk.clear();
+                cur_vm.clear();
                 continue;
             }
             if t.starts_with("element ") {
-                in_block = true; is_req = false;
-                let name = t["element ".len()..].trim_end_matches('{').trim().to_string();
+                in_block = true;
+                is_req = false;
+                let name = t["element ".len()..]
+                    .trim_end_matches('{')
+                    .trim()
+                    .to_string();
                 // element type is inside the block, so defer creation
                 cur_name = name;
                 continue;
@@ -2707,7 +2883,7 @@ impl Parser {
             if in_block {
                 if let Some(pos) = t.find(':') {
                     let key = t[..pos].trim();
-                    let val = t[pos+1..].trim().to_string();
+                    let val = t[pos + 1..].trim().to_string();
                     if is_req {
                         match key {
                             "id" => cur_id = val,
@@ -2732,9 +2908,10 @@ impl Parser {
             if t.contains("->") {
                 let arrow_pos = t.find("->").unwrap();
                 let before = t[..arrow_pos].trim();
-                let after = t[arrow_pos+2..].trim();
+                let after = t[arrow_pos + 2..].trim();
                 // before is "X - type" or "X -  type"
-                let before_parts: Vec<&str> = before.splitn(2, |c: char| c.is_whitespace()).collect();
+                let before_parts: Vec<&str> =
+                    before.splitn(2, |c: char| c.is_whitespace()).collect();
                 let from = before_parts[0].to_string();
                 let rel_type = if before_parts.len() > 1 {
                     before_parts[1].trim_matches('-').trim().to_string()
@@ -2742,15 +2919,22 @@ impl Parser {
                     String::new()
                 };
                 let to = after.trim_start_matches('>').trim().to_string();
-                stmts.push(Statement::RequirementRelation { from, to, relation_type: rel_type });
+                stmts.push(Statement::RequirementRelation {
+                    from,
+                    to,
+                    relation_type: rel_type,
+                });
             }
         }
 
         // Flush if closing brace missing
         if in_block && is_req {
             stmts.push(Statement::RequirementDef {
-                name: cur_name, req_id: cur_id, text: cur_text,
-                risk: cur_risk, verify_method: cur_vm,
+                name: cur_name,
+                req_id: cur_id,
+                text: cur_text,
+                risk: cur_risk,
+                verify_method: cur_vm,
             });
         }
 
@@ -2765,7 +2949,8 @@ impl Parser {
     fn parse_block(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start_idx = lines.iter()
+        let start_idx = lines
+            .iter()
             .position(|l| l.trim() == "block")
             .map(|i| i + 1)
             .unwrap_or(lines.len());
@@ -2773,13 +2958,19 @@ impl Parser {
         let mut nodes: Vec<(usize, String)> = Vec::new();
         for line in &lines[start_idx..] {
             let t = line.trim();
-            if t.is_empty() { continue; }
+            if t.is_empty() {
+                continue;
+            }
             let level = (line.len() - t.len()) / 2;
             nodes.push((level, t.to_string()));
         }
 
         let mut counter = 0usize;
-        Ok(Self::build_block_level(&mut nodes.into_iter().peekable(), 0, &mut counter))
+        Ok(Self::build_block_level(
+            &mut nodes.into_iter().peekable(),
+            0,
+            &mut counter,
+        ))
     }
 
     fn build_block_level(
@@ -2789,12 +2980,18 @@ impl Parser {
     ) -> Vec<Statement> {
         let mut children = Vec::new();
         while let Some(&(level, _)) = iter.peek() {
-            if level <= parent_level { break; }
+            if level <= parent_level {
+                break;
+            }
             let (_, label) = iter.next().unwrap();
             let id = format!("b{}", *counter);
             *counter += 1;
             let sub = Self::build_block_level(iter, level, counter);
-            children.push(Statement::BlockNode { id, label, children: sub });
+            children.push(Statement::BlockNode {
+                id,
+                label,
+                children: sub,
+            });
         }
         children
     }
@@ -2810,22 +3007,56 @@ impl Parser {
 
         for line in source.lines() {
             let t = line.trim();
-            if t.is_empty() || t.starts_with("C4Context") || t.starts_with("C4Container") || t.starts_with("C4Component") { continue; }
-            if t.starts_with("System_Boundary") || t.starts_with("Enterprise_Boundary") { continue; }
+            if t.is_empty()
+                || t.starts_with("C4Context")
+                || t.starts_with("C4Container")
+                || t.starts_with("C4Component")
+            {
+                continue;
+            }
+            if t.starts_with("System_Boundary") || t.starts_with("Enterprise_Boundary") {
+                continue;
+            }
 
             // Element definitions: Type(alias, "label", "desc")
             let result = if let Some(inner) = t.strip_prefix("Person(") {
-                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4Person { alias: a, label: l, description: d })
+                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4Person {
+                    alias: a,
+                    label: l,
+                    description: d,
+                })
             } else if let Some(inner) = t.strip_prefix("System(") {
-                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4System { alias: a, label: l, description: d })
+                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4System {
+                    alias: a,
+                    label: l,
+                    description: d,
+                })
             } else if let Some(inner) = t.strip_prefix("Container(") {
-                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4Container { alias: a, label: l, description: d })
+                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4Container {
+                    alias: a,
+                    label: l,
+                    description: d,
+                })
             } else if let Some(inner) = t.strip_prefix("Component(") {
-                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4Component { alias: a, label: l, description: d })
+                parse_c4_triple(inner).map(|(a, l, d)| Statement::C4Component {
+                    alias: a,
+                    label: l,
+                    description: d,
+                })
             } else if t.starts_with("Rel(") || t.starts_with("Rel_Up(") || t.starts_with("BiRel(") {
-                let inner = t.strip_prefix("Rel(").or_else(|| t.strip_prefix("Rel_Up(")).or_else(|| t.strip_prefix("BiRel(")).unwrap_or("");
-                parse_c4_rel_triple(inner).map(|(f, t, l)| Statement::C4Rel { from: f, to: t, label: l })
-            } else { None };
+                let inner = t
+                    .strip_prefix("Rel(")
+                    .or_else(|| t.strip_prefix("Rel_Up("))
+                    .or_else(|| t.strip_prefix("BiRel("))
+                    .unwrap_or("");
+                parse_c4_rel_triple(inner).map(|(f, t, l)| Statement::C4Rel {
+                    from: f,
+                    to: t,
+                    label: l,
+                })
+            } else {
+                None
+            };
 
             if let Some(stmt) = result {
                 stmts.push(stmt);
@@ -2842,17 +3073,23 @@ impl Parser {
     fn parse_architecture(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start = lines.iter().position(|l| l.trim() == "architecture").map(|i| i+1).unwrap_or(lines.len());
+        let start = lines
+            .iter()
+            .position(|l| l.trim() == "architecture")
+            .map(|i| i + 1)
+            .unwrap_or(lines.len());
 
         let mut stmts = Vec::new();
         for line in &lines[start..] {
             let t = line.trim();
-            if t.is_empty() { continue; }
+            if t.is_empty() {
+                continue;
+            }
             if t.starts_with("service ") {
                 let rest = t["service ".len()..].trim();
                 if let Some(paren) = rest.find('(') {
                     let id = rest[..paren].trim().to_string();
-                    let label = rest[paren+1..].trim_end_matches(')').trim().to_string();
+                    let label = rest[paren + 1..].trim_end_matches(')').trim().to_string();
                     stmts.push(Statement::ArchService { id, label });
                 }
             } else if t.starts_with("database ") {
@@ -2860,20 +3097,29 @@ impl Parser {
                 if let Some(paren) = rest.find('[') {
                     let id = rest[..paren].trim().to_string();
                     let inner = rest[paren..].trim();
-                    let label = inner.trim_start_matches('[').trim_start_matches('(').trim_end_matches(']').trim_end_matches(')').trim().to_string();
+                    let label = inner
+                        .trim_start_matches('[')
+                        .trim_start_matches('(')
+                        .trim_end_matches(']')
+                        .trim_end_matches(')')
+                        .trim()
+                        .to_string();
                     stmts.push(Statement::ArchDatabase { id, label });
                 }
             } else if t.starts_with("queue ") {
                 let rest = t["queue ".len()..].trim();
                 if let Some(paren) = rest.find('(') {
                     let id = rest[..paren].trim().to_string();
-                    let label = rest[paren+1..].trim_end_matches(')').trim().to_string();
+                    let label = rest[paren + 1..].trim_end_matches(')').trim().to_string();
                     stmts.push(Statement::ArchQueue { id, label });
                 }
             } else if t.contains("->") {
                 let parts: Vec<&str> = t.splitn(2, "->").collect();
                 if parts.len() == 2 {
-                    stmts.push(Statement::ArchRelation { from: parts[0].trim().to_string(), to: parts[1].trim().to_string() });
+                    stmts.push(Statement::ArchRelation {
+                        from: parts[0].trim().to_string(),
+                        to: parts[1].trim().to_string(),
+                    });
                 }
             }
         }
@@ -2888,36 +3134,70 @@ impl Parser {
     fn parse_xychart(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start = lines.iter().position(|l| l.trim() == "xychart" || l.trim().starts_with("xychart")).map(|i| i+1).unwrap_or(lines.len());
+        let start = lines
+            .iter()
+            .position(|l| l.trim() == "xychart" || l.trim().starts_with("xychart"))
+            .map(|i| i + 1)
+            .unwrap_or(lines.len());
 
         let mut stmts = Vec::new();
         for line in &lines[start..] {
             let t = line.trim();
-            if t.is_empty() { continue; }
+            if t.is_empty() {
+                continue;
+            }
             if let Some(title) = t.strip_prefix("title ") {
-                stmts.push(Statement::XyTitle(title.trim().trim_matches('"').to_string()));
+                stmts.push(Statement::XyTitle(
+                    title.trim().trim_matches('"').to_string(),
+                ));
             } else if let Some(rest) = t.strip_prefix("x-axis ") {
                 let r = rest.trim();
                 let label = r.trim_matches('"').to_string();
                 let cats = if r.contains('[') {
-                    r.split('[').nth(1).and_then(|s| s.split(']').next())
-                        .map(|s| s.split(',').map(|c| c.trim().trim_matches('"').to_string()).collect())
+                    r.split('[')
+                        .nth(1)
+                        .and_then(|s| s.split(']').next())
+                        .map(|s| {
+                            s.split(',')
+                                .map(|c| c.trim().trim_matches('"').to_string())
+                                .collect()
+                        })
                         .unwrap_or_default()
-                } else { vec![] };
-                stmts.push(Statement::XyXAxis { label, categories: cats });
+                } else {
+                    vec![]
+                };
+                stmts.push(Statement::XyXAxis {
+                    label,
+                    categories: cats,
+                });
             } else if let Some(rest) = t.strip_prefix("y-axis ") {
                 let r = rest.trim();
                 let label = r.trim_matches('"').to_string();
                 let (min, max) = if r.contains("-->") {
                     let parts: Vec<&str> = r.split("-->").collect();
-                    (parts[0].trim().parse::<f64>().unwrap_or(0.0), parts[1].trim().parse::<f64>().unwrap_or(100.0))
-                } else { (0.0, 100.0) };
+                    (
+                        parts[0].trim().parse::<f64>().unwrap_or(0.0),
+                        parts[1].trim().parse::<f64>().unwrap_or(100.0),
+                    )
+                } else {
+                    (0.0, 100.0)
+                };
                 stmts.push(Statement::XyYAxis { label, min, max });
             } else if let Some(rest) = t.strip_prefix("bar ") {
-                let data = rest.trim_matches('[').trim_matches(']').split(',').filter_map(|v| v.trim().parse::<f64>().ok()).collect();
+                let data = rest
+                    .trim_matches('[')
+                    .trim_matches(']')
+                    .split(',')
+                    .filter_map(|v| v.trim().parse::<f64>().ok())
+                    .collect();
                 stmts.push(Statement::XyBar { data });
             } else if let Some(rest) = t.strip_prefix("line ") {
-                let data = rest.trim_matches('[').trim_matches(']').split(',').filter_map(|v| v.trim().parse::<f64>().ok()).collect();
+                let data = rest
+                    .trim_matches('[')
+                    .trim_matches(']')
+                    .split(',')
+                    .filter_map(|v| v.trim().parse::<f64>().ok())
+                    .collect();
                 stmts.push(Statement::XyLine { data });
             }
         }
@@ -2931,19 +3211,29 @@ impl Parser {
     fn parse_sankey(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start = lines.iter().position(|l| l.trim() == "sankey").map(|i| i+1).unwrap_or(lines.len());
+        let start = lines
+            .iter()
+            .position(|l| l.trim() == "sankey")
+            .map(|i| i + 1)
+            .unwrap_or(lines.len());
 
         let mut stmts = Vec::new();
         for line in &lines[start..] {
             let t = line.trim();
-            if t.is_empty() { continue; }
+            if t.is_empty() {
+                continue;
+            }
             if let Some(arrow) = t.find("->") {
                 let source = t[..arrow].trim().to_string();
-                let rest = t[arrow+2..].trim();
+                let rest = t[arrow + 2..].trim();
                 if let Some(col) = rest.find(':') {
                     let target = rest[..col].trim().to_string();
-                    let val = rest[col+1..].trim().parse::<f64>().unwrap_or(0.0);
-                    stmts.push(Statement::SankeyLink { source, target, value: val });
+                    let val = rest[col + 1..].trim().parse::<f64>().unwrap_or(0.0);
+                    stmts.push(Statement::SankeyLink {
+                        source,
+                        target,
+                        value: val,
+                    });
                 }
             }
         }
@@ -2953,14 +3243,20 @@ impl Parser {
     fn parse_treemap(&mut self) -> Result<Vec<Statement>, ParseError> {
         let source = &self._source;
         let lines: Vec<&str> = source.lines().collect();
-        let start = lines.iter().position(|l| l.trim() == "treemap").map(|i| i+1).unwrap_or(lines.len());
+        let start = lines
+            .iter()
+            .position(|l| l.trim() == "treemap")
+            .map(|i| i + 1)
+            .unwrap_or(lines.len());
         let mut stmts = Vec::new();
         for line in &lines[start..] {
             let t = line.trim();
-            if t.is_empty() { continue; }
+            if t.is_empty() {
+                continue;
+            }
             if let Some(col) = t.find(':') {
                 let label = t[..col].trim().to_string();
-                let val = t[col+1..].trim().parse::<f64>().unwrap_or(0.0);
+                let val = t[col + 1..].trim().parse::<f64>().unwrap_or(0.0);
                 stmts.push(Statement::TreemapItem { label, value: val });
             }
         }
@@ -3019,7 +3315,11 @@ impl Parser {
 fn parse_c4_triple(inner: &str) -> Option<(String, String, String)> {
     let inner = inner.trim_end().strip_suffix(')')?;
     let args = parse_c4_args(inner);
-    if args.len() == 3 { Some((args[0].clone(), args[1].clone(), args[2].clone())) } else { None }
+    if args.len() == 3 {
+        Some((args[0].clone(), args[1].clone(), args[2].clone()))
+    } else {
+        None
+    }
 }
 
 /// Parse three comma-separated arguments for a C4 relationship.
@@ -3034,10 +3334,20 @@ fn parse_c4_args(input: &str) -> Vec<String> {
     let mut in_quotes = false;
     for ch in input.trim().chars() {
         if in_quotes {
-            if ch == '"' { in_quotes = false; } else { current.push(ch); }
-        } else if ch == '"' { current.clear(); in_quotes = true; }
-        else if ch == ',' { args.push(current.trim().to_string()); current = String::new(); }
-        else { current.push(ch); }
+            if ch == '"' {
+                in_quotes = false;
+            } else {
+                current.push(ch);
+            }
+        } else if ch == '"' {
+            current.clear();
+            in_quotes = true;
+        } else if ch == ',' {
+            args.push(current.trim().to_string());
+            current = String::new();
+        } else {
+            current.push(ch);
+        }
     }
     args.push(current.trim().to_string());
     args
@@ -3338,7 +3648,12 @@ mod tests {
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.statements.len(), 1);
         match &diagram.statements[0] {
-            Statement::Message { from, to, label, arrow_type } => {
+            Statement::Message {
+                from,
+                to,
+                label,
+                arrow_type,
+            } => {
                 assert_eq!(from, "Alice");
                 assert_eq!(to, "Bob");
                 assert_eq!(label, "Hello Bob");
@@ -3354,8 +3669,12 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         let expected = [
-            ArrowType::Solid, ArrowType::Dashed, ArrowType::SolidCross,
-            ArrowType::DashedCross, ArrowType::SolidOpen, ArrowType::DashedOpen,
+            ArrowType::Solid,
+            ArrowType::Dashed,
+            ArrowType::SolidCross,
+            ArrowType::DashedCross,
+            ArrowType::SolidOpen,
+            ArrowType::DashedOpen,
         ];
         for (i, exp) in expected.iter().enumerate() {
             match &diagram.statements[i] {
@@ -3389,13 +3708,19 @@ mod tests {
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.statements.len(), 1);
         match &diagram.statements[0] {
-            Statement::Block { keyword, condition, statements } => {
+            Statement::Block {
+                keyword,
+                condition,
+                statements,
+            } => {
                 assert_eq!(keyword, "alt");
                 assert_eq!(condition.as_deref(), Some("success"));
                 // should contain: Message + else Block
                 assert_eq!(statements.len(), 2);
                 assert!(matches!(&statements[0], Statement::Message { .. }));
-                assert!(matches!(&statements[1], Statement::Block { keyword, .. } if keyword == "else"));
+                assert!(
+                    matches!(&statements[1], Statement::Block { keyword, .. } if keyword == "else")
+                );
             }
             _ => panic!("Expected Block"),
         }
@@ -3407,7 +3732,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         match &diagram.statements[0] {
-            Statement::Block { keyword, condition, statements } => {
+            Statement::Block {
+                keyword,
+                condition,
+                statements,
+            } => {
                 assert_eq!(keyword, "loop");
                 assert_eq!(condition.as_deref(), Some("retry"));
                 assert_eq!(statements.len(), 1);
@@ -3422,7 +3751,9 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         match &diagram.statements[0] {
-            Statement::Block { keyword, condition, .. } => {
+            Statement::Block {
+                keyword, condition, ..
+            } => {
                 assert_eq!(keyword, "opt");
                 assert_eq!(condition.as_deref(), Some("if needed"));
             }
@@ -3436,7 +3767,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         match &diagram.statements[0] {
-            Statement::Note { target, text, position } => {
+            Statement::Note {
+                target,
+                text,
+                position,
+            } => {
                 assert_eq!(target, "Alice");
                 assert_eq!(text, "This is a note");
                 assert_eq!(*position, NotePosition::Right);
@@ -3487,7 +3822,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         match &diagram.statements[0] {
-            Statement::Note { target, text, position } => {
+            Statement::Note {
+                target,
+                text,
+                position,
+            } => {
                 assert_eq!(target, "Alice");
                 assert_eq!(text, "A note");
                 assert_eq!(*position, NotePosition::Left);
@@ -3502,7 +3841,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         match &diagram.statements[0] {
-            Statement::Note { target, text, position } => {
+            Statement::Note {
+                target,
+                text,
+                position,
+            } => {
                 assert_eq!(target, "Alice");
                 assert_eq!(text, "Over both");
                 assert_eq!(*position, NotePosition::Over);
@@ -3601,7 +3944,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         // Should have ClassDef + 3 members
-        assert!(diagram.statements.len() >= 4, "Expected at least 4 statements, got {}", diagram.statements.len());
+        assert!(
+            diagram.statements.len() >= 4,
+            "Expected at least 4 statements, got {}",
+            diagram.statements.len()
+        );
     }
 
     #[test]
@@ -3609,10 +3956,18 @@ mod tests {
         let code = "classDiagram\nAnimal <|-- Dog";
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
-        let rel = diagram.statements.iter().find(|s| matches!(s, Statement::ClassRelation { .. }));
+        let rel = diagram
+            .statements
+            .iter()
+            .find(|s| matches!(s, Statement::ClassRelation { .. }));
         assert!(rel.is_some(), "Expected a ClassRelation");
         match rel.unwrap() {
-            Statement::ClassRelation { from, to, relation_type, .. } => {
+            Statement::ClassRelation {
+                from,
+                to,
+                relation_type,
+                ..
+            } => {
                 assert_eq!(from, "Animal");
                 assert_eq!(to, "Dog");
                 assert_eq!(*relation_type, ClassRelationType::Inheritance);
@@ -3626,10 +3981,15 @@ mod tests {
         let code = "classDiagram\nAnimal --> Food : eats";
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
-        let rel = diagram.statements.iter().find(|s| matches!(s, Statement::ClassRelation { .. }));
+        let rel = diagram
+            .statements
+            .iter()
+            .find(|s| matches!(s, Statement::ClassRelation { .. }));
         assert!(rel.is_some());
         match rel.unwrap() {
-            Statement::ClassRelation { from, to, label, .. } => {
+            Statement::ClassRelation {
+                from, to, label, ..
+            } => {
                 assert_eq!(from, "Animal");
                 assert_eq!(to, "Food");
                 assert_eq!(label.as_deref(), Some("eats"));
@@ -3644,7 +4004,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         // Check that we have members with different visibilities
-        let members: Vec<_> = diagram.statements.iter().filter(|s| matches!(s, Statement::ClassMember { .. })).collect();
+        let members: Vec<_> = diagram
+            .statements
+            .iter()
+            .filter(|s| matches!(s, Statement::ClassMember { .. }))
+            .collect();
         assert!(members.len() >= 3, "Expected at least 3 members");
     }
 
@@ -3782,7 +4146,11 @@ mod tests {
         let code = "sequenceDiagram\nAlice->>Bob: Auth\nBob-->>Alice: Token";
         let mut parser = Parser::new(code);
         let result = parser.parse();
-        assert!(result.is_ok(), "Cross arrows should parse: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Cross arrows should parse: {:?}",
+            result.err()
+        );
     }
 
     #[test]
@@ -3795,15 +4163,17 @@ mod tests {
 
     #[test]
     fn test_parse_er_relationship_all_types() {
-        let cases = vec![
-            "||--||",
-            "|o--o|",
-        ];
+        let cases = vec!["||--||", "|o--o|"];
         for code_fragment in &cases {
             let code = format!("erDiagram\nCUSTOMER {} ORDER : label", code_fragment);
             let mut parser = Parser::new(&code);
             let result = parser.parse();
-            assert!(result.is_ok(), "Failed to parse {}: {:?}", code_fragment, result.err());
+            assert!(
+                result.is_ok(),
+                "Failed to parse {}: {:?}",
+                code_fragment,
+                result.err()
+            );
         }
     }
 
@@ -3814,7 +4184,9 @@ mod tests {
         let result = parser.parse();
         assert!(result.is_ok());
         let diagram = result.unwrap();
-        let transitions: Vec<_> = diagram.statements.iter()
+        let transitions: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::StateTransition { .. }))
             .collect();
         assert_eq!(transitions.len(), 6);
@@ -3875,7 +4247,9 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         // Should have 2 transitions
-        let transitions: Vec<_> = diagram.statements.iter()
+        let transitions: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::StateTransition { .. }))
             .collect();
         assert_eq!(transitions.len(), 2);
@@ -3899,11 +4273,15 @@ mod tests {
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.diagram_type, DiagramType::Er);
         // Should have entity + attributes
-        let entities: Vec<_> = diagram.statements.iter()
+        let entities: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::ErEntity { .. }))
             .collect();
         assert_eq!(entities.len(), 1);
-        let attrs: Vec<_> = diagram.statements.iter()
+        let attrs: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::ErAttribute { .. }))
             .collect();
         assert_eq!(attrs.len(), 2);
@@ -3914,12 +4292,16 @@ mod tests {
         let code = "erDiagram\nCUSTOMER ||--o{ ORDER : places";
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
-        let rels: Vec<_> = diagram.statements.iter()
+        let rels: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::ErRelation { .. }))
             .collect();
         assert_eq!(rels.len(), 1);
         match rels[0] {
-            Statement::ErRelation { from, to, label, .. } => {
+            Statement::ErRelation {
+                from, to, label, ..
+            } => {
                 assert_eq!(from, "CUSTOMER");
                 assert_eq!(to, "ORDER");
                 assert_eq!(label.as_deref(), Some("places"));
@@ -3933,7 +4315,9 @@ mod tests {
         let code = "erDiagram\nCUSTOMER ||--o{ ORDER : places\nORDER ||--|{ LINE-ITEM : contains";
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
-        let rels: Vec<_> = diagram.statements.iter()
+        let rels: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::ErRelation { .. }))
             .collect();
         assert_eq!(rels.len(), 2);
@@ -3955,7 +4339,9 @@ mod tests {
         let code = "gantt\n    section My Section\n    Task 1 :t1, 2024-01-01, 10d";
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
-        let sections: Vec<_> = diagram.statements.iter()
+        let sections: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::GanttSection { .. }))
             .collect();
         assert_eq!(sections.len(), 1);
@@ -3966,7 +4352,9 @@ mod tests {
         let code = "gantt\n    Task 1 :t1, 2024-01-01, 10d";
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
-        let tasks: Vec<_> = diagram.statements.iter()
+        let tasks: Vec<_> = diagram
+            .statements
+            .iter()
             .filter(|s| matches!(s, Statement::GanttTask { .. }))
             .collect();
         assert_eq!(tasks.len(), 1);
@@ -4042,7 +4430,11 @@ mod tests {
         let code = "graph TD\nsubgraph Outer\nA-->B\nsubgraph Inner\nC-->D\nend\nend";
         let mut parser = Parser::new(code);
         let result = parser.parse();
-        assert!(result.is_ok(), "Nested subgraph should parse: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Nested subgraph should parse: {:?}",
+            result.err()
+        );
     }
 
     #[test]
@@ -4071,7 +4463,14 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         assert!(!diagram.subgraphs.is_empty(), "Should have subgraph");
-        assert_eq!(diagram.subgraphs[0].id, "MyGroup", "Identifier after subgraph becomes id");
-        assert_eq!(diagram.subgraphs[0].statements.len(), 1, "Should have inner edges");
+        assert_eq!(
+            diagram.subgraphs[0].id, "MyGroup",
+            "Identifier after subgraph becomes id"
+        );
+        assert_eq!(
+            diagram.subgraphs[0].statements.len(),
+            1,
+            "Should have inner edges"
+        );
     }
 }

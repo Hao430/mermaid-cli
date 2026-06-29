@@ -328,13 +328,19 @@ impl Lexer {
         let raw = ident.clone();
         let token_type = match ident.as_str() {
             "graph" | "flowchart" | "sequenceDiagram" | "classDiagram" | "stateDiagram"
-            | "stateDiagram-v2" | "gantt" | "pie" | "erDiagram" | "mindmap" | "gitGraph" | "timeline" | "journey" | "kanban" | "venn" | "packet" | "radar" | "ishikawa" | "quadrantChart" | "zenuml" | "requirementDiagram" | "block" | "C4Context" | "C4Container" | "C4Component" | "architecture" | "xychart" | "sankey" | "treemap" => TokenType::Keyword(ident),
+            | "stateDiagram-v2" | "gantt" | "pie" | "erDiagram" | "mindmap" | "gitGraph"
+            | "timeline" | "journey" | "kanban" | "venn" | "packet" | "radar" | "ishikawa"
+            | "quadrantChart" | "zenuml" | "requirementDiagram" | "block" | "C4Context"
+            | "C4Container" | "C4Component" | "architecture" | "xychart" | "sankey" | "treemap" => {
+                TokenType::Keyword(ident)
+            }
             "TD" | "BT" | "LR" | "RL" => TokenType::Keyword(ident),
             "end" | "subgraph" | "participant" | "Note" | "note" | "as" | "alt" | "loop"
             | "opt" | "par" | "else" | "activate" | "deactivate" | "title" | "class"
-            | "annotation" | "interface" | "abstract" | "namespace" | "state"
-            | "section" | "dateFormat" | "excludes"
-            | "cssClass" | "callback" | "link" | "click" => TokenType::Keyword(ident),
+            | "annotation" | "interface" | "abstract" | "namespace" | "state" | "section"
+            | "dateFormat" | "excludes" | "cssClass" | "callback" | "link" | "click" => {
+                TokenType::Keyword(ident)
+            }
             _ => TokenType::Identifier(ident),
         };
 
@@ -493,7 +499,9 @@ mod tests {
     fn test_lexer_colon() {
         let mut lexer = Lexer::new("Alice->Bob: Hello");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Keyword(ref s) if s == ":")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Keyword(ref s) if s == ":")));
     }
 
     #[test]
@@ -501,9 +509,13 @@ mod tests {
         // ? should be skipped, not break the tokenizer
         let mut lexer = Lexer::new("Alice->Bob: Hello?");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "Hello")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "Hello")));
         // ? should not appear as a token
-        assert!(!tokens.iter().any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "Hello?")));
+        assert!(!tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "Hello?")));
     }
 
     #[test]
@@ -518,40 +530,61 @@ mod tests {
     fn test_lexer_special_chars() {
         let mut lexer = Lexer::new("+ - # ~ *");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "+")));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "#")));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "~")));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "*")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "+")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "#")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "~")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Identifier(ref s) if s == "*")));
     }
 
     #[test]
     fn test_lexer_less_than() {
         let mut lexer = Lexer::new("<<interface>>");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::LessThan)));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::GreaterThan)));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::LessThan)));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::GreaterThan)));
     }
 
     #[test]
     fn test_lexer_string_with_quotes() {
         let mut lexer = Lexer::new("\"Hello World\" 'Single Quote'");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::String(ref s) if s == "Hello World")));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::String(ref s) if s == "Single Quote")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::String(ref s) if s == "Hello World")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::String(ref s) if s == "Single Quote")));
     }
 
     #[test]
     fn test_lexer_pipe_operator() {
         let mut lexer = Lexer::new("A | B");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Pipe)));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Pipe)));
     }
 
     #[test]
     fn test_lexer_multiple_arrows() {
         let mut lexer = Lexer::new("-> --> ->> -->> -) --)");
         let tokens = lexer.tokenize();
-        let arrows: Vec<_> = tokens.iter().filter(|t| matches!(t.token_type, TokenType::Arrow)).collect();
+        let arrows: Vec<_> = tokens
+            .iter()
+            .filter(|t| matches!(t.token_type, TokenType::Arrow))
+            .collect();
         assert_eq!(arrows.len(), 6, "Should have 6 arrow tokens");
     }
 
@@ -559,17 +592,27 @@ mod tests {
     fn test_lexer_pie_chart_tokens() {
         let mut lexer = Lexer::new("pie title Sales\n\"Q1\" : 100");
         let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Keyword(ref s) if s == "pie")));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::Keyword(ref s) if s == "title")));
-        assert!(tokens.iter().any(|t| matches!(t.token_type, TokenType::String(ref s) if s == "Q1")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Keyword(ref s) if s == "pie")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::Keyword(ref s) if s == "title")));
+        assert!(tokens
+            .iter()
+            .any(|t| matches!(t.token_type, TokenType::String(ref s) if s == "Q1")));
     }
 
     #[test]
     fn test_lexer_gantt_keywords() {
         let mut lexer = Lexer::new("gantt title dateFormat section");
         let tokens = lexer.tokenize();
-        let keywords: Vec<_> = tokens.iter()
-            .filter_map(|t| match &t.token_type { TokenType::Keyword(s) => Some(s.as_str()), _ => None })
+        let keywords: Vec<_> = tokens
+            .iter()
+            .filter_map(|t| match &t.token_type {
+                TokenType::Keyword(s) => Some(s.as_str()),
+                _ => None,
+            })
             .collect();
         assert!(keywords.contains(&"gantt"));
         assert!(keywords.contains(&"title"));
@@ -580,8 +623,12 @@ mod tests {
     fn test_lexer_class_keywords() {
         let mut lexer = Lexer::new("classDiagram class interface abstract namespace");
         let tokens = lexer.tokenize();
-        let keywords: Vec<_> = tokens.iter()
-            .filter_map(|t| match &t.token_type { TokenType::Keyword(s) => Some(s.as_str()), _ => None })
+        let keywords: Vec<_> = tokens
+            .iter()
+            .filter_map(|t| match &t.token_type {
+                TokenType::Keyword(s) => Some(s.as_str()),
+                _ => None,
+            })
             .collect();
         assert!(keywords.contains(&"class"));
         assert!(keywords.contains(&"interface"));
@@ -606,55 +653,98 @@ mod tests {
     fn test_lexer_only_whitespace() {
         let mut lexer = Lexer::new("   \n  \n  ");
         let tokens = lexer.tokenize();
-        assert!(tokens.is_empty(), "Whitespace-only should produce no tokens");
+        assert!(
+            tokens.is_empty(),
+            "Whitespace-only should produce no tokens"
+        );
     }
 
     #[test]
     fn test_lexer_diagram_all_keywords() {
-        let keywords = ["graph", "flowchart", "sequenceDiagram", "classDiagram", "stateDiagram", "pie", "erDiagram", "gantt", "mindmap", "gitGraph", "timeline", "journey", "kanban", "venn", "packet", "radar", "ishikawa", "quadrantChart", "zenuml", "requirementDiagram", "block", "C4Context", "architecture", "xychart", "sankey", "treemap"];
+        let keywords = [
+            "graph",
+            "flowchart",
+            "sequenceDiagram",
+            "classDiagram",
+            "stateDiagram",
+            "pie",
+            "erDiagram",
+            "gantt",
+            "mindmap",
+            "gitGraph",
+            "timeline",
+            "journey",
+            "kanban",
+            "venn",
+            "packet",
+            "radar",
+            "ishikawa",
+            "quadrantChart",
+            "zenuml",
+            "requirementDiagram",
+            "block",
+            "C4Context",
+            "architecture",
+            "xychart",
+            "sankey",
+            "treemap",
+        ];
         for kw in &keywords {
             let mut lexer = Lexer::new(kw);
             let tokens = lexer.tokenize();
             assert_eq!(tokens.len(), 1, "{} should be a single token", kw);
-            assert!(matches!(tokens[0].token_type, TokenType::Keyword(ref s) if s == *kw),
-                "{} should be a keyword", kw);
+            assert!(
+                matches!(tokens[0].token_type, TokenType::Keyword(ref s) if s == *kw),
+                "{} should be a keyword",
+                kw
+            );
         }
     }
 }
 
-    #[test]
-    fn test_lexer_arrow_variants() {
-        let mut lexer = Lexer::new("-> --> -x --x -) --)");
-        let tokens = lexer.tokenize();
-        let arrows: Vec<_> = tokens.iter().filter(|t| matches!(t.token_type, TokenType::Arrow)).collect();
-        assert_eq!(arrows.len(), 5, "Should recognize 5 arrow types");
-    }
+#[test]
+fn test_lexer_arrow_variants() {
+    let mut lexer = Lexer::new("-> --> -x --x -) --)");
+    let tokens = lexer.tokenize();
+    let arrows: Vec<_> = tokens
+        .iter()
+        .filter(|t| matches!(t.token_type, TokenType::Arrow))
+        .collect();
+    assert_eq!(arrows.len(), 5, "Should recognize 5 arrow types");
+}
 
-    #[test]
-    fn test_lexer_brackets_nested() {
-        let mut lexer = Lexer::new("A[[B[[C]]]]");
-        let tokens = lexer.tokenize();
-        assert!(tokens.len() >= 5);
-    }
+#[test]
+fn test_lexer_brackets_nested() {
+    let mut lexer = Lexer::new("A[[B[[C]]]]");
+    let tokens = lexer.tokenize();
+    assert!(tokens.len() >= 5);
+}
 
-    #[test]
-    fn test_lexer_string_with_escaped_quotes() {
-        let mut lexer = Lexer::new(r#"A->B: "Hello \"World\""#);
-        let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(&t.token_type, TokenType::String(s) if s.contains("Hello"))));
-    }
+#[test]
+fn test_lexer_string_with_escaped_quotes() {
+    let mut lexer = Lexer::new(r#"A->B: "Hello \"World\""#);
+    let tokens = lexer.tokenize();
+    assert!(tokens
+        .iter()
+        .any(|t| matches!(&t.token_type, TokenType::String(s) if s.contains("Hello"))));
+}
 
-    #[test]
-    fn test_lexer_percent_comment() {
-        let mut lexer = Lexer::new("%% comment\ngraph TD\n%% another\nA-->B");
-        let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(&t.token_type, TokenType::Keyword(k) if k == "graph")));
-    }
+#[test]
+fn test_lexer_percent_comment() {
+    let mut lexer = Lexer::new("%% comment\ngraph TD\n%% another\nA-->B");
+    let tokens = lexer.tokenize();
+    assert!(tokens
+        .iter()
+        .any(|t| matches!(&t.token_type, TokenType::Keyword(k) if k == "graph")));
+}
 
-    #[test]
-    fn test_lexer_multiple_semicolons() {
-        let mut lexer = Lexer::new("A-->B; C-->D; E-->F");
-        let tokens = lexer.tokenize();
-        let semis = tokens.iter().filter(|t| matches!(t.token_type, TokenType::Semicolon)).count();
-        assert_eq!(semis, 2, "Should have 2 semicolons");
-    }
+#[test]
+fn test_lexer_multiple_semicolons() {
+    let mut lexer = Lexer::new("A-->B; C-->D; E-->F");
+    let tokens = lexer.tokenize();
+    let semis = tokens
+        .iter()
+        .filter(|t| matches!(t.token_type, TokenType::Semicolon))
+        .count();
+    assert_eq!(semis, 2, "Should have 2 semicolons");
+}

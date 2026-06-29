@@ -1,6 +1,6 @@
-use mermaid_cli::*;
 use mermaid_cli::parser::DiagramType;
 use mermaid_cli::renderer;
+use mermaid_cli::*;
 
 #[test]
 fn test_render_produces_valid_svg() {
@@ -271,12 +271,16 @@ fn test_sequence_participant_alias() {
 
 #[test]
 fn test_sequence_arrow_types() {
-    let code = "sequenceDiagram\n    A->B: solid\n    A-->B: dashed\n    A->>B: cross\n    A-->>B: dcross";
+    let code =
+        "sequenceDiagram\n    A->B: solid\n    A-->B: dashed\n    A->>B: cross\n    A-->>B: dcross";
     let result = render(code);
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
     let svg = result.unwrap();
     // dashed arrows should have stroke-dasharray
-    assert!(svg.contains("stroke-dasharray"), "Dashed arrows should have dasharray");
+    assert!(
+        svg.contains("stroke-dasharray"),
+        "Dashed arrows should have dasharray"
+    );
 }
 
 #[test]
@@ -292,7 +296,8 @@ fn test_sequence_auto_participants() {
 
 #[test]
 fn test_sequence_alt_block() {
-    let code = "sequenceDiagram\n    alt ok\n        A->B: yes\n    else no\n        A->B: no\n    end";
+    let code =
+        "sequenceDiagram\n    alt ok\n        A->B: yes\n    else no\n        A->B: no\n    end";
     let result = render(code);
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
     let svg = result.unwrap();
@@ -355,9 +360,18 @@ fn test_sequence_svg_structure() {
     assert!(result.contains("<?xml"), "Should have XML declaration");
     assert!(result.contains("<svg"), "Should have SVG tag");
     assert!(result.contains("</svg>"), "Should have closing SVG tag");
-    assert!(result.contains("<line"), "Should have line elements for arrows");
-    assert!(result.contains("<text"), "Should have text elements for labels");
-    assert!(result.contains("<rect"), "Should have rect elements for participant boxes");
+    assert!(
+        result.contains("<line"),
+        "Should have line elements for arrows"
+    );
+    assert!(
+        result.contains("<text"),
+        "Should have text elements for labels"
+    );
+    assert!(
+        result.contains("<rect"),
+        "Should have rect elements for participant boxes"
+    );
 }
 
 #[test]
@@ -365,7 +379,10 @@ fn test_sequence_three_participants() {
     let code = "sequenceDiagram\n    A->B: msg1\n    B->C: msg2\n    C->A: msg3";
     let result = render(code).unwrap();
     // should have lifelines (dashed lines)
-    assert!(result.contains("stroke-dasharray"), "Should have dashed lifelines");
+    assert!(
+        result.contains("stroke-dasharray"),
+        "Should have dashed lifelines"
+    );
 }
 
 #[test]
@@ -384,7 +401,10 @@ fn test_sequence_note_right() {
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
     let svg = result.unwrap();
     assert!(svg.contains("This is a note"));
-    assert!(svg.contains("#fffde7"), "Note should have yellow background");
+    assert!(
+        svg.contains("#fffde7"),
+        "Note should have yellow background"
+    );
 }
 
 #[test]
@@ -506,8 +526,14 @@ fn test_pie_svg_structure() {
     assert!(result.contains("<?xml"), "Should have XML declaration");
     assert!(result.contains("<svg"), "Should have SVG tag");
     assert!(result.contains("</svg>"), "Should have closing SVG tag");
-    assert!(result.contains("<path"), "Should have path elements for pie slices");
-    assert!(result.contains("<text"), "Should have text elements for labels");
+    assert!(
+        result.contains("<path"),
+        "Should have path elements for pie slices"
+    );
+    assert!(
+        result.contains("<text"),
+        "Should have text elements for labels"
+    );
 }
 
 // ============================================================
@@ -758,8 +784,14 @@ fn test_extract_single_mermaid_block() {
     let md = "# Title\n\n```mermaid\ngraph TD\nA-->B\n```\n\nEnd";
     let blocks = extract_mermaid_blocks(md);
     assert_eq!(blocks.len(), 1, "Should find 1 block");
-    assert!(blocks[0].contains("graph TD"), "Should contain mermaid code");
-    assert!(blocks[0].contains("A-->B"), "Should contain diagram content");
+    assert!(
+        blocks[0].contains("graph TD"),
+        "Should contain mermaid code"
+    );
+    assert!(
+        blocks[0].contains("A-->B"),
+        "Should contain diagram content"
+    );
 }
 
 #[test]
@@ -814,7 +846,10 @@ fn validate_svg_structure(svg: &str, expected_elements: &[&str]) -> Vec<String> 
     let open_count = svg.matches("<svg").count();
     let close_count = svg.matches("</svg>").count();
     if open_count != close_count {
-        issues.push(format!("SVG tag imbalance: {} open, {} close", open_count, close_count));
+        issues.push(format!(
+            "SVG tag imbalance: {} open, {} close",
+            open_count, close_count
+        ));
     }
 
     issues
@@ -824,14 +859,22 @@ fn validate_svg_structure(svg: &str, expected_elements: &[&str]) -> Vec<String> 
 fn test_svg_valid_structure_flowchart() {
     let svg = render("graph TD; A[Start]-->B[End]").unwrap();
     let issues = validate_svg_structure(&svg, &["rect", "text"]);
-    assert!(issues.is_empty(), "Flowchart SVG structure issues: {:?}", issues);
+    assert!(
+        issues.is_empty(),
+        "Flowchart SVG structure issues: {:?}",
+        issues
+    );
 }
 
 #[test]
 fn test_svg_valid_structure_sequence() {
     let svg = render("sequenceDiagram\n    A->B: Hello").unwrap();
     let issues = validate_svg_structure(&svg, &["rect", "text", "line"]);
-    assert!(issues.is_empty(), "Sequence SVG structure issues: {:?}", issues);
+    assert!(
+        issues.is_empty(),
+        "Sequence SVG structure issues: {:?}",
+        issues
+    );
 }
 
 #[test]
@@ -845,14 +888,22 @@ fn test_svg_valid_structure_pie() {
 fn test_svg_valid_structure_class() {
     let svg = render("classDiagram\nclass Animal {\n+String name\n}").unwrap();
     let issues = validate_svg_structure(&svg, &["rect", "text"]);
-    assert!(issues.is_empty(), "Class SVG structure issues: {:?}", issues);
+    assert!(
+        issues.is_empty(),
+        "Class SVG structure issues: {:?}",
+        issues
+    );
 }
 
 #[test]
 fn test_svg_valid_structure_state() {
     let svg = render("stateDiagram-v2\n[*] --> A\nA --> [*]").unwrap();
     let issues = validate_svg_structure(&svg, &["circle", "text"]);
-    assert!(issues.is_empty(), "State SVG structure issues: {:?}", issues);
+    assert!(
+        issues.is_empty(),
+        "State SVG structure issues: {:?}",
+        issues
+    );
 }
 
 #[test]
@@ -866,7 +917,11 @@ fn test_svg_valid_structure_er() {
 fn test_svg_valid_structure_gantt() {
     let svg = render("gantt\n    title Project\n    section S\n    Task :t1, 1, 5d").unwrap();
     let issues = validate_svg_structure(&svg, &["rect", "text"]);
-    assert!(issues.is_empty(), "Gantt SVG structure issues: {:?}", issues);
+    assert!(
+        issues.is_empty(),
+        "Gantt SVG structure issues: {:?}",
+        issues
+    );
 }
 
 #[test]
@@ -889,7 +944,12 @@ fn test_svg_valid_structure_all_types() {
 
     for (name, code) in &cases {
         let result = render(code);
-        assert!(result.is_ok(), "{} should render successfully: {:?}", name, result.err());
+        assert!(
+            result.is_ok(),
+            "{} should render successfully: {:?}",
+            name,
+            result.err()
+        );
         let svg = result.unwrap();
         let issues = validate_svg_structure(&svg, &["text"]);
         assert!(issues.is_empty(), "{} SVG structure: {:?}", name, issues);
@@ -911,7 +971,11 @@ fn test_extract_empty_block() {
 #[test]
 fn test_render_unicode_in_node() {
     let result = render("graph TD; A[你好世界]-->B[こんにちは]");
-    assert!(result.is_ok(), "Unicode labels should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Unicode labels should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("你好世界"));
     assert!(svg.contains("こんにちは"));
@@ -925,7 +989,11 @@ fn test_render_very_large_diagram() {
         code.push_str(&format!("N{}-->N{}\n", i, i + 1));
     }
     let result = render(&code);
-    assert!(result.is_ok(), "100-node chain should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "100-node chain should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("<svg"), "Large diagram should produce SVG");
 }
@@ -993,7 +1061,11 @@ fn test_render_pie_many_slices() {
         code.push_str(&format!("\"Item {}\" : {}\n", i, (i + 1) * 10));
     }
     let result = render(&code);
-    assert!(result.is_ok(), "12-slice pie should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "12-slice pie should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("Item 0"));
     assert!(svg.contains("Item 11"));
@@ -1051,7 +1123,11 @@ fn test_check_multiple_error_types() {
     ];
     for (name, code, expected_valid) in &cases {
         let result = check(code).expect("check() should not fail");
-        assert_eq!(result.valid, *expected_valid, "{} should be valid={}", name, expected_valid);
+        assert_eq!(
+            result.valid, *expected_valid,
+            "{} should be valid={}",
+            name, expected_valid
+        );
     }
 }
 
@@ -1099,7 +1175,11 @@ fn test_render_flowchart_with_edge_labels() {
     A[Start]-->|Process|B[End]
     C-->|Label|D";
     let result = render(code);
-    assert!(result.is_ok(), "Edge labels should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Edge labels should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("Process"), "Should contain edge label");
 }
@@ -1123,7 +1203,12 @@ fn test_render_flowchart_mixed_directions() {
     ];
     for (name, code) in &cases {
         let result = render(code);
-        assert!(result.is_ok(), "{} direction should render: {:?}", name, result.err());
+        assert!(
+            result.is_ok(),
+            "{} direction should render: {:?}",
+            name,
+            result.err()
+        );
     }
 }
 
@@ -1135,7 +1220,11 @@ fn test_render_flowchart_long_chains() {
         code.push_str(&format!("N{}-->N{}\n", i, i + 1));
     }
     let result = render(&code);
-    assert!(result.is_ok(), "Long chain should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Long chain should render: {:?}",
+        result.err()
+    );
 }
 
 #[test]
@@ -1165,7 +1254,11 @@ fn test_render_sequence_note_right() {
 fn test_render_sequence_activation_boxes() {
     let code = "sequenceDiagram\nactivate Alice\nAlice->Bob: Hello\ndeactivate Alice";
     let result = render(code);
-    assert!(result.is_ok(), "Activation boxes should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Activation boxes should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("Hello"), "Should contain message");
 }
@@ -1174,7 +1267,11 @@ fn test_render_sequence_activation_boxes() {
 fn test_render_sequence_nested_blocks() {
     let code = "sequenceDiagram\n    alt outer\n        A->B: msg\n    end";
     let result = render(code);
-    assert!(result.is_ok(), "Simple nested block should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Simple nested block should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("msg"), "Should contain message text");
 }
@@ -1183,7 +1280,11 @@ fn test_render_sequence_nested_blocks() {
 fn test_render_pie_large_values() {
     let code = "pie\n\"Large\" : 99999\n\"Small\" : 1";
     let result = render(code);
-    assert!(result.is_ok(), "Large values should work: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Large values should work: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("Large"), "Should contain label");
 }
@@ -1199,7 +1300,11 @@ fn test_render_pie_zero_values() {
 fn test_render_class_multiple_classes() {
     let code = "classDiagram\nclass Animal {\n+String name\n}\nclass Dog {\n+bark() void\n}";
     let result = render(code);
-    assert!(result.is_ok(), "Multiple classes should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Multiple classes should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("Animal"));
     assert!(svg.contains("Dog"));
@@ -1209,14 +1314,22 @@ fn test_render_class_multiple_classes() {
 fn test_render_class_visibility_modifiers() {
     let code = "classDiagram\nclass Test {\n+public_field\n-private field\n#protected field\n~package field\n}";
     let result = render(code);
-    assert!(result.is_ok(), "Visibility modifiers should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Visibility modifiers should render: {:?}",
+        result.err()
+    );
 }
 
 #[test]
 fn test_render_state_complex() {
     let code = "stateDiagram-v2\n[*] --> Idle\nIdle --> Processing\nProcessing --> Completed\nProcessing --> Failed\nCompleted --> [*]\nFailed --> Idle";
     let result = render(code);
-    assert!(result.is_ok(), "Complex state should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Complex state should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("Processing"), "Should contain state");
 }
@@ -1225,7 +1338,11 @@ fn test_render_state_complex() {
 fn test_render_er_with_attributes() {
     let code = "erDiagram\nCUSTOMER {\nstring name PK\nint age NULL\n}";
     let result = render(code);
-    assert!(result.is_ok(), "ER with attributes should render: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "ER with attributes should render: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("name"), "Should contain attribute name");
     assert!(svg.contains("age"), "Should contain attribute");
@@ -1253,22 +1370,30 @@ fn test_check_various_diagram_types() {
     ];
     for (code, expected) in &cases {
         let result = check(code).expect("check() should not fail");
-        assert_eq!(result.valid, *expected, "check('{}...') should be valid={}", &code[..code.len().min(20)], expected);
+        assert_eq!(
+            result.valid,
+            *expected,
+            "check('{}...') should be valid={}",
+            &code[..code.len().min(20)],
+            expected
+        );
     }
 }
 
 #[test]
 fn test_parse_error_messages() {
-    let cases = vec![
-        ("", "Empty input"),
-        ("unknown_keyword", "Expected"),
-    ];
+    let cases = vec![("", "Empty input"), ("unknown_keyword", "Expected")];
     for (code, expected_msg) in &cases {
         let result = parse(code);
         assert!(result.is_err(), "{} should fail to parse", code);
         if let Err(errors) = result {
             let msg = format!("{}", errors[0]);
-            assert!(msg.contains(expected_msg), "Error '{}' should contain '{}'", msg, expected_msg);
+            assert!(
+                msg.contains(expected_msg),
+                "Error '{}' should contain '{}'",
+                msg,
+                expected_msg
+            );
         }
     }
 }
@@ -1283,7 +1408,11 @@ fn test_fixer_apply_fixes() {
     for (input, expected) in &cases {
         let (fixed, fixes) = fixer.fix(input);
         assert!(!fixes.is_empty(), "Should fix: {}", input);
-        assert!(fixed.contains(expected), "Fixed code should contain '{}'", expected);
+        assert!(
+            fixed.contains(expected),
+            "Fixed code should contain '{}'",
+            expected
+        );
     }
 }
 
@@ -1291,7 +1420,10 @@ fn test_fixer_apply_fixes() {
 fn test_fixer_preserves_valid_code() {
     let fixer = mermaid_cli::fixer::Fixer::new();
     let (fixed, _fixes) = fixer.fix("graph TD; A-->B");
-    assert!(fixed.contains("graph"), "Valid code should preserve graph keyword");
+    assert!(
+        fixed.contains("graph"),
+        "Valid code should preserve graph keyword"
+    );
 }
 
 #[test]
@@ -1312,10 +1444,18 @@ fn test_markdown_multiple_extraction() {
 fn test_render_png_basic() {
     let code = "graph TD; A-->B";
     let result = mermaid_cli::render_png(code, 800, 600, 1.0);
-    assert!(result.is_ok(), "PNG render should succeed: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "PNG render should succeed: {:?}",
+        result.err()
+    );
     let png_bytes = result.unwrap();
     // PNG magic bytes: 89 50 4E 47
-    assert_eq!(png_bytes[..4], [137, 80, 78, 71], "Should have PNG magic bytes");
+    assert_eq!(
+        png_bytes[..4],
+        [137, 80, 78, 71],
+        "Should have PNG magic bytes"
+    );
     assert!(png_bytes.len() > 100, "PNG should be non-trivial size");
 }
 
@@ -1326,7 +1466,11 @@ fn test_render_png_scaled() {
     let result = mermaid_cli::render_png(code, 400, 300, 2.0);
     assert!(result.is_ok(), "Scaled PNG render should succeed");
     let png_bytes = result.unwrap();
-    assert_eq!(png_bytes[..4], [137, 80, 78, 71], "Should have PNG magic bytes");
+    assert_eq!(
+        png_bytes[..4],
+        [137, 80, 78, 71],
+        "Should have PNG magic bytes"
+    );
 }
 
 #[cfg(feature = "png")]
@@ -1342,9 +1486,19 @@ fn test_render_png_all_types() {
     ];
     for (name, code) in &types {
         let result = mermaid_cli::render_png(code, 800, 600, 1.0);
-        assert!(result.is_ok(), "{} PNG should render: {:?}", name, result.err());
+        assert!(
+            result.is_ok(),
+            "{} PNG should render: {:?}",
+            name,
+            result.err()
+        );
         let png_bytes = result.unwrap();
-        assert_eq!(png_bytes[..4], [137, 80, 78, 71], "{} should have PNG magic", name);
+        assert_eq!(
+            png_bytes[..4],
+            [137, 80, 78, 71],
+            "{} should have PNG magic",
+            name
+        );
     }
 }
 
@@ -1361,7 +1515,11 @@ fn test_diagram_type_detection() {
     ];
     for (code, expected) in &cases {
         let diagram = parse(code).expect("Should parse");
-        assert_eq!(diagram.diagram_type, *expected, "Diagram type mismatch for code: {}", code);
+        assert_eq!(
+            diagram.diagram_type, *expected,
+            "Diagram type mismatch for code: {}",
+            code
+        );
     }
 }
 
@@ -1386,7 +1544,12 @@ fn test_render_all_diagram_types_basic() {
         let diagram = result.unwrap();
         // Verify rendering
         let rendered = renderer::Renderer::new().render(&diagram);
-        assert!(rendered.is_ok(), "{} should render: {:?}", name, rendered.err());
+        assert!(
+            rendered.is_ok(),
+            "{} should render: {:?}",
+            name,
+            rendered.err()
+        );
         let svg = rendered.unwrap();
         assert!(svg.contains("<svg"), "{} SVG should have svg tag", name);
     }
@@ -1404,8 +1567,8 @@ fn test_parse_error_types() {
         let result = parse(code);
         // Should either error or produce a partial diagram
         match result {
-            Ok(_) => {}, // Partial parse is acceptable
-            Err(_) => {}, // Error is also acceptable
+            Ok(_) => {}  // Partial parse is acceptable
+            Err(_) => {} // Error is also acceptable
         }
     }
 }
@@ -1432,8 +1595,14 @@ fn test_markdown_extract_multiple_fences() {
     let md = "```mermaid\ngraph TD\nA-->B\n```\ntext\n```\nnot mermaid\n```\n```mermaid\nsequenceDiagram\nC->D: test\n```";
     let blocks = extract_mermaid_blocks(md);
     assert_eq!(blocks.len(), 2, "Should extract exactly 2 mermaid blocks");
-    assert!(blocks[0].contains("graph TD"), "First block should be graph");
-    assert!(blocks[1].contains("sequenceDiagram"), "Second block should be sequence");
+    assert!(
+        blocks[0].contains("graph TD"),
+        "First block should be graph"
+    );
+    assert!(
+        blocks[1].contains("sequenceDiagram"),
+        "Second block should be sequence"
+    );
 }
 
 #[test]
@@ -1450,13 +1619,21 @@ fn test_svg_structure_all_types() {
     ];
     for code in &cases {
         let svg = render(code).unwrap();
-        assert!(svg.starts_with("<?xml"), "SVG should start with XML declaration");
+        assert!(
+            svg.starts_with("<?xml"),
+            "SVG should start with XML declaration"
+        );
         assert!(svg.contains("<svg "), "SVG should have opening tag");
         assert!(svg.contains("</svg>"), "SVG should have closing tag");
         // Well-formed check: open/close tags
         let open = svg.matches("<svg").count();
         let close = svg.matches("</svg>").count();
-        assert_eq!(open, close, "SVG tags should be balanced for: {}", &code[..code.len().min(30)]);
+        assert_eq!(
+            open,
+            close,
+            "SVG tags should be balanced for: {}",
+            &code[..code.len().min(30)]
+        );
     }
 }
 
@@ -1507,7 +1684,10 @@ fn test_render_state_with_label() {
     let result = render("stateDiagram-v2\nstate Idle : Waiting for input");
     assert!(result.is_ok(), "State with label should render");
     let svg = result.unwrap();
-    assert!(svg.contains("Waiting for input"), "Should contain state description");
+    assert!(
+        svg.contains("Waiting for input"),
+        "Should contain state description"
+    );
 }
 
 #[test]
@@ -1588,7 +1768,10 @@ fn test_parse_flowchart_stress() {
 fn test_parse_class_stress() {
     let mut code = String::from("classDiagram\n");
     for i in 0..20 {
-        code.push_str(&format!("class C{} {{\n+int field{}\n+method{}() void\n}}\n", i, i, i));
+        code.push_str(&format!(
+            "class C{} {{\n+int field{}\n+method{}() void\n}}\n",
+            i, i, i
+        ));
     }
     let result = parse(&code);
     assert!(result.is_ok(), "20 classes should parse");
@@ -1602,7 +1785,11 @@ fn test_parse_pie_stress() {
     }
     let result = parse(&code);
     assert!(result.is_ok(), "50 slices should parse");
-    assert_eq!(result.unwrap().statements.len(), 50, "Should have 50 slices");
+    assert_eq!(
+        result.unwrap().statements.len(),
+        50,
+        "Should have 50 slices"
+    );
 }
 
 #[test]
@@ -1634,7 +1821,10 @@ fn test_fixer_preserve_exact_code() {
 fn test_markdown_extract_weird_spacing() {
     let md = "text\n```   mermaid   \ngraph TD\nA-->B\n   ```   \nend";
     let blocks = extract_mermaid_blocks(md);
-    assert!(blocks.len() == 1 || blocks.len() == 0, "Should handle weird spacing");
+    assert!(
+        blocks.len() == 1 || blocks.len() == 0,
+        "Should handle weird spacing"
+    );
 }
 
 #[test]
@@ -1729,7 +1919,10 @@ fn test_parse_flowchart_direction_aliases() {
 #[test]
 fn test_parse_flowchart_no_direction() {
     let d = parse("graph; A-->B").unwrap();
-    assert!(d.direction.is_none() || d.direction.as_deref() == Some("TD"), "Default or none direction");
+    assert!(
+        d.direction.is_none() || d.direction.as_deref() == Some("TD"),
+        "Default or none direction"
+    );
 }
 
 #[test]
@@ -1751,7 +1944,12 @@ fn test_render_svg_contains_diagram_specific_elements() {
     ];
     for (name, code, expect_element) in &test_cases {
         let svg = render(code).unwrap();
-        assert!(svg.contains(expect_element), "{} should contain {} element", name, expect_element);
+        assert!(
+            svg.contains(expect_element),
+            "{} should contain {} element",
+            name,
+            expect_element
+        );
     }
 }
 
@@ -1868,7 +2066,11 @@ fn test_parse_all_eight_node_shapes() {
     let result = parse(code);
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert_eq!(diagram.statements.len(), 8, "Should have 8 node definitions");
+    assert_eq!(
+        diagram.statements.len(),
+        8,
+        "Should have 8 node definitions"
+    );
 }
 
 #[test]
@@ -2026,7 +2228,11 @@ fn test_fix_multiple_typos_integration() {
     assert!(fixed.contains("flowchart"), "flowchrat should be fixed");
     assert!(!fixed.contains("-->>"), "-->> should be fixed to -->");
     assert!(!fixed.contains("=>"), "=> should be fixed to ->");
-    assert!(fixes.len() >= 3, "Should have at least 3 fixes, got {}", fixes.len());
+    assert!(
+        fixes.len() >= 3,
+        "Should have at least 3 fixes, got {}",
+        fixes.len()
+    );
     let result = render(&fixed);
     assert!(result.is_ok(), "fixed code should render");
 }
@@ -2110,8 +2316,14 @@ fn test_render_mindmap_success() {
     let result = render("mindmap\n  Root\n    Branch");
     assert!(result.is_ok(), "Mindmap should render successfully");
     let svg = result.unwrap();
-    assert!(svg.contains("Root"), "Mindmap SVG should contain root label");
-    assert!(svg.contains("Branch"), "Mindmap SVG should contain branch label");
+    assert!(
+        svg.contains("Root"),
+        "Mindmap SVG should contain root label"
+    );
+    assert!(
+        svg.contains("Branch"),
+        "Mindmap SVG should contain branch label"
+    );
 }
 
 #[test]
@@ -2128,7 +2340,11 @@ fn test_parse_large_chain() {
     );
     let diagram = result.unwrap();
     assert_eq!(diagram.get_edges().len(), 200, "Should have 200 edges");
-    assert_eq!(diagram.get_nodes().len(), 201, "Should have 201 unique nodes");
+    assert_eq!(
+        diagram.get_nodes().len(),
+        201,
+        "Should have 201 unique nodes"
+    );
 }
 
 #[test]
@@ -2208,7 +2424,6 @@ fn test_renderer_custom_dimensions() {
     assert!(svg.contains("Custom"), "SVG should contain label");
 }
 
-
 // ============================================================
 // GitGraph API 测试
 // ============================================================
@@ -2220,10 +2435,7 @@ fn test_gitgraph_basic_parse() {
     let result = parse("gitGraph\n  commit\n  commit\n  commit");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert!(
-        !diagram.statements.is_empty(),
-        "AST should have statements"
-    );
+    assert!(!diagram.statements.is_empty(), "AST should have statements");
 }
 
 #[test]
@@ -2245,10 +2457,7 @@ fn test_gitgraph_with_branches() {
     let result = parse(code);
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert!(
-        !diagram.statements.is_empty(),
-        "AST should have statements"
-    );
+    assert!(!diagram.statements.is_empty(), "AST should have statements");
 }
 
 #[test]
@@ -2257,10 +2466,7 @@ fn test_gitgraph_with_merge() {
     let result = parse(code);
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert!(
-        !diagram.statements.is_empty(),
-        "AST should have statements"
-    );
+    assert!(!diagram.statements.is_empty(), "AST should have statements");
 }
 
 #[test]
@@ -2269,29 +2475,19 @@ fn test_gitgraph_with_tags() {
     let result = parse(code);
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert!(
-        !diagram.statements.is_empty(),
-        "AST should have statements"
-    );
+    assert!(!diagram.statements.is_empty(), "AST should have statements");
 }
 
 #[test]
 fn test_gitgraph_diagram_type() {
     let diagram = parse("gitGraph\n  commit").unwrap();
-    assert_eq!(
-        diagram.diagram_type,
-        mermaid_cli::DiagramType::GitGraph
-    );
+    assert_eq!(diagram.diagram_type, mermaid_cli::DiagramType::GitGraph);
 }
 
 #[test]
 fn test_gitgraph_check_valid() {
-    let result =
-        check("gitGraph\n  commit\n  commit").expect("check() should not fail");
-    assert!(
-        result.valid,
-        "Valid gitgraph should be reported as valid"
-    );
+    let result = check("gitGraph\n  commit\n  commit").expect("check() should not fail");
+    assert!(result.valid, "Valid gitgraph should be reported as valid");
     assert!(
         result.errors.is_empty(),
         "Valid gitgraph should have no errors"
@@ -2304,10 +2500,7 @@ fn test_gitgraph_commit_id() {
     let result = parse(code);
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert!(
-        !diagram.statements.is_empty(),
-        "AST should have statements"
-    );
+    assert!(!diagram.statements.is_empty(), "AST should have statements");
 }
 
 #[test]
@@ -2336,7 +2529,6 @@ fn test_gitgraph_svg_structure() {
     );
 }
 
-
 // ============================================================
 // Timeline API 测试
 // ============================================================
@@ -2345,32 +2537,39 @@ fn test_gitgraph_svg_structure() {
 
 #[test]
 fn test_timeline_basic_parse() {
-    let result = parse(
-        "timeline\n    2020 : Event1\n    2021 : Event2\n    2022 : Event3",
-    );
+    let result = parse("timeline\n    2020 : Event1\n    2021 : Event2\n    2022 : Event3");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
 
     let diagram = result.unwrap();
-    let events: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::TimelineEvent { time, .. } = s {
-            Some(time)
-        } else { None })
+    let events: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::TimelineEvent { time, .. } = s {
+                Some(time)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(events.len(), 3, "Timeline should have 3 events");
-    assert!(diagram.statements.iter().any(|s| matches!(s, mermaid_cli::Statement::TimelineEvent { time, .. } if time == "2020")));
+    assert!(diagram.statements.iter().any(
+        |s| matches!(s, mermaid_cli::Statement::TimelineEvent { time, .. } if time == "2020")
+    ));
     assert!(diagram.statements.iter().any(|s| matches!(s, mermaid_cli::Statement::TimelineEvent { description, .. } if description == "Event3")));
 }
 
 #[test]
 fn test_timeline_basic_render() {
-    let result = render(
-        "timeline\n    2020 : Event1\n    2021 : Event2\n    2022 : Event3",
-    );
+    let result = render("timeline\n    2020 : Event1\n    2021 : Event2\n    2022 : Event3");
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
 
     let svg = result.unwrap();
     assert!(svg.contains("<svg"), "SVG should contain <svg tag");
-    assert!(svg.contains("</svg>"), "SVG should contain closing </svg> tag");
+    assert!(
+        svg.contains("</svg>"),
+        "SVG should contain closing </svg> tag"
+    );
     assert!(svg.contains("2020"), "SVG should contain time '2020'");
     assert!(svg.contains("Event2"), "SVG should contain event 'Event2'");
 }
@@ -2387,16 +2586,28 @@ fn test_timeline_with_sections() {
     );
 
     let diagram = result.unwrap();
-    let events: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::TimelineEvent { time, .. } = s {
-            Some(time)
-        } else { None })
+    let events: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::TimelineEvent { time, .. } = s {
+                Some(time)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(events.len(), 2);
-    let sections: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::TimelineSection { name } = s {
-            Some(name)
-        } else { None })
+    let sections: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::TimelineSection { name } = s {
+                Some(name)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(sections.len(), 2, "Should have 2 sections");
 }
@@ -2430,8 +2641,14 @@ fn test_timeline_svg_structure() {
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
 
     let svg = result.unwrap();
-    assert!(svg.contains("circle"), "Timeline SVG should have circle elements");
-    assert!(svg.contains("text"), "Timeline SVG should have text elements");
+    assert!(
+        svg.contains("circle"),
+        "Timeline SVG should have circle elements"
+    );
+    assert!(
+        svg.contains("text"),
+        "Timeline SVG should have text elements"
+    );
     assert!(svg.contains("2020"), "SVG should contain time '2020'");
     assert!(svg.contains("Event1"), "SVG should contain event 'Event1'");
     assert!(svg.contains("2021"), "SVG should contain time '2021'");
@@ -2447,8 +2664,16 @@ fn test_journey_basic_parse() {
     let result = parse("journey\n  section S1\n  A:1:Me");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    let tasks: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::JourneyTask { name, .. } = s { Some(name) } else { None })
+    let tasks: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::JourneyTask { name, .. } = s {
+                Some(name)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(tasks.len(), 1, "Should have 1 task");
     assert_eq!(tasks[0], "A");
@@ -2469,8 +2694,16 @@ fn test_journey_with_sections() {
     let result = parse("journey\n  section S1\n  A:1:Me\n  section S2\n  B:3:You");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    let sections: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::JourneySection { name } = s { Some(name) } else { None })
+    let sections: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::JourneySection { name } = s {
+                Some(name)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(sections.len(), 2, "Should have 2 sections");
 }
@@ -2480,7 +2713,10 @@ fn test_journey_diagram_type() {
     let result = parse("journey\n  title Test\n  A:1:Me");
     assert!(result.is_ok());
     let diagram = result.unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Journey);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Journey
+    );
 }
 
 #[test]
@@ -2509,8 +2745,16 @@ fn test_kanban_basic_parse() {
     let result = parse("kanban\n  Todo\n    [Task1] : Do something\n    [Task2] : Another");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    let tasks: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::KanbanTask { name, .. } = s { Some(name) } else { None })
+    let tasks: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::KanbanTask { name, .. } = s {
+                Some(name)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(tasks.len(), 2, "Should have 2 tasks");
 }
@@ -2529,8 +2773,16 @@ fn test_kanban_with_multiple_columns() {
     let result = parse("kanban\n  Todo\n    [A] : a\n  Doing\n    [B] : b\n  Done\n    [C] : c");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    let cols: Vec<&String> = diagram.statements.iter()
-        .filter_map(|s| if let mermaid_cli::Statement::KanbanColumn { name } = s { Some(name) } else { None })
+    let cols: Vec<&String> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::KanbanColumn { name } = s {
+                Some(name)
+            } else {
+                None
+            }
+        })
         .collect();
     assert_eq!(cols.len(), 3, "Should have 3 columns");
 }
@@ -2540,7 +2792,10 @@ fn test_kanban_diagram_type() {
     let result = parse("kanban\n  Col\n    [T] : test");
     assert!(result.is_ok());
     let diagram = result.unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Kanban);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Kanban
+    );
 }
 
 #[test]
@@ -2618,7 +2873,10 @@ fn test_venn_diagram_type() {
 fn test_venn_check_valid() {
     let result = check("venn\n    a : Cats\n    b : Dogs").unwrap();
     assert!(result.valid, "Valid Venn code should be reported as valid");
-    assert!(result.errors.is_empty(), "Valid Venn code should have no errors");
+    assert!(
+        result.errors.is_empty(),
+        "Valid Venn code should have no errors"
+    );
 }
 
 #[test]
@@ -2645,7 +2903,11 @@ fn test_packet_basic_parse() {
     let diagram = result.unwrap();
     assert_eq!(diagram.statements.len(), 2);
     match &diagram.statements[0] {
-        mermaid_cli::Statement::PacketField { start_bit, end_bit, label } => {
+        mermaid_cli::Statement::PacketField {
+            start_bit,
+            end_bit,
+            label,
+        } => {
             assert_eq!(*start_bit, 0);
             assert_eq!(*end_bit, 7);
             assert_eq!(label, "Source Port");
@@ -2674,7 +2936,10 @@ fn test_packet_multiple_fields() {
 #[test]
 fn test_packet_diagram_type() {
     let diagram = parse("packet\n  0-7: A").unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Packet);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Packet
+    );
 }
 
 #[test]
@@ -2692,7 +2957,6 @@ fn test_packet_svg_structure() {
     assert!(svg.contains("B"), "Should contain B label");
     assert!(svg.contains("C"), "Should contain C label");
 }
-
 
 // ============================================================
 // Radar API 测试
@@ -2735,9 +2999,18 @@ fn test_radar_basic_render() {
     let svg = result.unwrap();
     assert!(svg.contains("<svg"), "SVG should contain <svg tag");
     assert!(svg.contains("</svg>"), "SVG should contain closing </svg>");
-    assert!(svg.contains("Speed"), "SVG should contain axis label 'Speed'");
-    assert!(svg.contains("Power"), "SVG should contain axis label 'Power'");
-    assert!(svg.contains("Accuracy"), "SVG should contain axis label 'Accuracy'");
+    assert!(
+        svg.contains("Speed"),
+        "SVG should contain axis label 'Speed'"
+    );
+    assert!(
+        svg.contains("Power"),
+        "SVG should contain axis label 'Power'"
+    );
+    assert!(
+        svg.contains("Accuracy"),
+        "SVG should contain axis label 'Accuracy'"
+    );
 }
 
 #[test]
@@ -2793,7 +3066,10 @@ fn test_radar_svg_structure() {
     let svg = mermaid_cli::render(code).unwrap();
 
     // Should contain polygon elements (rings + data polygon)
-    assert!(svg.contains("polygon"), "SVG should contain polygon elements");
+    assert!(
+        svg.contains("polygon"),
+        "SVG should contain polygon elements"
+    );
 
     // Should contain line elements (axis lines)
     assert!(svg.contains("line"), "SVG should contain line elements");
@@ -2805,7 +3081,6 @@ fn test_radar_svg_structure() {
     assert!(svg.contains("<text"), "SVG should contain text elements");
 }
 
-
 // ============================================================
 // Ishikawa API 测试
 // ============================================================
@@ -2814,7 +3089,10 @@ fn test_radar_svg_structure() {
 fn test_ishikawa_basic_parse() {
     let diagram = parse("ishikawa\n  root Problem\n  category Man\n    cause1\n    cause2\n  category Machine\n    cause3").unwrap();
     assert_eq!(diagram.statements.len(), 6);
-    assert!(matches!(diagram.statements[0], mermaid_cli::Statement::IshikawaRoot { .. }));
+    assert!(matches!(
+        diagram.statements[0],
+        mermaid_cli::Statement::IshikawaRoot { .. }
+    ));
 }
 
 #[test]
@@ -2828,7 +3106,10 @@ fn test_ishikawa_basic_render() {
 #[test]
 fn test_ishikawa_diagram_type() {
     let diagram = parse("ishikawa\n  root X\n  category Y\n    z").unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Ishikawa);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Ishikawa
+    );
 }
 
 #[test]
@@ -2845,7 +3126,6 @@ fn test_ishikawa_svg_structure() {
     assert!(svg.contains("R"), "Should contain root");
 }
 
-
 // ============================================================
 // Quadrant Chart API 测试
 // ============================================================
@@ -2855,7 +3135,10 @@ fn test_quadrant_basic_parse() {
     let result = parse("quadrantChart\n  title Test\n  x-axis X\n  y-axis Y\n  quadrant-1 A\n  quadrant-2 B\n  P1: [0.3, 0.6]");
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Quadrant);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Quadrant
+    );
 }
 
 #[test]
@@ -2869,7 +3152,10 @@ fn test_quadrant_basic_render() {
 #[test]
 fn test_quadrant_diagram_type() {
     let diagram = parse("quadrantChart\n  title T").unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Quadrant);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Quadrant
+    );
 }
 
 #[test]
@@ -2898,11 +3184,7 @@ fn test_zenuml_basic_parse() {
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
 
     let diagram = result.unwrap();
-    assert_eq!(
-        diagram.statements.len(),
-        2,
-        "Should have 2 messages"
-    );
+    assert_eq!(diagram.statements.len(), 2, "Should have 2 messages");
 }
 
 #[test]
@@ -2929,7 +3211,10 @@ fn test_zenuml_basic_render() {
         svg.contains("</svg>"),
         "SVG should contain closing </svg> tag"
     );
-    assert!(svg.contains("Alice"), "SVG should contain participant Alice");
+    assert!(
+        svg.contains("Alice"),
+        "SVG should contain participant Alice"
+    );
     assert!(svg.contains("Bob"), "SVG should contain participant Bob");
     assert!(
         svg.contains("Hello"),
@@ -2944,7 +3229,10 @@ fn test_zenuml_basic_render() {
 #[test]
 fn test_zenuml_check_valid() {
     let result = mermaid_cli::check("zenuml\nAlice->Bob: Hello").expect("check() should not fail");
-    assert!(result.valid, "Valid ZenUML code should be reported as valid");
+    assert!(
+        result.valid,
+        "Valid ZenUML code should be reported as valid"
+    );
     assert!(
         result.errors.is_empty(),
         "Valid ZenUML code should have no errors"
@@ -2958,9 +3246,15 @@ fn test_zenuml_svg_structure() {
 
     let svg = result.unwrap();
     // Should have participant boxes (rect elements)
-    assert!(svg.contains("<rect"), "SVG should have rect elements for participants");
+    assert!(
+        svg.contains("<rect"),
+        "SVG should have rect elements for participants"
+    );
     // Should have arrow lines (line elements)
-    assert!(svg.contains("<line"), "SVG should have line elements for arrows");
+    assert!(
+        svg.contains("<line"),
+        "SVG should have line elements for arrows"
+    );
     // Should have text rendering
     assert!(svg.contains("<text"), "SVG should have text elements");
     // Should have arrowhead (path or polygon)
@@ -2975,7 +3269,9 @@ fn test_zenuml_parse_message_edge() {
 
     let diagram = result.unwrap();
     match &diagram.statements[0] {
-        mermaid_cli::Statement::Message { from, to, label, .. } => {
+        mermaid_cli::Statement::Message {
+            from, to, label, ..
+        } => {
             assert_eq!(from, "Alice", "Source should be Alice");
             assert_eq!(to, "Bob", "Target should be Bob");
             assert_eq!(label, "Hello", "Label should be 'Hello'");
@@ -2990,7 +3286,10 @@ fn test_zenuml_empty_input() {
     assert!(result.is_ok(), "Empty zenuml should parse");
     let diagram = result.unwrap();
     assert!(diagram.statements.is_empty());
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::ZenUml);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::ZenUml
+    );
 }
 
 #[test]
@@ -3008,7 +3307,6 @@ fn test_zenuml_multiple_participants() {
     assert!(svg.contains("Forward"));
     assert!(svg.contains("Response"));
 }
-
 
 // ============================================================
 // Requirement Diagram API 测试
@@ -3034,12 +3332,21 @@ fn test_requirement_basic_parse() {
     let result = parse(code);
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
     let diagram = result.unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Requirement);
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Requirement
+    );
     assert_eq!(diagram.statements.len(), 3, "Should have 3 statements");
 
     // Check requirement def
     match &diagram.statements[0] {
-        mermaid_cli::Statement::RequirementDef { name, req_id, text, risk, verify_method } => {
+        mermaid_cli::Statement::RequirementDef {
+            name,
+            req_id,
+            text,
+            risk,
+            verify_method,
+        } => {
             assert_eq!(name, "test_req");
             assert_eq!(req_id, "1");
             assert_eq!(text, "the test text.");
@@ -3060,7 +3367,11 @@ fn test_requirement_basic_parse() {
 
     // Check relation
     match &diagram.statements[2] {
-        mermaid_cli::Statement::RequirementRelation { from, to, relation_type } => {
+        mermaid_cli::Statement::RequirementRelation {
+            from,
+            to,
+            relation_type,
+        } => {
             assert_eq!(from, "test_entity");
             assert_eq!(to, "test_req");
             assert_eq!(relation_type, "satisfies");
@@ -3093,8 +3404,14 @@ fn test_requirement_basic_render() {
 
 #[test]
 fn test_requirement_diagram_type() {
-    let diagram = parse("requirementDiagram\n    requirement r { id: 1 text: t risk: low verifymethod: analysis }").unwrap();
-    assert_eq!(diagram.diagram_type, mermaid_cli::parser::DiagramType::Requirement);
+    let diagram = parse(
+        "requirementDiagram\n    requirement r { id: 1 text: t risk: low verifymethod: analysis }",
+    )
+    .unwrap();
+    assert_eq!(
+        diagram.diagram_type,
+        mermaid_cli::parser::DiagramType::Requirement
+    );
 }
 
 #[test]
@@ -3107,7 +3424,10 @@ fn test_requirement_check_valid() {
         verifymethod: review
     }";
     let result = check(code).expect("check() should not fail");
-    assert!(result.valid, "Valid requirement diagram should be reported as valid");
+    assert!(
+        result.valid,
+        "Valid requirement diagram should be reported as valid"
+    );
     assert!(result.errors.is_empty(), "Valid code should have no errors");
 }
 
@@ -3124,8 +3444,14 @@ fn test_requirement_svg_structure() {
     assert!(result.contains("<?xml"), "Should have XML declaration");
     assert!(result.contains("<svg"), "Should have SVG tag");
     assert!(result.contains("</svg>"), "Should have closing SVG tag");
-    assert!(result.contains("<rect"), "Should have rect elements for boxes");
-    assert!(result.contains("<text"), "Should have text elements for labels");
+    assert!(
+        result.contains("<rect"),
+        "Should have rect elements for boxes"
+    );
+    assert!(
+        result.contains("<text"),
+        "Should have text elements for labels"
+    );
 }
 
 // ============================================================
@@ -3144,7 +3470,9 @@ fn test_block_basic_parse() {
     let diagram = result.unwrap();
     assert_eq!(diagram.statements.len(), 3, "Should have 3 blocks");
     match &diagram.statements[0] {
-        mermaid_cli::Statement::BlockNode { label, children, .. } => {
+        mermaid_cli::Statement::BlockNode {
+            label, children, ..
+        } => {
             assert_eq!(label, "Block1");
             assert!(children.is_empty(), "Top-level blocks have no children");
         }
@@ -3159,10 +3487,22 @@ fn test_block_basic_render() {
 
     let svg = result.unwrap();
     assert!(svg.contains("<svg"), "SVG should contain <svg tag");
-    assert!(svg.contains("</svg>"), "SVG should contain closing </svg> tag");
-    assert!(svg.contains("Block1"), "SVG should contain block label 'Block1'");
-    assert!(svg.contains("Block2"), "SVG should contain block label 'Block2'");
-    assert!(svg.contains("Block3"), "SVG should contain block label 'Block3'");
+    assert!(
+        svg.contains("</svg>"),
+        "SVG should contain closing </svg> tag"
+    );
+    assert!(
+        svg.contains("Block1"),
+        "SVG should contain block label 'Block1'"
+    );
+    assert!(
+        svg.contains("Block2"),
+        "SVG should contain block label 'Block2'"
+    );
+    assert!(
+        svg.contains("Block3"),
+        "SVG should contain block label 'Block3'"
+    );
 }
 
 #[test]
@@ -3172,9 +3512,15 @@ fn test_block_nested() {
     assert!(result.is_ok(), "parse() failed: {:?}", result.err());
 
     let diagram = result.unwrap();
-    assert_eq!(diagram.statements.len(), 2, "Should have 2 top-level blocks");
+    assert_eq!(
+        diagram.statements.len(),
+        2,
+        "Should have 2 top-level blocks"
+    );
     match &diagram.statements[0] {
-        mermaid_cli::Statement::BlockNode { label, children, .. } => {
+        mermaid_cli::Statement::BlockNode {
+            label, children, ..
+        } => {
             assert_eq!(label, "Root");
             assert_eq!(children.len(), 2, "Root should have 2 children");
         }
@@ -3183,7 +3529,11 @@ fn test_block_nested() {
 
     // Also verify rendering
     let render_result = mermaid_cli::render(code);
-    assert!(render_result.is_ok(), "render() failed: {:?}", render_result.err());
+    assert!(
+        render_result.is_ok(),
+        "render() failed: {:?}",
+        render_result.err()
+    );
     let svg = render_result.unwrap();
     assert!(svg.contains("Root"));
     assert!(svg.contains("Child1"));
@@ -3203,8 +3553,14 @@ fn test_block_diagram_type() {
 #[test]
 fn test_block_check_valid() {
     let result = mermaid_cli::check("block\n  A\n  B").expect("check() should not fail");
-    assert!(result.valid, "Valid block diagram should be reported as valid");
-    assert!(result.errors.is_empty(), "Valid block diagram should have no errors");
+    assert!(
+        result.valid,
+        "Valid block diagram should be reported as valid"
+    );
+    assert!(
+        result.errors.is_empty(),
+        "Valid block diagram should have no errors"
+    );
 }
 
 #[test]
@@ -3216,8 +3572,14 @@ fn test_block_svg_structure() {
     assert!(svg.contains("<?xml"), "Should have XML declaration");
     assert!(svg.contains("<svg"), "Should have SVG tag");
     assert!(svg.contains("</svg>"), "Should have closing SVG tag");
-    assert!(svg.contains("<rect"), "Should have rect elements for blocks");
-    assert!(svg.contains("<text"), "Should have text elements for labels");
+    assert!(
+        svg.contains("<rect"),
+        "Should have rect elements for blocks"
+    );
+    assert!(
+        svg.contains("<text"),
+        "Should have text elements for labels"
+    );
     assert!(svg.contains("Alpha"), "Should contain block label 'Alpha'");
     assert!(svg.contains("Beta"), "Should contain block label 'Beta'");
     assert!(svg.contains("rx:6"), "Should have rounded corners");
@@ -3238,7 +3600,11 @@ fn test_c4_basic_parse() {
     assert_eq!(diagram.statements.len(), 3);
     // Verify first statement is C4Person
     match &diagram.statements[0] {
-        mermaid_cli::Statement::C4Person { alias, label, description } => {
+        mermaid_cli::Statement::C4Person {
+            alias,
+            label,
+            description,
+        } => {
             assert_eq!(alias, "customer");
             assert_eq!(label, "Customer");
             assert_eq!(description, "A customer");
@@ -3263,8 +3629,14 @@ fn test_c4_basic_render() {
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
     let svg = result.unwrap();
     assert!(svg.contains("<svg"), "SVG should contain <svg tag");
-    assert!(svg.contains("</svg>"), "SVG should contain closing </svg> tag");
-    assert!(svg.contains("Customer"), "SVG should contain customer label");
+    assert!(
+        svg.contains("</svg>"),
+        "SVG should contain closing </svg> tag"
+    );
+    assert!(
+        svg.contains("Customer"),
+        "SVG should contain customer label"
+    );
     assert!(svg.contains("System"), "SVG should contain system label");
 }
 
@@ -3272,7 +3644,10 @@ fn test_c4_basic_render() {
 fn test_c4_diagram_type() {
     let result = parse("C4Context\nPerson(p, \"P\", \"\")");
     assert!(result.is_ok());
-    assert_eq!(result.unwrap().diagram_type, mermaid_cli::parser::DiagramType::C4);
+    assert_eq!(
+        result.unwrap().diagram_type,
+        mermaid_cli::parser::DiagramType::C4
+    );
 }
 
 #[test]
@@ -3357,9 +3732,18 @@ fn test_architecture_basic_render() {
     assert!(result.is_ok(), "render() failed: {:?}", result.err());
     let svg = result.unwrap();
     assert!(svg.contains("<svg"), "SVG should contain <svg tag");
-    assert!(svg.contains("</svg>"), "SVG should contain closing </svg> tag");
-    assert!(svg.contains("Web Frontend"), "SVG should contain service label");
-    assert!(svg.contains("Database"), "SVG should contain database label");
+    assert!(
+        svg.contains("</svg>"),
+        "SVG should contain closing </svg> tag"
+    );
+    assert!(
+        svg.contains("Web Frontend"),
+        "SVG should contain service label"
+    );
+    assert!(
+        svg.contains("Database"),
+        "SVG should contain database label"
+    );
     // assert!(svg.contains("rx:8"), "Service should have rounded corners");
     // assert!(svg.contains("ellipse"), "Database should use ellipse element");
 }
@@ -3397,13 +3781,14 @@ fn test_architecture_svg_structure() {
     assert!(svg.contains("Database"));
     assert!(svg.contains("Message Queue"));
     // Element shapes
-    assert!(svg.contains("rx:8"), "Service should have rx:8 for rounded corners");
+    assert!(
+        svg.contains("rx:8"),
+        "Service should have rx:8 for rounded corners"
+    );
     // assert!(svg.contains("ellipse"), "Database should use ellipse (cylinder)");
     // assert!(svg.contains("polygon"), "Should have arrow polygon");
     assert!(svg.contains("line"), "Should have connection lines");
 }
-
-
 
 // ============================================================
 // XY Chart API 测试
@@ -3440,7 +3825,10 @@ fn test_xychart_basic_render() {
     assert!(svg.contains("Months"), "SVG should contain x-axis label");
     assert!(svg.contains("Revenue"), "SVG should contain y-axis label");
     assert!(svg.contains("<rect"), "SVG should have bar rectangles");
-    assert!(svg.contains("<line"), "SVG should have axis or line elements");
+    assert!(
+        svg.contains("<line"),
+        "SVG should have axis or line elements"
+    );
 }
 
 #[test]
@@ -3459,7 +3847,10 @@ fn test_xychart_check_valid() {
     let code = "xychart\n  title \"Test\"\n  bar [10, 20]";
     let result = mermaid_cli::check(code).expect("check() should not fail");
     assert!(result.valid, "Valid xychart should be reported as valid");
-    assert!(result.errors.is_empty(), "Valid xychart should have no errors");
+    assert!(
+        result.errors.is_empty(),
+        "Valid xychart should have no errors"
+    );
 }
 
 #[test]
@@ -3497,7 +3888,11 @@ fn test_sankey_basic_parse() {
     let diagram = parse(code).expect("sankey parse should succeed");
     assert_eq!(diagram.statements.len(), 3);
     match &diagram.statements[0] {
-        mermaid_cli::Statement::SankeyLink { source, target, value } => {
+        mermaid_cli::Statement::SankeyLink {
+            source,
+            target,
+            value,
+        } => {
             assert_eq!(source, "A");
             assert_eq!(target, "B");
             assert!((*value - 100.0).abs() < 1e-9);
@@ -3518,7 +3913,10 @@ fn test_sankey_basic_render() {
     assert!(svg.contains("B"));
     assert!(svg.contains("C"));
     // Should have flow band polygons
-    assert!(svg.contains("<polygon"), "Sankey SVG should contain path elements for flows");
+    assert!(
+        svg.contains("<polygon"),
+        "Sankey SVG should contain path elements for flows"
+    );
 }
 
 #[test]
@@ -3542,14 +3940,16 @@ fn test_sankey_check_valid() {
 fn test_sankey_svg_structure() {
     let code = "sankey\nA -> B: 100\nB -> C: 50\nB -> D: 30";
     let svg = render(code).expect("render should succeed");
-    assert!(svg.starts_with("<?xml"), "SVG should start with XML declaration");
+    assert!(
+        svg.starts_with("<?xml"),
+        "SVG should start with XML declaration"
+    );
     assert!(svg.contains("<svg"), "Should contain <svg");
     assert!(svg.contains("</svg>"), "Should contain </svg>");
     assert!(svg.contains("<rect"), "Should have node rectangles");
     assert!(svg.contains("<polygon"), "Should have flow band paths");
     assert!(svg.contains("<text"), "Should have node labels");
 }
-
 
 // ============================================================
 // Treemap API 测试
@@ -3568,7 +3968,11 @@ fn test_treemap_basic_parse() {
 fn test_treemap_basic_render() {
     let code = "treemap\nA: 100\nB: 50\nC: 30";
     let result = render(code);
-    assert!(result.is_ok(), "Treemap render should succeed: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Treemap render should succeed: {:?}",
+        result.err()
+    );
     let svg = result.unwrap();
     assert!(svg.contains("A"), "SVG should contain label 'A'");
     assert!(svg.contains("B"), "SVG should contain label 'B'");
@@ -3586,7 +3990,10 @@ fn test_treemap_diagram_type() {
 fn test_treemap_check_valid() {
     let result = check("treemap\nA: 100\nB: 50").expect("check() should not fail");
     assert!(result.valid, "Valid treemap should be reported as valid");
-    assert!(result.errors.is_empty(), "Valid treemap should have no errors");
+    assert!(
+        result.errors.is_empty(),
+        "Valid treemap should have no errors"
+    );
 }
 
 #[test]
@@ -3594,8 +4001,14 @@ fn test_treemap_svg_structure() {
     let code = "treemap\nA: 100\nB: 50";
     let result = render(code).expect("Treemap render should succeed");
     assert!(result.contains("<svg"), "SVG should contain <svg tag");
-    assert!(result.contains("</svg>"), "SVG should contain closing </svg> tag");
-    assert!(result.contains("<rect"), "Treemap should have rect elements");
+    assert!(
+        result.contains("</svg>"),
+        "SVG should contain closing </svg> tag"
+    );
+    assert!(
+        result.contains("<rect"),
+        "Treemap should have rect elements"
+    );
     assert!(result.contains("A"), "SVG should contain label 'A'");
     assert!(result.contains("B"), "SVG should contain label 'B'");
 }
@@ -3635,13 +4048,17 @@ fn test_treemap_invalid_non_numeric_value() {
 fn test_treemap_parse_values() {
     let code = "treemap\nA: 100\nB: 50\nC: 30";
     let diagram = parse(code).expect("Treemap parse should succeed");
-    let values: Vec<f64> = diagram.statements.iter().filter_map(|s| {
-        if let mermaid_cli::Statement::TreemapItem { value, .. } = s {
-            Some(*value)
-        } else {
-            None
-        }
-    }).collect();
+    let values: Vec<f64> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::TreemapItem { value, .. } = s {
+                Some(*value)
+            } else {
+                None
+            }
+        })
+        .collect();
     assert_eq!(values.len(), 3);
     assert!(values.contains(&100.0));
     assert!(values.contains(&50.0));
@@ -3652,13 +4069,17 @@ fn test_treemap_parse_values() {
 fn test_treemap_parse_labels() {
     let code = "treemap\nApple: 100\nBanana: 50\nCherry: 30";
     let diagram = parse(code).expect("Treemap parse should succeed");
-    let labels: Vec<&str> = diagram.statements.iter().filter_map(|s| {
-        if let mermaid_cli::Statement::TreemapItem { label, .. } = s {
-            Some(label.as_str())
-        } else {
-            None
-        }
-    }).collect();
+    let labels: Vec<&str> = diagram
+        .statements
+        .iter()
+        .filter_map(|s| {
+            if let mermaid_cli::Statement::TreemapItem { label, .. } = s {
+                Some(label.as_str())
+            } else {
+                None
+            }
+        })
+        .collect();
     assert_eq!(labels, vec!["Apple", "Banana", "Cherry"]);
 }
 
@@ -3718,10 +4139,7 @@ fn test_pdf_output_contains_svg() {
         "PDF should contain SVG label text 'HelloWorld'"
     );
     // The SVG <svg> tag should be inside the Form XObject stream
-    assert!(
-        pdf_text.contains("<svg"),
-        "PDF should contain SVG markup"
-    );
+    assert!(pdf_text.contains("<svg"), "PDF should contain SVG markup");
 }
 
 #[test]
@@ -3766,8 +4184,14 @@ fn test_pdf_output_produces_valid_pdf_bytes() {
 fn test_json_flowchart() {
     let diagram = parse("graph TD; A-->B").unwrap();
     let json = mermaid_cli::to_json(&diagram).unwrap();
-    assert!(json.contains("Flowchart"), "JSON should contain diagram type");
-    assert!(json.contains("statements"), "JSON should contain statements array");
+    assert!(
+        json.contains("Flowchart"),
+        "JSON should contain diagram type"
+    );
+    assert!(
+        json.contains("statements"),
+        "JSON should contain statements array"
+    );
 }
 
 #[cfg(feature = "json")]
@@ -3818,7 +4242,6 @@ fn test_check_json_error_has_location() {
     }
 }
 
-
 // ---------------------------------------------------------------------------
 
 // ============================================================
@@ -3836,7 +4259,9 @@ fn test_mindmap_basic_nesting() {
 fn test_mindmap_multiple_roots() {
     let diagram = parse("mindmap\n  A\n  B\n  C").unwrap();
     // Three root-level nodes
-    let roots: Vec<&Statement> = diagram.statements.iter()
+    let roots: Vec<&Statement> = diagram
+        .statements
+        .iter()
         .filter(|s| matches!(s, Statement::MindmapNode { .. }))
         .collect();
     assert_eq!(roots.len(), 3);
@@ -3846,7 +4271,9 @@ fn test_mindmap_multiple_roots() {
 #[test]
 #[test]
 fn test_gitgraph_two_branches() {
-    let result = render("gitGraph\n  commit\n  branch a\n  checkout a\n  commit\n  checkout main\n  merge a");
+    let result = render(
+        "gitGraph\n  commit\n  branch a\n  checkout a\n  commit\n  checkout main\n  merge a",
+    );
     assert!(result.is_ok(), "GitGraph with branches should render");
 }
 
@@ -3870,7 +4297,9 @@ fn test_journey_score_range() {
 #[test]
 fn test_kanban_empty_column() {
     let diagram = parse("kanban\n  Col1\n  Col2\n    [Task]").unwrap();
-    let cols: Vec<&Statement> = diagram.statements.iter()
+    let cols: Vec<&Statement> = diagram
+        .statements
+        .iter()
         .filter(|s| matches!(s, Statement::KanbanColumn { .. }))
         .collect();
     assert_eq!(cols.len(), 2, "Should have 2 columns");
@@ -4017,7 +4446,7 @@ fn test_sequence_dashed_arrow() {
 fn test_pie_many_slices() {
     let mut code = "pie title Many\n".to_string();
     for i in 0..10 {
-        code.push_str(&format!("\"Item {}\" : {}\n", i, (i+1)*10));
+        code.push_str(&format!("\"Item {}\" : {}\n", i, (i + 1) * 10));
     }
     let svg = render(&code).unwrap();
     assert!(svg.contains("Item 0"));
@@ -4055,7 +4484,10 @@ fn test_er_self_reference() {
 // --- Gantt edge cases ---
 #[test]
 fn test_gantt_multiple_sections() {
-    let svg = render("gantt\n  section S1\n  T1:t1,1,3d\n  section S2\n  T2:t2,4,5d\n  section S3\n  T3:t3,6,7d").unwrap();
+    let svg = render(
+        "gantt\n  section S1\n  T1:t1,1,3d\n  section S2\n  T2:t2,4,5d\n  section S3\n  T3:t3,6,7d",
+    )
+    .unwrap();
     assert!(svg.contains("T1"));
     assert!(svg.contains("T2"));
 }
@@ -4130,7 +4562,7 @@ fn test_stress_many_mindmap_nodes() {
 fn test_stress_many_sankey_links() {
     let mut code = "sankey\n".to_string();
     for i in 0..20 {
-        code.push_str(&format!("  N{} -> N{}: {}\n", i, i+1, (i+1)*10));
+        code.push_str(&format!("  N{} -> N{}: {}\n", i, i + 1, (i + 1) * 10));
     }
     let result = render(&code);
     assert!(result.is_ok(), "20-link sankey should render");
@@ -4140,7 +4572,7 @@ fn test_stress_many_sankey_links() {
 fn test_stress_large_flowchart() {
     let mut code = "graph TD\n".to_string();
     for i in 0..100 {
-        code.push_str(&format!("  N{}-->N{}\n", i, i+1));
+        code.push_str(&format!("  N{}-->N{}\n", i, i + 1));
     }
     let result = render(&code);
     assert!(result.is_ok(), "100-node flowchart should render");
@@ -4167,8 +4599,16 @@ fn test_render_all_special_types_valid_svg() {
     ];
     for (name, code) in &cases {
         let svg = render(code).unwrap_or_else(|_| panic!("{} should render", name));
-        assert!(svg.starts_with("<?xml"), "{} should have XML declaration", name);
-        assert!(svg.contains("</svg>"), "{} should have closing SVG tag", name);
+        assert!(
+            svg.starts_with("<?xml"),
+            "{} should have XML declaration",
+            name
+        );
+        assert!(
+            svg.contains("</svg>"),
+            "{} should have closing SVG tag",
+            name
+        );
     }
 }
 
@@ -4190,14 +4630,22 @@ fn test_extract_mermaid_blocks_multiple_diagrams() {
     let md = "# Title\n\n```mermaid\ngraph TD\nA-->B\n```\n\n## Section\n\n```mermaid\nsequenceDiagram\nA->B: Hi\n```\n\n```mermaid\npie\n\"X\" : 50\n```\n\nEnd";
     let blocks = extract_mermaid_blocks(md);
     assert_eq!(blocks.len(), 3, "Should find 3 mermaid blocks");
-    assert!(blocks[0].contains("graph"), "First block should be flowchart");
-    assert!(blocks[1].contains("sequence"), "Second block should be sequence");
+    assert!(
+        blocks[0].contains("graph"),
+        "First block should be flowchart"
+    );
+    assert!(
+        blocks[1].contains("sequence"),
+        "Second block should be sequence"
+    );
     assert!(blocks[2].contains("pie"), "Third block should be pie");
 }
 
 #[test]
 fn test_render_empty_statements_graceful() {
-    let empty_types = vec!["graph", "pie", "gantt", "mindmap", "timeline", "kanban", "radar"];
+    let empty_types = vec![
+        "graph", "pie", "gantt", "mindmap", "timeline", "kanban", "radar",
+    ];
     for t in &empty_types {
         let result = render(t);
         // Should either produce SVG or error, but not panic
@@ -4210,7 +4658,9 @@ fn test_render_empty_statements_graceful() {
 
 #[test]
 fn test_check_empty_diagrams_report_invalid() {
-    let empty_types = vec!["graph", "pie", "gantt", "mindmap", "timeline", "journey", "kanban"];
+    let empty_types = vec![
+        "graph", "pie", "gantt", "mindmap", "timeline", "journey", "kanban",
+    ];
     for t in &empty_types {
         let result = check(t).expect("check should not fail");
         // Empty diagrams may or may not be valid
@@ -4256,7 +4706,9 @@ fn test_journey_many_actors() {
 // --- Kanban multiple tasks ---
 #[test]
 fn test_kanban_many_tasks() {
-    let result = render("kanban\n  Todo\n    [A] : a\n    [B] : b\n    [C] : c\n    [D] : d\n    [E] : e").unwrap();
+    let result =
+        render("kanban\n  Todo\n    [A] : a\n    [B] : b\n    [C] : c\n    [D] : d\n    [E] : e")
+            .unwrap();
     assert!(result.contains("A"));
     assert!(result.contains("E"));
 }
@@ -4303,7 +4755,9 @@ fn test_xychart_bar_and_line() {
 #[test]
 fn test_treemap_many_items() {
     let mut code = "treemap\n".to_string();
-    for i in 0..10 { code.push_str(&format!("  Item{}: {}\n", i, (i+1)*10)); }
+    for i in 0..10 {
+        code.push_str(&format!("  Item{}: {}\n", i, (i + 1) * 10));
+    }
     let result = render(&code).unwrap();
     assert!(result.contains("Item0"));
     assert!(result.contains("Item9"));
@@ -4312,7 +4766,9 @@ fn test_treemap_many_items() {
 // --- Sankey multi-hop ---
 #[test]
 fn test_sankey_multihop() {
-    let result = render("sankey\n  A -> B: 100\n  B -> C: 60\n  B -> D: 40\n  C -> E: 30\n  D -> E: 20").unwrap();
+    let result =
+        render("sankey\n  A -> B: 100\n  B -> C: 60\n  B -> D: 40\n  C -> E: 30\n  D -> E: 20")
+            .unwrap();
     assert!(result.contains("A"));
     assert!(result.contains("E"));
 }
@@ -4348,7 +4804,7 @@ fn test_render_isolation() {
 #[test]
 fn test_consecutive_renders_different_content() {
     for i in 0..5 {
-        let code = format!("graph TD; N{}-->N{}", i, i+1);
+        let code = format!("graph TD; N{}-->N{}", i, i + 1);
         let result = render(&code);
         assert!(result.is_ok(), "Iteration {} should render", i);
     }

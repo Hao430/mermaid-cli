@@ -6,7 +6,6 @@
 /// passed via `--configFile`) and applies the settings to the Renderer.
 ///
 /// This module is feature-gated behind the `json` feature.
-
 use std::fs;
 use std::path::Path;
 
