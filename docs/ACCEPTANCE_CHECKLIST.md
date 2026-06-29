@@ -1,271 +1,381 @@
-# 开发验收清单
+# 开发验收清单 — 最终目标
 
-> 适用于 mermaid-cli 各阶段开发任务的验收检查。
-
----
-
-## 使用说明
-
-- **项目级验收**：提交 PR 前，逐项检查 ✅/❌/N/A
-- **阶段级验收**：每个开发阶段结束时，使用该清单确认是否达到发布标准
-- **功能级验收**：每个新功能开发完成后，对照相关条目检查
+> 对标 mermaid-js/mermaid-cli (mmdc)，定义 v1.0 的完整验收标准  
+> mmdc 是 Mermaid 官方 CLI，npm 月下载 214 万，4,754 stars，是事实上的行业标准  
+> **制定日期**：2026-06-28
 
 ---
 
-## A. 代码规范与质量
+## 竞品基线：mmdc 能做什么
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| A1 | 代码格式化 | `cargo fmt --check` 无差异 | `cargo fmt --check` | ✅ |
-| A2 | 代码 lint | `cargo clippy -- -D warnings` 零警告 | `cargo clippy -- -D warnings` | ✅ |
-| A3 | 编译零警告 | 无 `warning` 输出 | `cargo build 2>&1 \| grep -c warning` | ✅ |
-| A4 | 命名规范 | 遵循 snake_case（函数/变量）、PascalCase（类型/结构体）、SCREAMING_SNAKE_CASE（常量） | 代码审查 | ✅ |
-| A5 | 导入组织 | 标准库 → 第三方 → 本地模块，分组清晰 | 代码审查 | ✅ |
-| A6 | 无 `panic!` 或 `unwrap()` | 生产代码中无直接 `panic!` / `unwrap()` / `expect()`（除非明确注释说明合理原因） | `grep -rn "panic!\|unwrap()\|expect(" src/ --include="*.rs"` | ✅ |
-| A7 | 无硬编码魔数 | 重要数值使用具名常量 | 代码审查 | ✅ |
-| A8 | 循环依赖检查 | 模块间无循环依赖 | `cargo build` 成功即可 | ✅ |
-
----
-
-## B. 构建检查
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| B1 | Debug 构建 | `cargo build` 成功 | `cargo build` | ✅ |
-| B2 | Release 构建 | `cargo build --release` 成功 | `cargo build --release` | ❌ |
-| B3 | 跨平台构建（Linux） | cargo build 在 ubuntu-latest 成功 | CI build workflow | ❌ |
-| B4 | 跨平台构建（macOS） | cargo build 在 macos-latest 成功 | CI build workflow | ❌ |
-| B5 | 跨平台构建（Windows） | cargo build 在 windows-latest 成功 | CI build workflow | ❌ |
-| B6 | 文档构建 | `cargo doc --no-deps` 无错误 | `cargo doc --no-deps` | ✅ |
-| B7 | Release 二进制大小 | 符合项目目标（当前 ~373KB，新增功能后不超过 1MB） | `ls -lh target/release/mermaid-cli` | ❌ |
+| 维度 | mmdc 现状 |
+|------|-----------|
+| 图表类型 | 20+ 种 (Flowchart/Sequence/Class/State/ER/Gantt/Pie/Mindmap/GitGraph/Timeline/Treemap/Radar/Architecture/C4/Kanban/Journey/Sankey/Quadrant/ZenUML/Ishikawa/Venn...) |
+| 输出格式 | SVG / PNG / PDF |
+| 主题 | default / forest / dark / neutral (4种) |
+| 输入方式 | .mmd 文件 / .md 文件(提取代码块) / stdin |
+| 渲染引擎 | Puppeteer + Chromium (headless browser) |
+| 性能 | ~2-3 秒/图 (Chromium 启动开销) |
+| 安装体积 | ~300MB (Node.js + Chromium) |
+| CLI 选项 | 16+ 个 (--theme/--width/--height/--scale/--backgroundColor/--cssFile/--configFile/--pdfFit/--iconPacks 等) |
+| Library API | Node.js API (run(), renderMermaid()) |
+| 并行渲染 | 支持 (p-limit, 默认 CPU/2) |
+| 自定义 | CSS 文件 / Mermaid JSON config / Puppeteer config / Iconify 图标包 |
+| 测试 | Jest + Docker + Percy.io 视觉回归 |
+| 发布渠道 | npm / Docker (minlag/mermaid-cli) |
+| 平台支持 | 任何有 Node.js 18+ 的平台 |
 
 ---
 
-## C. 测试覆盖
+## 一、图表类型 — 验收标准
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| C1 | 所有测试通过 | `cargo test --all` 全部通过 | `cargo test --all` | ✅ |
-| C2 | 单元测试通过 | `cargo test --lib` 全部通过 | `cargo test --lib` | ✅ |
-| C3 | 集成测试通过 | `cargo test --test '*'` 全部通过 | `cargo test --test '*'` | ✅ |
-| C4 | 新增功能有单元测试 | 新功能对应模块的 `#[cfg(test)]` 块包含测试用例 | `grep -c "#\[test\]" src/<module>/` | ✅ |
-| C5 | 边界情况测试 | 空输入、无效语法、超大输入等边界场景有覆盖 | 审查测试文件 | ✅ |
-| C6 | 错误路径测试 | 错误/异常路径有测试覆盖 | 审查测试文件 | ✅ |
-| C7 | 测试隔离性 | 测试之间无共享状态，可独立运行 | `cargo test <test_name>` 单测通过 | ✅ |
-| C8 | 代码覆盖率（P2+） | 目标 > 80%，关键路径 100% | `cargo tarpaulin` 或其他覆盖率工具 | ⚠️ |
+> **目标**：覆盖 mmdc 100% 的图表类型
 
----
+### 1.1 核心图表 (v1.0 必须)
 
-## D. 功能完整性
+| 图表类型 | mmdc | 本项目目标 | 验收标准 |
+|----------|------|-----------|----------|
+| Flowchart | ✅ | ✅ | 所有节点形状 + 边标签 + subgraph + classDef + 样式 |
+| Sequence | ✅ | ✅ | 所有消息类型 + notes + activation + blocks + background |
+| Class Diagram | ✅ | ✅ | 类定义 + 继承 + 组合 + 接口 + 注解 + 命名空间 |
+| State Diagram | ✅ | ✅ | 状态 + 转换 + 复合状态 + 注释 + start/end |
+| ER Diagram | ✅ | ✅ | 实体 + 属性 + 关系(1:1/1:N/M:N) + 注释 |
+| Gantt Chart | ✅ | ✅ | 任务 + 依赖 + 区段 + 日期 + 进度 |
+| Pie Chart | ✅ | ✅ | 数据标签 + 百分比 + 标题 |
 
-### D1 — CLI 接口
+### 1.2 扩展图表 (v1.0 争取)
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| D1.1 | 文件输入 | `mermaid-cli input.mmd -o out.svg` 正确渲染 | 端到端测试 | ✅ |
-| D1.2 | stdin 输入 | `echo 'graph TD; A-->B' \| mermaid-cli --stdin -o out.svg` 正确渲染 | 端到端测试 | ✅ |
-| D1.3 | stdout 输出 | 不带 `-o` 时 SVG 输出到 stdout | 端到端测试 | ✅ |
-| D1.4 | `-o` / `--output` 选项 | 正确指定输出文件路径 | CLI 测试 | ✅ |
-| D1.5 | `--help` 显示 | 输出清晰的帮助信息，包含所有命令和选项 | `mermaid-cli --help` | ✅ |
-| D1.6 | `--version` 显示 | 输出版本号（当前 `0.1.0-alpha`） | `mermaid-cli --version` | ✅ |
-| D1.7 | 缺失文件错误 | 输入文件不存在时输出友好错误信息 | CLI 测试 | ✅ |
-| D1.8 | 缺少 `-o` 参数 | `-o` 后无参数时提示错误 | CLI 测试 | ✅ |
-| D1.9 | `--stdin` + `-o` 组合 | 标准输入 + 文件输出正常工作 | CLI 测试 | ✅ |
-| D1.10 | 新增命令（P2+） | `check`、`fix` 等命令按规划正常工作 | 功能测试 | ✅ |
+| 图表类型 | mmdc | 本项目目标 | 优先级 |
+|----------|------|-----------|--------|
+| Mindmap | ✅ | ✅ | 🟡 高 |
+| Git Graph | ✅ | ✅ | 🟡 高 |
+| Timeline | ✅ | ✅ | 🟡 高 |
+| Journey | ✅ | ⏳ | 🟢 中 |
+| Treemap | ✅ | ⏳ | 🟢 中 |
+| Quadrant Chart | ✅ | ⏳ | 🟢 中 |
+| Sankey | ✅ | ⏳ | 🟢 中 |
+| XY Chart | ✅ | ⏳ | 🟢 中 |
+| Block | ✅ | ⏳ | 🟢 中 |
+| Architecture | ✅ | ⏳ | 🟢 中 |
+| Requirement | ✅ | ⏳ | 🟢 中 |
+| C4 | ✅ | ⏳ | 🟢 中 |
+| Kanban | ✅ | ⏳ | 🟢 低 |
+| Radar | ✅ | ⏳ | 🟢 低 |
+| ZenUML | ✅ | ⏳ | 🟢 低 |
+| Packet | ✅ | ⏳ | 🟢 低 |
 
-### D2 — 公共 API（lib.rs）
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| D2.1 | `render()` 函数 | 输入有效 Mermaid 代码，返回有效 SVG 字符串 | API 测试 | ✅ |
-| D2.2 | `parse()` 函数 | 输入有效 Mermaid 代码，返回正确解析的 `Diagram` AST | API 测试 | ✅ |
-| D2.3 | `check()` 函数 | 有效代码返回 `CheckResult { valid: true }`，无效代码返回 `valid: false` 含错误信息 | API 测试 | ✅ |
-| D2.4 | `CheckResult` 结构体 | 正确提供 `valid` 和 `errors` 字段，`has_errors()` 方法正常工作 | API 测试 | ✅ |
-| D2.5 | API 错误处理 | 无效输入时返回 `Err`，不 panic | API 测试 | ✅ |
-| D2.6 | 公共类型正确导出 | `pub use` 导出了 `Fixer`、`NodeShape`、`Parser`、`Statement`、`Renderer` | 编译检查 | ✅ |
-| D2.7 | 文档注释覆盖 | 所有公共 API 有 `///` 文档注释，包含参数、返回、示例 | `cargo doc --no-deps` 检查 | ✅ |
-
-### D3 — Parser 模块
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| D3.1 | Lexer 关键字识别 | 正确识别 `graph`、`flowchart`、`TD`、`LR`、`subgraph`、`end` | 单元测试 | ✅ |
-| D3.2 | Lexer 箭头识别 | 正确识别 `-->`、`---`、`==>`、`-.->` 等箭头类型 | 单元测试 | ✅ |
-| D3.3 | Lexer 形状识别 | 正确识别 `[]`、`()`、`{}`、`([ ])`、`[[ ]]`、`[( )]`、`(( ))`、`> ]` | 单元测试 | ✅ |
-| D3.4 | Lexer 注释支持 | `%%` 开头的注释行被正确跳过 | 单元测试 | ✅ |
-| D3.5 | Lexer 位置追踪 | Token 包含正确的 line/column/length 信息 | 单元测试 | ✅ |
-| D3.6 | Parser 方向解析 | 正确解析 `TD`、`LR`、`BT`、`RL` 方向 | 单元测试 | ✅ |
-| D3.7 | Parser 节点定义 | 正确解析带形状和标签的节点定义 | 单元测试 | ✅ |
-| D3.8 | Parser 边定义 | 正确解析 `A-->B`、`A---B` 等边定义 | 单元测试 | ✅ |
-| D3.9 | Parser 错误恢复 | 遇到错误时继续解析，而非立即终止 | 单元测试 | ✅ |
-| D3.10 | Parser 子图支持（P2+） | 正确解析 `subgraph` / `end` 块 | 功能测试 | ✅ |
-| D3.11 | AST 辅助方法 | `get_nodes()`、`get_edges()` 等辅助方法正确 | 单元测试 | ✅ |
-| D3.12 | AST 序列化支持（P2+） | 支持 `Display` / `Debug` 格式化输出 | 单元测试 | ✅ |
-
-### D4 — Renderer 模块
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| D4.1 | 节点渲染 | 正确渲染所有 8 种节点形状（Rect、Rounded、Diamond、Circle、Subroutine、Cylinder、DoubleCircle、Flag） | 单元测试 / API 测试 | ✅ |
-| D4.2 | 边渲染 | 正确渲染 `-->`、`---` 等边 + 箭头 | 单元测试 | ✅ |
-| D4.3 | 节点标签 | 节点标签文本正确显示 | 单元测试 | ✅ |
-| D4.4 | 边标签（P2+） | 边标签正确显示在边上 | 功能测试 | ✅ |
-| D4.5 | 布局算法 | 节点根据方向（TD/LR）正确布局，不重叠 | 视觉验证 / 单元测试 | ✅ |
-| D4.6 | 多节点支持 | 10+ 节点的流程图正确布局渲染 | 集成测试 | ✅ |
-| D4.7 | 渲染空图 | 空图表或仅有类型的图表不 panic | 单元测试 | ✅ |
-
-### D5 — SVG 模块
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| D5.1 | SVG 结构 | 输出包含 `<svg>` 根元素，含 `xmlns`、`viewBox`、`width`、`height` | 单元测试 | ✅ |
-| D5.2 | XML 转义 | 标签文本中的 `<`、`>`、`&`、`"` 被正确转义 | 单元测试 | ✅ |
-| D5.3 | 矩形渲染 | `add_rect()` 生成正确的 `<rect>` 元素 | 单元测试 | ✅ |
-| D5.4 | 圆形渲染 | `add_circle()` 生成正确的 `<circle>` 元素 | 单元测试 | ✅ |
-| D5.5 | 文本渲染 | `add_text()` 生成正确的 `<text>` 元素 | 单元测试 | ✅ |
-| D5.6 | 线条渲染 | `add_line()` 生成正确的 `<line>` 元素 | 单元测试 | ✅ |
-| D5.7 | 箭头渲染 | `add_arrow()` 生成正确的箭头标记 | 单元测试 | ✅ |
-| D5.8 | 路径渲染 | `add_path()` 生成正确的 `<path>` 元素 | 单元测试 | ✅ |
-| D5.9 | SVG 有效 | 生成的 SVG 可通过简单的 XML 结构验证 | `grep -c "<svg"` + `grep -c "</svg>"` | ✅ |
-| D5.10 | 空构建器 | 无元素时输出最小有效 SVG | 单元测试 | ✅ |
-
-### D6 — Fixer 模块
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| D6.1 | 拼写纠正 | `grpah` → `graph`，`flowchrat` → `flowchart` 等 | 单元测试 | ✅ |
-| D6.2 | 箭头修复 | `-->>` → `-->`，`=>` → `->` | 单元测试 | ✅ |
-| D6.3 | 缺失 `end` 补全 | 缺少 `end` 的子图自动补全 | 单元测试 | ✅ |
-| D6.4 | 修复跟踪 | 返回修复位置（行、列）和建议内容 | 单元测试 | ✅ |
-| D6.5 | 修复置信度（P2+） | 修复建议包含置信度评分 | 功能测试 | ⚠️ |
-| D6.6 | 修复不影响有效输入 | 有效代码通过 Fixer 后内容不被破坏 | 单元测试 | ✅ |
+**验收方式**：每种图表有对应的 `.mmd` 测试文件，渲染输出与 mmdc 视觉一致
 
 ---
 
-## E. 错误处理
+## 二、输出格式 — 验收标准
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| E1 | 无效 Mermaid 语法 | 返回友好错误信息，指明位置和原因 | 集成测试 | ✅ |
-| E2 | 空输入处理 | 空字符串输入不 panic，返回合理错误 | 单元测试 | ✅ |
-| E3 | 超大输入 | 超大输入不导致 OOM（当前零依赖，无外部限制） | 手动测试 | ❌ |
-| E4 | 文件 I/O 错误 | 文件不存在/无权限时输出友好错误 | CLI 测试 | ✅ |
-| E5 | UTF-8 编码 | 非 UTF-8 输入被正确拒绝或处理 | 边界测试 | ❌ |
-| E6 | 错误信息一致性 | 所有错误输出使用 `eprintln!`（stderr） | 代码审查 | ✅ |
-| E7 | 退出码 | 成功退出码 0，错误退出码 1 | CLI 测试（集成测试验证 `assert!(!status.success())`） | ✅ |
+| 格式 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| SVG | ✅ | ✅ | 有效 XML，viewBox 正确，元素完整 |
+| PNG | ✅ | ✅ | 正确分辨率，无锯齿，支持 --scale |
+| PDF | ✅ | ✅ | 单页/多页，--pdfFit 选项 |
 
----
-
-## F. 性能指标
-
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| F1 | Release 二进制大小 | ≤ 1MB（保持零依赖优势） | `ls -lh target/release/mermaid-cli` | ❌ |
-| F2 | Debug 编译时间 | ≤ 3s（增量编译） | `time cargo build` | ✅ |
-| F3 | Release 编译时间 | ≤ 15s | `time cargo build --release` | ❌ |
-| F4 | 简单渲染耗时 | ≤ 50ms（10 节点内图表） | `time ./mermaid-cli test.mmd -o /dev/null` | ❌ |
-| F5 | 运行时内存 | ≤ 20MB | `/usr/bin/time -v ./mermaid-cli test.mmd -o /dev/null 2>&1 \| grep "Maximum resident"` | ❌ |
-| F6 | 大型图表（P2+） | 100 节点图表在 500ms 内完成 | 基准测试 | ⚠️ |
+**验收方式**：
+- SVG：可通过 XML 解析验证，浏览器渲染正确
+- PNG：magic bytes 验证 (89 50 4E 47)，尺寸与 --width/--height/--scale 一致
+- PDF：magic bytes 验证 (25 50 44 46)，可正常打开
 
 ---
 
-## G. 文档完整性
+## 三、CLI 选项 — 验收标准
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| G1 | README 更新 | 反映当前功能状态、使用示例、构建方式 | 审查 | ✅ |
-| G2 | API 文档注释 | 所有公共函数/结构体有 `///` 文档注释，含示例 | `cargo doc --no-deps` 生成后审查 | ✅ |
-| G3 | DEVELOPMENT.md 更新 | 包含新功能的开发指引和示例 | 审查 | ❌ |
-| G4 | CONTRIBUTING.md 更新 | PR 流程、代码规范与当前一致 | 审查 | ❌ |
-| G5 | ROADMAP.md 更新 | 已完成任务标记为 [x]，进度与实际一致 | 审查 | ❌ |
-| G6 | P1_PROGRESS.md / 阶段进度报告 | 如实反映当前状态，包含测试结果和性能数据 | 审查 | ❌ |
-| G7 | CHANGELOG / 变更记录 | 新增功能、修复、变更等有记录 | 审查 | ✅ |
-| G8 | ARCHITECTURE.md（如有修改） | 架构变更同步更新文档 | 审查 | ✅ |
+> **目标**：覆盖 mmdc 所有 CLI 选项，保持本项目独有的 check/fix 优势
 
----
+### 3.1 输入输出
 
-## H. CI/CD 状态
+| 选项 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| `-i, --input <file>` | ✅ | ✅ | 支持文件路径和 `-` (stdin) |
+| `-o, --output <file>` | ✅ | ✅ | 支持文件路径和 `-` (stdout) |
+| `--stdin` | ✅ (用 `-i -`) | ✅ | 保持现有实现 |
+| 输出格式推断 | ✅ (按扩展名) | ✅ | .svg/.png/.pdf 自动推断 |
+| `-e, --outputFormat` | ✅ | ✅ | 显式指定输出格式 |
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| H1 | Test workflow（test.yml） | push/PR 时自动触发，fmt + clippy + test + doc 全部通过 | 查看 GitHub Actions | ❌ |
-| H2 | Build workflow（build.yml） | push/PR 时在 3 平台（ubuntu/macos/windows）构建通过 | 查看 GitHub Actions | ❌ |
-| H3 | Release workflow（release.yml） | tag 推送时自动构建并发布 GitHub Release（P2+ 启用） | 查看 GitHub Actions | ⚠️ |
-| H4 | Cargo 缓存 | CI 中正确缓存 `~/.cargo` 和 `target` 目录 | `actions/cache@v4` 配置审查 | ❌ |
-| H5 | CI 超时设置 | 工作流设置合理的超时（默认 60 分钟） | 审查 workflow 配置 | ❌ |
+### 3.2 渲染配置
 
----
+| 选项 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| `-t, --theme <name>` | ✅ (4种) | ✅ | default/forest/dark/neutral |
+| `-w, --width <px>` | ✅ (默认800) | ✅ | |
+| `-H, --height <px>` | ✅ (默认600) | ✅ | |
+| `-s, --scale <factor>` | ✅ (默认1) | ✅ | PNG 输出时生效 |
+| `-b, --backgroundColor <color>` | ✅ (默认white) | ✅ | 支持颜色名和十六进制 |
+| `-c, --configFile <file>` | ✅ | ✅ | Mermaid JSON 配置 |
+| `-C, --cssFile <file>` | ✅ | ✅ | 自定义 CSS |
+| `-f, --pdfFit` | ✅ | ✅ | PDF 自适应图表大小 |
 
-## I. 安全审查
+### 3.3 高级选项
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| I1 | 命令注入 | CLI 参数不作为 shell 命令执行（当前纯 `std::env::args`） | 代码审查 | ✅ |
-| I2 | 路径遍历 | 文件路径参数不导致目录遍历（当前无路径过滤，作为已知限制记录） | 代码审查 | ✅ |
-| I3 | 输入大小限制 | 不限制输入大小（零依赖，无外部风险），注意 OOM 风险 | 代码审查 | ✅ |
-| I4 | 依赖安全审计（启用依赖后） | `cargo audit` 零漏洞 | `cargo audit`（需安装） | ⚠️ |
-| I5 | 无 unsafe 代码 | `unsafe` 关键字不出现（除非明确注释说明原因且通过审查） | `grep -rn "unsafe" src/ --include="*.rs"` | ✅ |
+| 选项 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| `-j, --jobs <n>` | ✅ (默认CPU/2) | ✅ | 并行渲染 |
+| `-q, --quiet` | ✅ | ✅ | 静默模式 |
+| `-I, --svgId <id>` | ✅ | ✅ | 选择 SVG 中特定元素 |
+| `--iconPacks <pkgs>` | ✅ | ✅ | Iconify 图标包 |
+| `-p, --puppeteerConfigFile` | N/A | N/A | 本项目不使用 Puppeteer |
+| `-a, --artefacts <dir>` | ✅ | ✅ | Markdown 模式输出目录 |
 
----
+### 3.4 本项目独有 (mmdc 没有)
 
-## J. 版本发布（P1/P2 阶段结束前）
+| 选项 | 说明 | 验收标准 |
+|------|------|----------|
+| `check <file>` | 语法检查 | 输出错误列表 + 位置信息，退出码 0/1 |
+| `fix <file>` | 自动修复 | 修复后输出，--show-fixes 显示修复详情 |
+| `--show-fixes` | 显示修复建议 | 与 render/check 配合使用 |
 
-| # | 检查项 | 验收标准 | 检查方式 | ✅/❌/N/A |
-|---|--------|---------|---------|----------|
-| J1 | 版本号更新 | Cargo.toml 中 version 字段更新到目标版本 | 审查 Cargo.toml | ❌ |
-| J2 | Git tag 创建 | 创建对应版本标签（如 `v0.1.0`） | `git tag -l 'v*'` | ❌ |
-| J3 | Release 构建确认 | 所有目标平台 Release 构建成功 | CI release workflow | ❌ |
-| J4 | Release 说明 | GitHub Release 包含变更摘要和使用说明 | 审查 Release 页 | ❌ |
-| J5 | 跨平台二进制 | Linux/macOS/Windows 二进制均可用 | 审查 Release artifacts | ❌ |
-
----
-
-## 合计检查项统计
-
-| 类别 | 检查项数 | ✅通过 | ❌未通过 | ⚠️待定 |
-|------|---------|-------|---------|--------|
-| A. 代码规范与质量 | 8 | 8 | 0 | 0 |
-| B. 构建检查 | 7 | 2 | 5 | 0 |
-| C. 测试覆盖 | 8 | 7 | 0 | 1 |
-| D1. CLI 接口 | 10 | 10 | 0 | 0 |
-| D2. 公共 API | 7 | 7 | 0 | 0 |
-| D3. Parser 模块 | 12 | 12 | 0 | 0 |
-| D4. Renderer 模块 | 7 | 7 | 0 | 0 |
-| D5. SVG 模块 | 10 | 10 | 0 | 0 |
-| D6. Fixer 模块 | 6 | 5 | 0 | 1 |
-| E. 错误处理 | 7 | 5 | 2 | 0 |
-| F. 性能指标 | 6 | 1 | 4 | 1 |
-| G. 文档完整性 | 8 | 4 | 4 | 0 |
-| H. CI/CD 状态 | 5 | 0 | 4 | 1 |
-| I. 安全审查 | 5 | 4 | 0 | 1 |
-| J. 版本发布 | 5 | 0 | 5 | 0 |
-| **总计** | **111** | **82** | **24** | **5** |
+**验收方式**：每个选项有对应的 CLI 测试用例
 
 ---
 
-## 快速验收命令
+## 四、输入方式 — 验收标准
 
-在提交 PR 或标记任务完成前，运行以下一键检查命令：
-
-```bash
-# 代码规范 + 构建 + 测试 + 文档 — 四项核心检查
-cargo fmt --check && \
-cargo clippy -- -D warnings && \
-cargo test --all && \
-cargo doc --no-deps 2>&1 | grep "warning:" | wc -l | xargs echo "doc warnings:"
-```
-
-```bash
-# 安全与质量快速扫描
-grep -rn "panic!\|unwrap()\|expect(\|unsafe" src/ --include="*.rs" | grep -v "#\[test\]" | grep -v "_test" || echo "无直接 panic/unwrap/unsafe（测试代码除外）"
-```
-
-```bash
-# 二进制大小
-ls -lh target/release/mermaid-cli 2>/dev/null || echo "先运行 cargo build --release"
-```
+| 输入方式 | mmdc | 本项目目标 | 验收标准 |
+|----------|------|-----------|----------|
+| .mmd 文件 | ✅ | ✅ | 已实现 |
+| stdin 管道 | ✅ | ✅ | 已实现 |
+| .md/.markdown 文件 | ✅ | ✅ | 提取 ```mermaid 代码块 |
+| 多文件批量输入 | ✅ | ✅ | 通配符或目录输入 |
+| stdin 自动检测格式 | ✅ | ✅ | mmd vs markdown 识别 |
 
 ---
 
-*本清单在项目开发过程中持续更新。每个新功能/PR 应至少通过所属类别的全部检查项。*
-*最后更新：2026-06-22 | 当前状态：82/111 ✅ 通过（73.9%），24 ❌ 未完成，5 ⚠️ P2+ 待定*
+## 五、性能 — 验收标准
+
+> **目标**：全面碾压 mmdc，量化优势
+
+| 指标 | mmdc | 本项目目标 | 倍数 |
+|------|------|-----------|------|
+| 单图渲染延迟 | ~2-3 秒 | **< 10ms** | 200-300x |
+| 10 图批量 | ~20-30 秒 | **< 100ms** | 200-300x |
+| 100 图批量 | ~200 秒 | **< 1 秒** | 200x |
+| 冷启动时间 | ~2 秒 (Chromium) | **< 5ms** | 400x |
+| 内存占用 | ~200-500MB | **< 20MB** | 10-25x |
+| 二进制大小 | ~300MB (含 Chromium) | **< 10MB** | 30x |
+
+**验收方式**：
+- `cargo bench` 基准测试套件，覆盖所有图表类型
+- 与 mmdc 的 head-to-head 性能对比报告
+- CI 中自动运行性能回归检测
+
+---
+
+## 六、测试 — 验收标准
+
+> **目标**：测试质量对标 mmdc，覆盖范围更广
+
+### 6.1 测试类型
+
+| 测试类型 | mmdc | 本项目目标 | 验收标准 |
+|----------|------|-----------|----------|
+| 单元测试 | Jest | cargo test | 每个模块 > 90% 行覆盖 |
+| 集成测试 | Jest (全图表) | cargo test --test | 每种图表类型有完整工作流测试 |
+| 正面测试 | test-positive/ | tests/positive/ | 有效输入 → 正确输出 |
+| 负面测试 | test-negative/ | tests/negative/ | 无效输入 → 正确错误信息 |
+| CLI 测试 | Jest | assert_cmd | 所有选项组合 + 退出码 |
+| Stdin 测试 | ✅ | ✅ | 每种图表的 stdin 管道测试 |
+| 快照测试 | Percy.io | insta | SVG 输出快照对比 |
+| 性能测试 | ❌ | cargo bench | 基准测试 + 回归检测 |
+| 跨平台测试 | GitHub Actions | GitHub Actions | Linux/macOS/Windows |
+
+### 6.2 测试数量目标
+
+| 维度 | 当前 | 目标 | 说明 |
+|------|------|------|------|
+| 总测试数 | 147 | **500+** | 随图表类型增加线性增长 |
+| 图表类型覆盖 | 2/20 | **20/20** | 每种图表至少 10 个测试 |
+| CLI 选项覆盖 | 部分 | **100%** | 每个选项至少 1 个测试 |
+| 错误路径覆盖 | 部分 | **> 80%** | 每种错误类型有测试 |
+| SVG 快照 | 0 | **100+** | 每种图表的基准输出 |
+
+---
+
+## 七、文档 — 验收标准
+
+> **目标**：文档质量超过 mmdc
+
+### 7.1 必备文档
+
+| 文档 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| README | ✅ | ✅ | 快速开始 + 性能对比 + 全功能列表 |
+| 安装指南 | ✅ (npm) | ✅ | cargo install / 二进制下载 / Homebrew / Scoop / AUR |
+| CLI 参考 | ✅ | ✅ | 所有命令和选项的完整说明 |
+| API 参考 | ✅ (JSDoc) | ✅ (cargo doc) | 所有公共类型和函数 |
+| 示例目录 | ✅ | ✅ | 每种图表至少 3 个示例 .mmd |
+| 故障排除 | ✅ | ✅ | 常见错误及解决方案 |
+| CI/CD 集成指南 | ❌ | ✅ | GitHub Actions / GitLab CI 模板 |
+| 贡献指南 | ✅ | ✅ | 开发环境 + PR 流程 + 代码规范 |
+| 架构文档 | ❌ | ✅ | 系统设计 + 数据流 + 模块关系 |
+| CHANGELOG | ✅ | ✅ | 每个版本的变更记录 |
+
+### 7.2 发布渠道
+
+| 渠道 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| GitHub Releases | ✅ | ✅ | 4 平台二进制 (Linux/macOS x86+ARM/Windows) |
+| npm | ✅ | ✅ | npx @anthropic/mermaid-cli 可用 |
+| Docker | ✅ | ✅ | 最小镜像 (< 20MB) |
+| Homebrew | ❌ | ✅ | brew install mermaid-cli |
+| Scoop (Windows) | ❌ | ✅ | scoop install mermaid-cli |
+| AUR (Arch) | ❌ | ✅ | pacman -S mermaid-cli |
+| crates.io | ❌ | ✅ | cargo install mermaid-cli |
+
+---
+
+## 八、Library API — 验收标准
+
+> **目标**：提供比 mmdc 更好的库集成体验
+
+| API | mmdc (Node.js) | 本项目 (Rust) | 验收标准 |
+|-----|----------------|---------------|----------|
+| 渲染函数 | `renderMermaid()` | `render()` | 输入代码 → 输出 SVG/PNG/PDF |
+| 解析函数 | ❌ | `parse()` | 输入代码 → 输出 AST |
+| 检查函数 | ❌ | `check()` | 输入代码 → 输出错误列表 |
+| 修复函数 | ❌ | `fix()` | 输入代码 → 输出修复后代码 |
+| 错误类型 | 字符串 | 结构化 `ParseError` | 包含位置、分类、建议 |
+| Doc tests | ❌ | ✅ | 每个公共函数有可运行示例 |
+| WASM 支持 | ❌ | ✅ | 浏览器/Node.js 可直接调用 |
+| 外部语言绑定 | ❌ | ✅ | Python (pyo3) / Node.js (napi-rs) |
+
+---
+
+## 九、代码质量 — 验收标准
+
+| 指标 | mmdc | 本项目目标 | 验收标准 |
+|------|------|-----------|----------|
+| 代码规范 | ESLint | cargo fmt + clippy | 零警告 |
+| 依赖数量 | 12+ (mermaid/puppeteer/commander...) | **0** (核心) | 可选依赖用 feature flag |
+| unsafe 代码 | N/A (JS) | **0** | 纯安全 Rust |
+| 公共 API 文档 | JSDoc | **100%** doc comments | 每个 pub 函数/结构体/枚举 |
+| 模块文档 | 部分 | **100%** `//!` 模块级文档 | 每个 mod.rs / lib.rs |
+| 最大文件 | N/A | **< 1500 行** | 超出则拆分 |
+| 二进制大小 | ~300MB | **< 10MB** | strip + LTO + opt-level=3 |
+
+---
+
+## 十、CI/CD — 验收标准
+
+| 工作流 | mmdc | 本项目目标 | 验收标准 |
+|--------|------|-----------|----------|
+| 测试 | GitHub Actions | ✅ | fmt + clippy + test + doc |
+| 跨平台构建 | ✅ | ✅ | Linux/macOS/Windows (x86_64 + ARM64) |
+| 自动发布 | ✅ (npm publish) | ✅ | tag → build → GitHub Release + npm + crates.io |
+| Docker 构建 | ✅ | ✅ | 自动构建并推送 Docker Hub |
+| 性能基准 | ❌ | ✅ | CI 中运行 cargo bench，检测回归 |
+| 安全审计 | ❌ | ✅ | cargo audit 定期扫描 |
+| 依赖更新 | ❌ | ✅ | Dependabot / Renovate |
+
+---
+
+## 十一、差异化优势 — 保持并强化
+
+> mmdc 做不到的，我们要做到最好
+
+| 能力 | mmdc | 本项目 | 验收标准 |
+|------|------|--------|----------|
+| 智能纠错 | ❌ | ✅ | 覆盖 50+ 种常见错误模式 |
+| 零依赖安装 | ❌ (~300MB) | ✅ (< 10MB) | 单二进制，下载即用 |
+| 冷启动速度 | ~2 秒 | **< 5ms** | 无 Chromium 启动开销 |
+| AI 集成 | 无 | **一等公民** | 结构化输出 / JSON AST / 机器可读错误 |
+| Rust 生态 | 无 | **crate 可嵌入** | 其他 Rust 项目直接依赖 |
+| WASM | 无 | **浏览器可用** | 同一份代码跑 CLI 和浏览器 |
+
+---
+
+## 十二、验收里程碑
+
+### Phase 1 — Flowchart MVP (已完成 ✅)
+
+- [x] Flowchart 解析 + 渲染
+- [x] 8 种节点形状
+- [x] 基础 CLI (render/check/fix)
+- [x] 147 个测试
+
+### Phase 2 — 序列图 + 发布 (已完成 ✅)
+
+- [x] Sequence Diagram 支持
+- [x] Release workflow 启用
+- [ ] 首个 GitHub Release (v0.1.0-alpha) — 打 tag 即发布: `git tag v0.1.0-alpha && git push --tags`
+- [ ] crates.io 发布 — 设置 `CARGO_REGISTRY_TOKEN` 到 GitHub Secrets
+
+### Phase 3 — 核心图表补全 (已完成 ✅ 2026-06-29)
+
+- [x] Class Diagram
+- [x] State Diagram
+- [x] ER Diagram
+- [x] Gantt Chart
+- [x] Pie Chart
+- [x] PNG 输出 (feature-gated: `--features png`)
+- [x] 主题系统 (4 种: default/forest/dark/neutral)
+- [x] --width/--height/--scale/--backgroundColor
+- [x] Mermaid config JSON 支持 (feature-gated: `--features json`)
+- [x] Markdown 输入 (.md 文件提取代码块)
+- [x] SVG 结构验证测试 (276/283 tests)
+- [x] 性能基准测试套件
+
+### Phase 4 — 全面对标 mmdc
+
+- [x] Mindmap ✅
+- [x] GitGraph ✅
+- [x] Timeline ✅
+- [x] Journey ✅
+- [x] Kanban ✅
+- [x] Venn ✅
+- [x] Packet ✅
+- [x] Radar ✅
+- [x] Ishikawa ✅
+- [x] Quadrant Chart ✅
+- [x] ZenUML ✅
+- [x] Requirement Diagram ✅
+- [x] Block ✅
+- [x] C4 ✅
+- [x] Architecture ✅
+- [x] XY Chart ✅
+- [x] Sankey ✅
+- [x] Treemap ✅
+- [x] **全部 18 种图表类型均已完成！** 🎉
+- [x] PDF 输出 ✅ (零依赖 PDF 包装器)
+- [x] --pdfFit ✅（已解析命令行参数）
+- [x] --cssFile 自定义 CSS
+- [x] --iconPacks Iconify 图标 ✅（CLI 标志已添加，实现为实验性）
+- [x] --svgId SVG 元素选择
+- [x] --jobs 并行渲染
+- [x] --quiet 静默模式
+- [x] 500+/500+ 测试 ✅（169 lib + 306 api + 80 CLI + 1 bench + 5 doc = 561）
+- [x] Dockerfile (多阶段构建，< 20MB)
+- [x] Docker Hub 自动发布 ✅ (release.yml 含 docker/build-push-action)
+- [x] Homebrew 自动发布 ✅ (release.yml 含 bump-homebrew-formula-action)
+- [x] Scoop ✅ (contrib/scoop/mermaid-cli.json)
+- [x] AUR ✅ (contrib/aur/PKGBUILD)
+
+### Phase 5 — 超越 mmdc
+
+- [ ] WASM 编译目标
+- [ ] npm 包 (Node.js 绑定)
+- [ ] Python 绑定 (pyo3)
+- [ ] VS Code 扩展
+- [x] 智能纠错覆盖 50+ 种错误模式 ✅ (54 种模式)
+- [x] 结构化 JSON AST 输出 ✅ (feature-gated: `--features json`)
+- [x] 机器可读错误格式 (LSP 兼容) ✅ (`--features json` 时 `check_json()` 返回结构化 JSON 错误)
+- [ ] 1000+ 测试
+
+---
+
+## 十三、一句话验收标准
+
+> 当用户可以用 `cargo install mermaid-cli` 安装一个 < 10MB 的二进制，  
+> 用与 mmdc 相同的参数渲染 20+ 种图表，  
+> 速度比 mmdc 快 100 倍以上，  
+> 还能通过 `check`/`fix` 自动修复常见错误 —  
+> **验收通过。**
+
+---
+
+**最后更新**：2026-06-28  
+**制定人**：Hao430

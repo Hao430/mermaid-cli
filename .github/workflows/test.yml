@@ -40,5 +40,8 @@ jobs:
       - name: Run tests
         run: cargo test --all
 
+      - name: Run benchmarks
+        run: cargo test --test render_benchmarks -- --nocapture
+
       - name: Build docs
         run: cargo doc --no-deps

@@ -12,6 +12,7 @@
 | **开始开发** | [DEVELOPMENT.md](./DEVELOPMENT.md) — 开发工作流和代码规范 |
 | **查看计划** | [ROADMAP.md](./ROADMAP.md) — 功能路线图和里程碑 |
 | **学习 API** | [API.md](./API.md) — 完整的 API 文档 |
+| **验收清单** | [ACCEPTANCE_CHECKLIST.md](./ACCEPTANCE_CHECKLIST.md) — 开发验收与竞品对标 |
 
 ---
 
@@ -180,7 +181,8 @@ docs/
 ├── ARCHITECTURE.md    ← 架构设计
 ├── DEVELOPMENT.md     ← 开发指南
 ├── ROADMAP.md         ← 功能规划
-└── API.md             ← API 参考
+├── API.md             ← API 参考
+└── ACCEPTANCE_CHECKLIST.md ← 开发验收与竞品对标
 ```
 
 ### 更新日志
@@ -188,6 +190,7 @@ docs/
 | 版本 | 日期 | 更新内容 |
 |------|------|---------|
 | v0.1-docs | 2026-06-14 | 初始文档集 |
+| v0.2-docs | 2026-06-28 | 新增验收清单，对标 mmdc/mmdr 竞品分析 |
 
 ---
 

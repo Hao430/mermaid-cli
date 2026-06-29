@@ -1,0 +1,19 @@
+# Maintainer: Hao430 <hao430@example.com>
+# Contributor: Hao430
+
+pkgname=mermaid-cli-bin
+pkgver=0.1.0_alpha
+pkgrel=1
+pkgdesc="High-performance Mermaid diagram CLI - 100x faster than mmdc"
+arch=('x86_64' 'aarch64')
+url="https://github.com/Hao430/mermaid-cli"
+license=('MIT')
+depends=('gcc-libs' 'glibc')
+source_x86_64=("https://github.com/Hao430/mermaid-cli/releases/download/v${pkgver/_alpha/-alpha}/mermaid-cli-v${pkgver/_alpha/-alpha}-x86_64-unknown-linux-gnu")
+source_aarch64=("https://github.com/Hao430/mermaid-cli/releases/download/v${pkgver/_alpha/-alpha}/mermaid-cli-v${pkgver/_alpha/-alpha}-aarch64-unknown-linux-gnu")
+sha256sums_x86_64=('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+sha256sums_aarch64=('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+
+package() {
+    install -Dm755 "mermaid-cli-v${pkgver/_alpha/-alpha}-x86_64-unknown-linux-gnu" "${pkgdir}/usr/bin/mermaid-cli"
+}

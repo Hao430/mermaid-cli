@@ -195,15 +195,6 @@ impl Lexer {
                     raw: ch.to_string(),
                 }
             }
-            ':' => {
-                self.advance();
-                Token {
-                    token_type: TokenType::Keyword(":".to_string()),
-                    line: start_line,
-                    column: start_column,
-                    raw: ":".to_string(),
-                }
-            }
             _ => {
                 self.advance_with_newline();
                 return self.next_token();
@@ -328,7 +319,7 @@ impl Lexer {
         let raw = ident.clone();
         let token_type = match ident.as_str() {
             "graph" | "flowchart" | "sequenceDiagram" | "classDiagram" | "stateDiagram"
-            | "stateDiagram-v2" | "gantt" | "pie" | "erDiagram" | "mindmap" | "gitGraph" | "timeline" | "journey" | "kanban" | "venn" | "packet" | "radar" | "ishikawa" | "quadrantChart" | "zenuml" | "requirementDiagram" | "block" | "C4Context" | "C4Container" | "C4Component" | "architecture" | "xychart" | "sankey" | "treemap" => TokenType::Keyword(ident),
+            | "stateDiagram-v2" | "gantt" | "pie" | "erDiagram" | "mindmap" | "gitGraph" => TokenType::Keyword(ident),
             "TD" | "BT" | "LR" | "RL" => TokenType::Keyword(ident),
             "end" | "subgraph" | "participant" | "Note" | "note" | "as" | "alt" | "loop"
             | "opt" | "par" | "else" | "activate" | "deactivate" | "title" | "class"
@@ -611,7 +602,7 @@ mod tests {
 
     #[test]
     fn test_lexer_diagram_all_keywords() {
-        let keywords = ["graph", "flowchart", "sequenceDiagram", "classDiagram", "stateDiagram", "pie", "erDiagram", "gantt", "mindmap", "gitGraph", "timeline", "journey", "kanban", "venn", "packet", "radar", "ishikawa", "quadrantChart", "zenuml", "requirementDiagram", "block", "C4Context", "architecture", "xychart", "sankey", "treemap"];
+        let keywords = ["graph", "flowchart", "sequenceDiagram", "classDiagram", "stateDiagram", "pie", "erDiagram", "gantt", "mindmap", "gitgraph"];
         for kw in &keywords {
             let mut lexer = Lexer::new(kw);
             let tokens = lexer.tokenize();
@@ -621,40 +612,3 @@ mod tests {
         }
     }
 }
-
-    #[test]
-    fn test_lexer_arrow_variants() {
-        let mut lexer = Lexer::new("-> --> -x --x -) --)");
-        let tokens = lexer.tokenize();
-        let arrows: Vec<_> = tokens.iter().filter(|t| matches!(t.token_type, TokenType::Arrow)).collect();
-        assert_eq!(arrows.len(), 5, "Should recognize 5 arrow types");
-    }
-
-    #[test]
-    fn test_lexer_brackets_nested() {
-        let mut lexer = Lexer::new("A[[B[[C]]]]");
-        let tokens = lexer.tokenize();
-        assert!(tokens.len() >= 5);
-    }
-
-    #[test]
-    fn test_lexer_string_with_escaped_quotes() {
-        let mut lexer = Lexer::new(r#"A->B: "Hello \"World\""#);
-        let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(&t.token_type, TokenType::String(s) if s.contains("Hello"))));
-    }
-
-    #[test]
-    fn test_lexer_percent_comment() {
-        let mut lexer = Lexer::new("%% comment\ngraph TD\n%% another\nA-->B");
-        let tokens = lexer.tokenize();
-        assert!(tokens.iter().any(|t| matches!(&t.token_type, TokenType::Keyword(k) if k == "graph")));
-    }
-
-    #[test]
-    fn test_lexer_multiple_semicolons() {
-        let mut lexer = Lexer::new("A-->B; C-->D; E-->F");
-        let tokens = lexer.tokenize();
-        let semis = tokens.iter().filter(|t| matches!(t.token_type, TokenType::Semicolon)).count();
-        assert_eq!(semis, 2, "Should have 2 semicolons");
-    }

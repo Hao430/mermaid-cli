@@ -1,7 +1,11 @@
 pub mod fixer;
+pub mod pdf;
 pub mod parser;
 pub mod renderer;
 pub mod svg;
+
+#[cfg(feature = "json")]
+pub mod config;
 
 /// Automatically fixes common syntax errors in Mermaid diagrams.
 ///
@@ -13,6 +17,7 @@ pub use fixer::Fixer;
 ///
 /// Variants: `Rect`, `Circle`, `Diamond`, `Rounded`, `Subroutine`,
 /// `Cylinder`, `DoubleCircle`, `Flag`.
+pub use parser::DiagramType;
 pub use parser::NodeShape;
 
 /// A grouping of nodes within a subgraph block.
@@ -46,6 +51,28 @@ pub fn render(code: &str) -> Result<String, String> {
 
     let renderer = Renderer::new();
     renderer.render(&diagram)
+}
+
+/// Render a Mermaid diagram from source code to PDF.
+///
+/// Parses the Mermaid code, renders it to SVG, then wraps the SVG
+/// in a minimal PDF 1.4 container. Returns PDF bytes.
+///
+/// # Example
+///
+/// ```
+/// let result = mermaid_cli::render_pdf("graph TD; A-->B", 800, 600);
+/// assert!(result.is_ok());
+/// let pdf = result.unwrap();
+/// assert!(pdf.starts_with(b"%PDF"));
+/// ```
+pub fn render_pdf(code: &str, width: u32, height: u32) -> Result<Vec<u8>, String> {
+    let mut parser = Parser::new(code);
+    let diagram = parser.parse().map_err(|e| e.to_string())?;
+    let renderer = Renderer::with_dimensions(width, height);
+    let svg = renderer.render(&diagram)?;
+    let pdf = pdf::PdfWriter::render_svg(&svg, width, height);
+    Ok(pdf.into_bytes())
 }
 
 /// Parse Mermaid source code into a Diagram AST.
@@ -102,6 +129,46 @@ pub fn fix(code: &str) -> (String, Vec<String>) {
     Fixer::new().fix(code)
 }
 
+/// Serialize a parsed Diagram to JSON (requires `json` feature).
+///
+/// Returns a JSON string representation of the AST on success.
+///
+/// # Example
+///
+/// ```ignore
+/// let diagram = mermaid_cli::parse("graph TD; A-->B").unwrap();
+/// let json = mermaid_cli::to_json(&diagram).unwrap();
+/// assert!(json.contains("Flowchart"));
+/// ```
+#[cfg(feature = "json")]
+pub fn to_json(diagram: &parser::Diagram) -> Result<String, String> {
+    serde_json::to_string_pretty(diagram).map_err(|e| e.to_string())
+}
+
+/// Check Mermaid source code and return machine-readable JSON errors (requires `json` feature).
+///
+/// Returns a JSON string with structured error information including line numbers
+/// and column positions, compatible with LSP error formats.
+///
+/// # Example
+///
+/// ```ignore
+/// let json = mermaid_cli::check_json("invalid syntax").unwrap();
+/// assert!(json.contains("line"));
+/// ```
+#[cfg(feature = "json")]
+pub fn check_json(code: &str) -> Result<String, String> {
+    let mut parser = Parser::new(code);
+    match parser.parse() {
+        Ok(_) => Ok(r#"{"valid":true,"errors":[]}"#.to_string()),
+        Err(e) => {
+            let error_json = serde_json::to_string_pretty(&e)
+                .map_err(|e| e.to_string())?;
+            Ok(format!(r#"{{"valid":false,"errors":[{}]}}"#, error_json))
+        }
+    }
+}
+
 /// Result of syntax checking via [`check`].
 ///
 /// Contains the validation status and any parse errors found.
@@ -118,4 +185,59 @@ impl CheckResult {
     pub fn has_errors(&self) -> bool {
         !self.errors.is_empty()
     }
+}
+
+/// Render a Mermaid diagram to PNG bytes (requires `png` feature).
+///
+/// Parses the code, renders it to SVG, then converts to PNG using resvg.
+/// Returns PNG bytes on success.
+#[cfg(feature = "png")]
+pub fn render_png(code: &str, width: u32, height: u32, scale: f32) -> Result<Vec<u8>, String> {
+    let mut parser = Parser::new(code);
+    let diagram = parser.parse().map_err(|e| e.to_string())?;
+    let renderer = Renderer::with_dimensions(width, height).with_scale(scale);
+    renderer.render_png(&diagram)
+}
+
+/// Extract mermaid code blocks from a markdown string.
+///
+/// Returns a list of mermaid code block contents found between
+/// ` ```mermaid ` and ` ``` ` fences.
+///
+/// # Example
+///
+/// ```
+/// let md = "# Title\n\n```mermaid\ngraph TD\nA-->B\n```\n\nText";
+/// let blocks = mermaid_cli::extract_mermaid_blocks(md);
+/// assert_eq!(blocks.len(), 1);
+/// assert!(blocks[0].contains("graph TD"));
+/// ```
+pub fn extract_mermaid_blocks(markdown: &str) -> Vec<String> {
+    let mut blocks = Vec::new();
+    let mut in_block = false;
+    let mut current_block = String::new();
+
+    for line in markdown.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("```mermaid") {
+            in_block = true;
+            current_block.clear();
+            continue;
+        }
+        if in_block && trimmed == "```" {
+            in_block = false;
+            if !current_block.is_empty() {
+                blocks.push(current_block.clone());
+            }
+            continue;
+        }
+        if in_block {
+            if !current_block.is_empty() {
+                current_block.push('\n');
+            }
+            current_block.push_str(line);
+        }
+    }
+
+    blocks
 }
