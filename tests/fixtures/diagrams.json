@@ -1,0 +1,122 @@
+{
+  "flowchart_simple": {
+    "input": "graph TD\nA[Start]\nB[Process]\nC[End]\nA-->B\nB-->C",
+    "type": "flowchart"
+  },
+  "flowchart_complex": {
+    "input": "graph TD\nA{Decision}\nB[Action1]\nC[Action2]\nD[End]\nA-->|Yes|B\nA-->|No|C\nB-->D\nC-->D",
+    "type": "flowchart"
+  },
+  "sequence_basic": {
+    "input": "sequenceDiagram\nAlice->>Bob: Hello\nBob->>Alice: Hi",
+    "type": "sequence"
+  },
+  "sequence_advanced": {
+    "input": "sequenceDiagram\nparticipant User\nparticipant System\nUser->>System: Request\nSystem-->>User: Response",
+    "type": "sequence"
+  },
+  "pie_basic": {
+    "input": "pie title Distribution\n\"Python\":30\n\"JavaScript\":25\n\"Rust\":45",
+    "type": "pie"
+  },
+  "pie_large": {
+    "input": "pie title Market\n\"A\":15\n\"B\":20\n\"C\":25\n\"D\":30\n\"E\":10",
+    "type": "pie"
+  },
+  "class_simple": {
+    "input": "classDiagram\nclass Animal\nclass Dog\nAnimal<|--Dog",
+    "type": "class"
+  },
+  "class_complex": {
+    "input": "classDiagram\nclass Shape\nclass Circle\nclass Rectangle\nShape<|--Circle\nShape<|--Rectangle",
+    "type": "class"
+  },
+  "state_simple": {
+    "input": "stateDiagram-v2\n[*]-->State1\nState1-->State2\nState2-->[*]",
+    "type": "state"
+  },
+  "state_complex": {
+    "input": "stateDiagram-v2\n[*]-->Idle\nIdle-->Processing:start\nProcessing-->Success:complete\nSuccess-->[*]",
+    "type": "state"
+  },
+  "er_basic": {
+    "input": "erDiagram\nUSERS||--o{POSTS:creates",
+    "type": "er"
+  },
+  "er_complex": {
+    "input": "erDiagram\nCUSTOMERS||--o{ORDERS:places\nORDERS||--|{PRODUCTS:contains",
+    "type": "er"
+  },
+  "gantt_basic": {
+    "input": "gantt\ntitle Project\nsection Dev\nFeatureA:a1,2024-01-01,30d\nFeatureB:a2,after a1,20d",
+    "type": "gantt"
+  },
+  "gantt_complex": {
+    "input": "gantt\ntitle Timeline\nsection Plan\nReq:req,2024-01-01,10d\nsection Dev\nBackend:dev1,2024-01-11,20d\nFrontend:dev2,2024-01-11,25d",
+    "type": "gantt"
+  },
+  "mindmap_basic": {
+    "input": "mindmap\nroot((Project))\n  Planning\n    Requirements\n    Design\n  Development",
+    "type": "mindmap"
+  },
+  "mindmap_complex": {
+    "input": "mindmap\nroot((Company))\n  Engineering\n    Backend\n    Frontend\n  Sales",
+    "type": "mindmap"
+  },
+  "gitgraph_basic": {
+    "input": "gitGraph\ncommit id:\"Initial\"\ncommit id:\"Feature\"\ncommit id:\"Fix\"",
+    "type": "gitgraph"
+  },
+  "gitgraph_branching": {
+    "input": "gitGraph\ncommit id:\"Initial\"\nbranch develop\ncommit id:\"Feature\"\ncheckout main\ncommit id:\"v1.0\"",
+    "type": "gitgraph"
+  },
+  "timeline_basic": {
+    "input": "timeline\ntitle Timeline\nsection 2020\nEvent A:a1:2020-01\nEvent B:a2:2020-06",
+    "type": "timeline"
+  },
+  "timeline_events": {
+    "input": "timeline\ntitle History\nsection 2010-2015\nFoundation:2010\nsection 2015-2020\nSeriesA:2016\nSeriesB:2018",
+    "type": "timeline"
+  },
+  "journey_basic": {
+    "input": "journey\ntitle Journey\nsection Discovery\nFind:5:Customer\nsection Purchase\nBuy:4:Customer",
+    "type": "journey"
+  },
+  "journey_detailed": {
+    "input": "journey\ntitle Onboarding\nsection Signup\nCreate:5:User\nsection Setup\nConfig:4:User\nsection Use\nStart:5:User",
+    "type": "journey"
+  },
+  "kanban_basic": {
+    "input": "kanban\nTodo\nInProgress\nDone",
+    "type": "kanban"
+  },
+  "kanban_detailed": {
+    "input": "kanban\nBacklog\nTodo\nInProgress\nReview\nDone",
+    "type": "kanban"
+  },
+  "venn_basic": {
+    "input": "venn\ntitle Venn\nA\nB\nA,B",
+    "type": "venn"
+  },
+  "venn_complex": {
+    "input": "venn\ntitle Tech\nFrontend\nBackend\nDevOps\nFrontend,Backend\nBackend,DevOps",
+    "type": "venn"
+  },
+  "packet_basic": {
+    "input": "packet-beta\nname: IP Header\n0-3: Version\n4-7: IHL\n8-15: Type",
+    "type": "packet"
+  },
+  "packet_detailed": {
+    "input": "packet-beta\nname: TCP Header\n0-15: Source Port\n16-31: Dest Port\n32-63: Sequence",
+    "type": "packet"
+  },
+  "radar_basic": {
+    "input": "radar\ntitle Skills\nPython: 4, JavaScript: 3, Rust: 5",
+    "type": "radar"
+  },
+  "radar_complex": {
+    "input": "radar\ntitle Metrics\nSpeed: 4, Reliability: 5, Security: 4, Usability: 3",
+    "type": "radar"
+  }
+}
