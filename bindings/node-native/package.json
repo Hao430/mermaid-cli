@@ -1,0 +1,52 @@
+{
+  "name": "@hao430/mermaid-cli",
+  "version": "0.1.0-alpha",
+  "type": "module",
+  "description": "High-performance Mermaid diagram renderer (Node.js binding)",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --experimental-vm-modules test/test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mermaid",
+    "diagram",
+    "renderer",
+    "flowchart",
+    "svg",
+    "png",
+    "pdf",
+    "native-binding"
+  ],
+  "author": "Hao430",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hao430/mermaid-cli.git",
+    "directory": "bindings/node-native"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
