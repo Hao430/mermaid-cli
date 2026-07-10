@@ -37,7 +37,24 @@ fn main() {
         }
         _ => {
             let show_fixes = args.contains(&"--show-fixes".to_string());
-            handle_file_render(&args, show_fixes);
+            // Collect all input files (multiple files can be specified)
+            let mut input_files = Vec::new();
+            for (i, arg) in args.iter().enumerate().skip(1) {
+                if !arg.starts_with('-') && (arg.ends_with(".mmd") || arg.ends_with(".md") || !arg.contains('.') == false) {
+                    input_files.push((i, arg.clone()));
+                }
+            }
+
+            if input_files.is_empty() {
+                // No files detected, try single file mode (backward compatibility)
+                handle_file_render(&args, show_fixes);
+            } else if input_files.len() == 1 {
+                // Single file mode
+                handle_file_render(&args, show_fixes);
+            } else {
+                // Multiple files mode
+                handle_multi_file_render(&args, input_files, show_fixes);
+            }
         }
     }
 }
@@ -915,4 +932,83 @@ EXAMPLES:
     mermaid-cli input.mmd
 "#
     );
+}
+
+// Handle multiple input files with --jobs support
+fn handle_multi_file_render(args: &[String], input_files: Vec<(usize, String)>, show_fixes: bool) {
+    let quiet = args.contains(&"-q".to_string()) || args.contains(&"--quiet".to_string());
+    let mut jobs = 1_usize;
+
+    // Parse --jobs parameter
+    for (i, arg) in args.iter().enumerate() {
+        if (arg == "-j" || arg == "--jobs") && i + 1 < args.len() {
+            if let Ok(n) = args[i + 1].parse::<usize>() {
+                jobs = n.max(1);
+            }
+        }
+    }
+
+    // Check if output is a directory
+    let output_dir = args.iter().zip(args.iter().skip(1))
+        .find(|(a, _)| a == &&"-o".to_string() || a == &&"--output".to_string())
+        .and_then(|(_, b)| Some(b.clone()));
+
+    let output_is_dir = output_dir.as_ref().map(|d| {
+        std::path::Path::new(d).is_dir()
+    }).unwrap_or(false);
+
+    let total = input_files.len();
+    if !quiet {
+        println!("ℹ️  Processing {} file(s) with {} job(s)...", total, jobs);
+    }
+
+    // Process each file (sequential for now, --jobs parameter for future parallelization)
+    for (idx, (_, input_file)) in input_files.iter().enumerate() {
+        if !quiet {
+            println!("[{}/{}] Processing: {}", idx + 1, total, input_file);
+        }
+
+        // Create modified args for this file
+        let mut file_args: Vec<String> = args.to_vec();
+
+        // Replace input file
+        if let Some(pos) = file_args.iter().position(|a| a == input_file) {
+            file_args[pos] = input_file.clone();
+        } else {
+            file_args[1] = input_file.clone();
+        }
+
+        // Adjust output filename if needed
+        if output_is_dir {
+            let input_path = std::path::Path::new(input_file);
+            let file_stem = input_path.file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("output");
+
+            let output_ext = args.iter().zip(args.iter().skip(1))
+                .find(|(a, _)| a == &&"-e".to_string() || a == &&"--outputFormat".to_string())
+                .map(|(_, e)| e.as_str())
+                .unwrap_or("svg");
+
+            let output_file = format!("{}/{}.{}",
+                output_dir.as_ref().unwrap(),
+                file_stem,
+                output_ext
+            );
+
+            // Update output path in args
+            if let Some(pos) = file_args.iter().position(|a| a == &"-o".to_string() || a == &"--output".to_string()) {
+                if pos + 1 < file_args.len() {
+                    file_args[pos + 1] = output_file;
+                }
+            }
+        }
+
+        // Process the file
+        handle_file_render(&file_args, show_fixes);
+    }
+
+    if !quiet && total > 1 {
+        println!("✅ Done! Processed {} file(s)", total);
+    }
 }
