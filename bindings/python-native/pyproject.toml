@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mermaid-cli"
+version = "0.1.0a1"
+description = "High-performance Mermaid diagram renderer for Python"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Hao430"}]
+requires-python = ">=3.8"
+keywords = ["mermaid", "diagram", "renderer", "flowchart", "svg", "png", "pdf"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Multimedia :: Graphics",
+]
+
+[project.urls]
+Repository = "https://github.com/Hao430/mermaid-cli"
+Documentation = "https://github.com/Hao430/mermaid-cli"
+Issues = "https://github.com/Hao430/mermaid-cli/issues"
+
+[tool.setuptools]
+packages = ["mermaid_cli"]
