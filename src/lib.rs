@@ -3,6 +3,8 @@ pub mod parser;
 pub mod pdf;
 pub mod renderer;
 pub mod svg;
+#[cfg(feature = "wasm")]
+pub mod wasm;
 
 #[cfg(feature = "json")]
 pub mod config;
@@ -171,6 +173,7 @@ pub fn check_json(code: &str) -> Result<String, String> {
 /// Result of syntax checking via [`check`].
 ///
 /// Contains the validation status and any parse errors found.
+#[cfg_attr(feature = "json", derive(serde::Serialize))]
 pub struct CheckResult {
     /// `true` if the Mermaid source code has valid syntax.
     pub valid: bool,

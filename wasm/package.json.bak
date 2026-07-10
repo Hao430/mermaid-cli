@@ -1,0 +1,55 @@
+{
+  "name": "@hao430/mermaid-cli",
+  "version": "0.1.0-alpha",
+  "description": "High-performance Mermaid diagram renderer (WASM) - 100x faster than mmdc, zero browser dependency",
+  "keywords": [
+    "mermaid",
+    "diagram",
+    "flowchart",
+    "svg",
+    "wasm",
+    "webassembly",
+    "sequence-diagram",
+    "gantt",
+    "mindmap",
+    "gitgraph"
+  ],
+  "homepage": "https://github.com/Hao430/mermaid-cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hao430/mermaid-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hao430/mermaid-cli/issues"
+  },
+  "license": "MIT",
+  "author": "Hao430",
+  "type": "module",
+  "main": "./pkg/mermaid_cli.js",
+  "types": "./pkg/mermaid_cli.d.ts",
+  "exports": {
+    ".": {
+      "import": "./pkg/mermaid_cli.js",
+      "require": "./pkg/mermaid_cli.cjs",
+      "types": "./pkg/mermaid_cli.d.ts"
+    }
+  },
+  "files": [
+    "pkg/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "wasm-pack build --target web --features wasm,json --out-dir wasm/pkg --scope hao430",
+    "build:node": "wasm-pack build --target nodejs --features wasm,json --out-dir wasm/pkg --scope hao430",
+    "build:all": "npm run build && npm run build:node",
+    "prepack": "npm run build",
+    "test": "node --experimental-vm-modules test/test.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

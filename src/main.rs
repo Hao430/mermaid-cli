@@ -7,6 +7,9 @@ use std::thread;
 
 use mermaid_cli::{check, extract_mermaid_blocks, Fixer};
 
+#[cfg(feature = "json")]
+use mermaid_cli::config::MermaidConfig;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -50,6 +53,7 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
     let mut quiet = false;
     let mut svg_id: Option<String> = None;
     let mut css_file: Option<String> = None;
+    let mut config_file: Option<String> = None;
     let mut output_format: Option<String> = None;
     let mut _jobs: usize = 1;
 
@@ -81,6 +85,15 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
                     i += 2;
                 } else {
                     eprintln!("Error: --cssFile requires an argument");
+                    std::process::exit(1);
+                }
+            }
+            "-c" | "--configFile" => {
+                if i + 1 < args.len() {
+                    config_file = Some(args[i + 1].clone());
+                    i += 2;
+                } else {
+                    eprintln!("Error: --configFile requires an argument");
                     std::process::exit(1);
                 }
             }
@@ -218,6 +231,18 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
         .with_background_color(&background_color)
         .with_scale(scale);
 
+    // Apply configuration file if provided
+    #[cfg(feature = "json")]
+    if let Some(ref config_path) = config_file {
+        let config = MermaidConfig::from_file(std::path::Path::new(config_path));
+        if let Some(cfg_theme) = config.theme {
+            renderer = renderer.with_theme(&cfg_theme);
+        }
+        if let Some(cfg_bg) = config.theme_variables.as_ref().and_then(|tv| tv.primary_color.as_ref()) {
+            renderer = renderer.with_background_color(cfg_bg);
+        }
+    }
+
     if let Some(ref css_path) = css_file {
         match fs::read_to_string(css_path) {
             Ok(css) => {
@@ -276,6 +301,28 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
             );
             std::process::exit(1);
         }
+    } else if fmt == "pdf" {
+        match mermaid_cli::render_pdf(&code, width, height) {
+            Ok(pdf_bytes) => {
+                if let Some(output) = output_path {
+                    match fs::write(&output, &pdf_bytes) {
+                        Ok(_) => {
+                            if !quiet {
+                                println!("✓ Rendered PDF to: {}", output.display());
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error writing PDF: {}", e);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                eprintln!("Error rendering PDF: {}", e);
+                std::process::exit(1);
+            }
+        }
     } else {
         match renderer.render(&diagram) {
             Ok(mut svg) => {
@@ -317,6 +364,7 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
     let mut quiet = false;
     let mut svg_id: Option<String> = None;
     let mut css_file: Option<String> = None;
+    let mut config_file: Option<String> = None;
     let output_format: Option<String> = None;
 
     let mut i = 2;
@@ -328,6 +376,15 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
                     i += 2;
                 } else {
                     eprintln!("Error: --cssFile requires an argument");
+                    std::process::exit(1);
+                }
+            }
+            "-c" | "--configFile" => {
+                if i + 1 < args.len() {
+                    config_file = Some(args[i + 1].clone());
+                    i += 2;
+                } else {
+                    eprintln!("Error: --configFile requires an argument");
                     std::process::exit(1);
                 }
             }
@@ -442,6 +499,18 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
         .with_background_color(&background_color)
         .with_scale(scale);
 
+    // Apply configuration file if provided
+    #[cfg(feature = "json")]
+    if let Some(ref config_path) = config_file {
+        let config = MermaidConfig::from_file(std::path::Path::new(config_path));
+        if let Some(cfg_theme) = config.theme {
+            renderer = renderer.with_theme(&cfg_theme);
+        }
+        if let Some(cfg_bg) = config.theme_variables.as_ref().and_then(|tv| tv.primary_color.as_ref()) {
+            renderer = renderer.with_background_color(cfg_bg);
+        }
+    }
+
     if let Some(ref css_path) = css_file {
         match fs::read_to_string(css_path) {
             Ok(css) => {
@@ -499,6 +568,28 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
                 "PNG output requires building with --features png. Use SVG output or rebuild."
             );
             std::process::exit(1);
+        }
+    } else if fmt == "pdf" {
+        match mermaid_cli::render_pdf(&code, width, height) {
+            Ok(pdf_bytes) => {
+                if let Some(output) = output_path {
+                    match fs::write(&output, &pdf_bytes) {
+                        Ok(_) => {
+                            if !quiet {
+                                println!("✓ Rendered PDF to: {}", output.display());
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("Error writing PDF: {}", e);
+                            std::process::exit(1);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                eprintln!("Error rendering PDF: {}", e);
+                std::process::exit(1);
+            }
         }
     } else {
         match renderer.render(&diagram) {

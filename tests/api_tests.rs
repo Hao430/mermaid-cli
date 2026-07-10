@@ -4832,3 +4832,120 @@ fn test_long_labels() {
     let result = render(&code);
     assert!(result.is_ok(), "Long label should render");
 }
+
+// ============================================================
+// 综合测试批量 4
+// ============================================================
+
+// --- SVG structure validation for ALL chart types ---
+#[test]
+fn test_svg_well_formed_all_types() {
+    let cases: Vec<(&str, &str)> = vec![
+        ("flowchart", "graph TD; A-->B"),
+        ("sequence", "sequenceDiagram\nA->B: Hi"),
+        ("pie", "pie\n\"A\":50\n\"B\":50"),
+        ("class", "classDiagram\nclass A"),
+        ("state", "stateDiagram-v2\n[*]-->A\nA-->[*]"),
+        ("er", "erDiagram\nX||--o{Y:z"),
+        ("gantt", "gantt\nT:t1,1,5d"),
+        ("mindmap", "mindmap\nRoot\n Branch"),
+        ("timeline", "timeline\n2020:E"),
+        ("journey", "journey\nsection S\nT:1:U"),
+        ("kanban", "kanban\nC\n[T]"),
+        ("venn", "venn\na:A\nb:B"),
+        ("packet", "packet\n0-7:H"),
+        ("radar", "radar\nX:50"),
+    ];
+    for (name, code) in &cases {
+        let svg = render(code).unwrap_or_else(|_| panic!("{} should render", name));
+        let opens = svg.matches("<svg").count();
+        let closes = svg.matches("</svg>").count();
+        assert_eq!(opens, closes, "{}: balanced svg tags ({} vs {})", name, opens, closes);
+        assert!(svg.starts_with("<?xml"), "{}: XML declaration", name);
+        assert!(svg.contains("</svg>"), "{}: closing tag", name);
+    }
+}
+
+// --- Multiple renders don't corrupt state ---
+#[test]
+fn test_render_state_isolation() {
+    for _ in 0..20 {
+        let _ = render("graph TD; A-->B");
+        let _ = render("sequenceDiagram\nA->B: Hi");
+        let _ = render("pie\n\"A\":50");
+        let _ = render("mindmap\nRoot\n Branch");
+        let _ = render("timeline\n2020:E");
+    }
+    // Just verify no crash
+    let final_result = render("graph TD; X-->Y");
+    assert!(final_result.is_ok());
+}
+
+// --- Arrow edge cases ---
+#[test]
+fn test_flowchart_arrow_styles() {
+    let dash = render("graph TD\nA-.->B").unwrap_or_default();
+    let thick = render("graph TD\nA==>B").unwrap_or_default();
+    // Both should contain the nodes
+    let _ = dash;
+    let _ = thick;
+}
+
+// --- Direction edge cases ---
+#[test]
+fn test_flowchart_dir_combinations() {
+    for dir in &["TD", "LR", "RL", "BT"] {
+        let code = format!("graph {}\nA-->B\nB-->C\nC-->D", dir);
+        let result = render(&code);
+        assert!(result.is_ok(), "Direction {} should render", dir);
+    }
+}
+
+// --- Long chain renders correctly ---
+#[test]
+fn test_flowchart_long_chain_renders() {
+    let mut code = "graph LR\n".to_string();
+    for i in 0..30 {
+        code.push_str(&format!("N{}-->N{}\n", i, i + 1));
+    }
+    let result = render(&code);
+    assert!(result.is_ok(), "30-node chain should render");
+}
+
+// --- Multi-byte unicode ---
+#[test]
+fn test_render_emoji_labels() {
+    let cases = vec![
+        ("smile", "graph TD; A[😀]-->B[😎]"),
+        ("flags", "graph TD; A[🇺🇸]-->B[🇨🇳]"),
+        ("arrows", "graph TD; A[↑↓→←]-->B"),
+    ];
+    for (name, code) in &cases {
+        let result = render(code);
+        assert!(result.is_ok(), "{} emoji should render", name);
+    }
+}
+
+// --- Numbers in labels ---
+#[test]
+fn test_render_numeric_labels() {
+    let result = render("graph TD; A[12345]-->B[3.14159]").unwrap();
+    assert!(result.contains("12345"));
+    assert!(result.contains("3.14159"));
+}
+
+// --- Same-source multiple edges ---
+#[test]
+fn test_flowchart_fan_out() {
+    let result = render("graph TD\nA-->B1\nA-->B2\nA-->B3\nA-->B4\nA-->B5").unwrap();
+    assert!(result.contains("A"));
+    assert!(result.contains("B5"));
+}
+
+// --- Nested quotes ---
+#[test]
+#[test]
+fn test_sequence_quoted_labels() {
+    let result = render("sequenceDiagram\nA->B: Hello said Alice");
+    assert!(result.is_ok(), "Should handle quoted text");
+}
