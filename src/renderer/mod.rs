@@ -435,15 +435,8 @@ impl Renderer {
         // Draw lifelines (dashed vertical lines)
         for (_, cx_val) in &centers {
             svg.add_line(
-                cx_val - box_width / 2.0,
-                lifeline_top,
-                cx_val + box_width / 2.0,
-                top_margin + box_height,
-                "fill:none;stroke:black;stroke-width:1",
-            );
-            svg.add_line(
                 *cx_val,
-                top_margin + box_height + 10.0,
+                lifeline_top,
                 *cx_val,
                 y_pos + 10.0,
                 "stroke:black;stroke-width:1;stroke-dasharray:4,4",
@@ -2983,9 +2976,18 @@ fn process_seq_stmts(
                 } else {
                     keyword.clone()
                 };
+                // 为标签添加白色背景，防止被条件框内容遮挡
+                let label_width = block_label.len() as f32 * 6.0;
+                svg.add_rect(
+                    blk_left - 2.0,
+                    block_start - 8.0,
+                    label_width + 8.0,
+                    14.0,
+                    "fill:white;stroke:none",
+                );
                 svg.add_text(
-                    blk_left + 4.0,
-                    block_start + 4.0,
+                    blk_left + 2.0,
+                    block_start + 2.0,
                     &block_label,
                     "text-anchor:start;font-size:10px;font-family:Arial;font-weight:bold",
                 );
