@@ -131,9 +131,6 @@ impl Renderer {
         let v_spacing = 80.0;  // 减小垂直间距让线更短
         let padding = 40.0;
 
-        let is_horizontal = diagram.direction.as_deref() == Some("LR")
-            || diagram.direction.as_deref() == Some("RL");
-
         // ponytail: calculate required canvas size based on content, not viewport
         let max_nodes_in_layer = layers.iter().map(|l| l.len()).max().unwrap_or(1) as f32;
         let num_layers = layers.len() as f32;
@@ -2739,7 +2736,7 @@ fn compute_tree_layers(node_ids: &[String], edges: &[(String, String)]) -> Vec<V
     }
 
     for d in 0..=max_depth {
-        let mut layer: Vec<String> = node_ids
+        let layer: Vec<String> = node_ids
             .iter()
             .filter(|id| depth_map.get(*id).copied().unwrap_or(usize::MAX) == d)
             .cloned()
