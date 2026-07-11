@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1080" height="950" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    text { font-family: Arial, sans-serif; font-size: 14px; }
+  </style>
+  <rect width="100%" height="100%" fill="white"/>
+  <line x1="120" y1="130" x2="340" y2="130" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="340,130 332,126 332,134" style="fill:black"/>
+  <rect x="195" y="121" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="230" y="134" style="text-anchor:middle;font-size:11px;font-family:Arial">登录请求</text>
+  <line x1="340" y1="180" x2="560" y2="180" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="560,180 552,176 552,184" style="fill:black"/>
+  <rect x="415" y="171" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="450" y="184" style="text-anchor:middle;font-size:11px;font-family:Arial">验证凭证</text>
+  <line x1="560" y1="230" x2="780" y2="230" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="780,230 772,226 772,234" style="fill:black"/>
+  <rect x="635" y="221" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="670" y="234" style="text-anchor:middle;font-size:11px;font-family:Arial">查询用户</text>
+  <line x1="780" y1="280" x2="560" y2="280" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="560,280 552,276 552,284" style="fill:black"/>
+  <rect x="635" y="271" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="670" y="284" style="text-anchor:middle;font-size:11px;font-family:Arial">返回用户信息</text>
+  <rect x="775.5" y="275" width="9" height="50" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="560" y1="330" x2="560" y2="330" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="560,330 552,326 552,334" style="fill:black"/>
+  <rect x="525" y="321" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="560" y="334" style="text-anchor:middle;font-size:11px;font-family:Arial">密码验证</text>
+  <line x1="560" y1="375" x2="1000" y2="375" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="1000,375 992,371 992,379" style="fill:black"/>
+  <rect x="745" y="366" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="780" y="379" style="text-anchor:middle;font-size:11px;font-family:Arial">存储会话</text>
+  <line x1="1000" y1="425" x2="560" y2="425" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="560,425 552,421 552,429" style="fill:black"/>
+  <rect x="745" y="416" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="780" y="429" style="text-anchor:middle;font-size:11px;font-family:Arial">会话已存储</text>
+  <rect x="995.5" y="420" width="9" height="50" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="560" y1="475" x2="340" y2="475" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="340,475 332,471 332,479" style="fill:black"/>
+  <rect x="415" y="466" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="450" y="479" style="text-anchor:middle;font-size:11px;font-family:Arial">认证成功</text>
+  <rect x="555.5" y="225" width="9" height="295" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="340" y1="525" x2="340" y2="525" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="340,525 332,521 332,529" style="fill:black"/>
+  <rect x="305" y="516" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="340" y="529" style="text-anchor:middle;font-size:11px;font-family:Arial">生成令牌</text>
+  <line x1="340" y1="570" x2="120" y2="570" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="120,570 112,566 112,574" style="fill:black"/>
+  <rect x="195" y="561" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="230" y="574" style="text-anchor:middle;font-size:11px;font-family:Arial">返回访问令牌</text>
+  <rect x="335.5" y="175" width="9" height="440" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="120" y1="620" x2="340" y2="620" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="340,620 332,616 332,624" style="fill:black"/>
+  <rect x="195" y="611" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="230" y="624" style="text-anchor:middle;font-size:11px;font-family:Arial">使用令牌请求数据</text>
+  <line x1="340" y1="670" x2="1000" y2="670" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="1000,670 992,666 992,674" style="fill:black"/>
+  <rect x="635" y="661" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="670" y="674" style="text-anchor:middle;font-size:11px;font-family:Arial">检查会话</text>
+  <line x1="1000" y1="720" x2="340" y2="720" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="340,720 332,716 332,724" style="fill:black"/>
+  <rect x="635" y="711" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="670" y="724" style="text-anchor:middle;font-size:11px;font-family:Arial">会话有效</text>
+  <rect x="995.5" y="715" width="9" height="50" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="340" y1="770" x2="780" y2="770" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="780,770 772,766 772,774" style="fill:black"/>
+  <rect x="525" y="761" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="560" y="774" style="text-anchor:middle;font-size:11px;font-family:Arial">获取用户数据</text>
+  <line x1="780" y1="820" x2="340" y2="820" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="340,820 332,816 332,824" style="fill:black"/>
+  <rect x="525" y="811" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="560" y="824" style="text-anchor:middle;font-size:11px;font-family:Arial">返回数据</text>
+  <rect x="775.5" y="815" width="9" height="50" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="340" y1="870" x2="120" y2="870" style="stroke:black;stroke-width:2;fill:none"/>
+  <polygon points="120,870 112,866 112,874" style="fill:black"/>
+  <rect x="195" y="861" width="70" height="18" style="fill:white;stroke:none;"/>
+  <text x="230" y="874" style="text-anchor:middle;font-size:11px;font-family:Arial">返回用户数据</text>
+  <rect x="335.5" y="665" width="9" height="250" style="fill:#f5f5f5;stroke:#999;stroke-width:1.5"/>
+  <line x1="120" y1="100" x2="120" y2="930" style="stroke:black;stroke-width:1;stroke-dasharray:4,4"/>
+  <line x1="340" y1="100" x2="340" y2="930" style="stroke:black;stroke-width:1;stroke-dasharray:4,4"/>
+  <line x1="560" y1="100" x2="560" y2="930" style="stroke:black;stroke-width:1;stroke-dasharray:4,4"/>
+  <line x1="780" y1="100" x2="780" y2="930" style="stroke:black;stroke-width:1;stroke-dasharray:4,4"/>
+  <line x1="1000" y1="100" x2="1000" y2="930" style="stroke:black;stroke-width:1;stroke-dasharray:4,4"/>
+  <rect x="60" y="40" width="120" height="40" style="fill:white;stroke:black;stroke-width:1;rx:4"/>
+  <text x="120" y="60" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-family:Arial">用户</text>
+  <text x="120" y="84" style="text-anchor:middle;font-size:9px;fill:gray;font-family:Arial">User</text>
+  <rect x="280" y="40" width="120" height="40" style="fill:white;stroke:black;stroke-width:1;rx:4"/>
+  <text x="340" y="60" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-family:Arial">应用</text>
+  <text x="340" y="84" style="text-anchor:middle;font-size:9px;fill:gray;font-family:Arial">App</text>
+  <rect x="500" y="40" width="120" height="40" style="fill:white;stroke:black;stroke-width:1;rx:4"/>
+  <text x="560" y="60" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-family:Arial">认证服务</text>
+  <text x="560" y="84" style="text-anchor:middle;font-size:9px;fill:gray;font-family:Arial">Auth</text>
+  <rect x="720" y="40" width="120" height="40" style="fill:white;stroke:black;stroke-width:1;rx:4"/>
+  <text x="780" y="60" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-family:Arial">数据库</text>
+  <text x="780" y="84" style="text-anchor:middle;font-size:9px;fill:gray;font-family:Arial">DB</text>
+  <rect x="940" y="40" width="120" height="40" style="fill:white;stroke:black;stroke-width:1;rx:4"/>
+  <text x="1000" y="60" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-family:Arial">缓存</text>
+  <text x="1000" y="84" style="text-anchor:middle;font-size:9px;fill:gray;font-family:Arial">Cache</text>
+</svg>

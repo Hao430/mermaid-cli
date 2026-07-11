@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant User as 用户
+    participant App as 应用
+    participant Auth as 认证服务
+    participant DB as 数据库
+    participant Cache as 缓存
+
+    User->>App: 登录请求
+    activate App
+    App->>Auth: 验证凭证
+    activate Auth
+
+    Auth->>DB: 查询用户
+    activate DB
+    DB->>Auth: 返回用户信息
+    deactivate DB
+
+    Auth->>Auth: 密码验证
+    Auth->>Cache: 存储会话
+    activate Cache
+    Cache->>Auth: 会话已存储
+    deactivate Cache
+
+    Auth->>App: 认证成功
+    deactivate Auth
+
+    App->>App: 生成令牌
+    App->>User: 返回访问令牌
+    deactivate App
+
+    User->>App: 使用令牌请求数据
+    activate App
+    App->>Cache: 检查会话
+    activate Cache
+    Cache->>App: 会话有效
+    deactivate Cache
+
+    App->>DB: 获取用户数据
+    activate DB
+    DB->>App: 返回数据
+    deactivate DB
+
+    App->>User: 返回用户数据
+    deactivate App
