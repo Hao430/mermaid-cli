@@ -168,22 +168,49 @@
 
 ---
 
-## 📖 文档维护
+## 📖 文档组织
 
-这些文档是生活文件，会随着项目进展而更新。
+这些文档遵循**渐进式披露**原则 — 按学习路径分层组织。
 
-### 文件位置
+### 文件结构
 ```
 docs/
-├── INDEX.md           ← 你在这里
-├── README.md          ← 项目概述
-├── QUICK_START.md     ← 快速开始
-├── ARCHITECTURE.md    ← 架构设计
-├── DEVELOPMENT.md     ← 开发指南
-├── ROADMAP.md         ← 功能规划
-├── API.md             ← API 参考
-└── ACCEPTANCE_CHECKLIST.md ← 开发验收与竞品对标
+├── INDEX.md                    ← 你在这里（导航中心）
+├── README.md                   ← 项目概述和基本使用
+├── QUICK_START.md              ← 5分钟快速开始
+├── ARCHITECTURE.md             ← 系统架构设计
+├── DEVELOPMENT.md              ← 开发工作流指南
+├── ROADMAP.md                  ← 项目规划和里程碑
+├── API.md                      ← 完整 API 文档
+├── ACCEPTANCE_CHECKLIST.md     ← 验收标准和竞品对标
+├── PERFORMANCE_REPORT.md       ← 性能基准测试结果
+│
+├── guides/                     ← 版本和发布指南
+│   ├── CHANGELOG_0.2.0.md      └─ v0.2.0-alpha 变更日志
+│   ├── RELEASE_GUIDE.md        └─ 发布流程指南
+│   └── ANNOUNCEMENT.md         └─ 版本发布公告
+│
+├── reports/                    ← 开发完成报告和计划
+│   ├── ACCEPTANCE_FINAL.md     └─ 最终验收清单
+│   ├── PHASE*.md               └─ 各阶段完成报告
+│   ├── *_PLAN.md               └─ 开发计划文档
+│   └── *_SUMMARY.md            └─ 开发总结
+│
+└── examples/                   ← 使用示例和测试结果
+    ├── org_chart_simple.mmd    └─ 组织结构图源文件
+    └── org_chart_barycenter.png └─ 最优布局渲染结果（示例）
 ```
+
+### 分层说明
+
+| 层级 | 文档位置 | 目的 | 受众 |
+|------|---------|------|------|
+| **入门** | 根目录 | 快速了解和使用 | 新用户 |
+| **开发** | 根目录 | 深入学习和扩展 | 开发者 |
+| **参考** | 根目录 | API 和架构参考 | 集成者 |
+| **发布** | `guides/` | 版本管理和发布流程 | 维护者 |
+| **存档** | `reports/` | 历史报告和决策记录 | 项目管理 |
+| **示例** | `examples/` | 实际使用案例 | 所有人 |
 
 ### 更新日志
 

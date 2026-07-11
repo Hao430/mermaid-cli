@@ -37,6 +37,11 @@ impl SvgBuilder {
         self
     }
 
+    pub fn set_dimensions(&mut self, width: u32, height: u32) {
+        self.width = width;
+        self.height = height;
+    }
+
     fn track_bounds(&mut self, x: f32, y: f32) {
         if x > self.max_x {
             self.max_x = x;
@@ -84,14 +89,40 @@ impl SvgBuilder {
 
     pub fn add_text(&mut self, x: f32, y: f32, text: &str, style: &str) {
         self.track_bounds(x, y);
-        let element = format!(
-            r#"  <text x="{}" y="{}" style="{}">{}</text>"#,
-            x,
-            y,
-            style,
-            escape_xml(text)
-        );
-        self.elements.push(element);
+
+        // Handle <br/> tags by splitting into tspan elements
+        let lines: Vec<&str> = text.split("<br/>").collect();
+
+        if lines.len() == 1 {
+            // Simple case: no line breaks
+            let element = format!(
+                r#"  <text x="{}" y="{}" style="{}">{}</text>"#,
+                x,
+                y,
+                style,
+                escape_xml(text)
+            );
+            self.elements.push(element);
+        } else {
+            // Multiple lines: use tspan elements
+            let line_height = 16.0; // Approximate line height
+            let mut element = format!(
+                r#"  <text x="{}" y="{}" style="{}">"#,
+                x, y, style
+            );
+
+            for (i, line) in lines.iter().enumerate() {
+                let dy = if i == 0 { 0.0 } else { line_height };
+                element.push_str(&format!(
+                    r#"<tspan x="{}" dy="{}">{}</tspan>"#,
+                    x,
+                    dy,
+                    escape_xml(line)
+                ));
+            }
+            element.push_str("</text>");
+            self.elements.push(element);
+        }
     }
 
     pub fn add_arrow(&mut self, x: f32, y: f32) {

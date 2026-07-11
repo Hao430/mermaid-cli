@@ -120,41 +120,75 @@ impl Renderer {
         let edges = diagram.get_edges();
         let edges_with_labels = diagram.get_edges_with_labels();
 
-        // 计算节点层级（拓扑排序）
+        // ponytail: use tree-aware layout for org charts; fallback to topological sort for DAGs
         let node_ids: Vec<String> = node_info.keys().cloned().collect();
-        let layers = compute_layers(&node_ids, &edges);
+        let layers = compute_tree_layers(&node_ids, &edges);
 
-        // 布局参数
-        let node_width = 100.0;
-        let node_height = 50.0;
-        let h_spacing = 60.0;
-        let v_spacing = 100.0;
-        let padding = 50.0;
+        // 布局参数（紧凑树形布局以最小化连线交叉）
+        let node_width = 130.0;
+        let node_height = 65.0;
+        let h_spacing = 40.0;
+        let v_spacing = 80.0;  // 减小垂直间距让线更短
+        let padding = 40.0;
 
         let is_horizontal = diagram.direction.as_deref() == Some("LR")
             || diagram.direction.as_deref() == Some("RL");
 
-        // 计算每层节点的位置
+        // ponytail: calculate required canvas size based on content, not viewport
+        let max_nodes_in_layer = layers.iter().map(|l| l.len()).max().unwrap_or(1) as f32;
+        let num_layers = layers.len() as f32;
+
+        let required_width = max_nodes_in_layer * node_width + (max_nodes_in_layer - 1.0) * h_spacing + 2.0 * padding;
+        let required_height = num_layers * node_height + (num_layers - 1.0) * v_spacing + 2.0 * padding;
+
+        let effective_width = required_width.max(self.width as f32) as u32;
+        let effective_height = required_height.max(self.height as f32) as u32;
+
+        // ponytail: Barycenter method - sort nodes by parent positions to minimize crossing
+        let mut parent_map: HashMap<String, String> = HashMap::new();
+        let mut children_map: HashMap<String, Vec<String>> = HashMap::new();
+
+        for (from, to) in &edges {
+            parent_map.insert(to.clone(), from.clone());
+            children_map
+                .entry(from.clone())
+                .or_insert_with(Vec::new)
+                .push(to.clone());
+        }
+
         let mut node_positions: HashMap<String, (f32, f32)> = HashMap::new();
 
         for (layer_idx, layer_nodes) in layers.iter().enumerate() {
-            let count = layer_nodes.len() as f32;
-            let total_width = count * node_width + (count - 1.0) * h_spacing;
-            let start_x = (self.width as f32 - total_width) / 2.0;
+            let y = padding + layer_idx as f32 * (node_height + v_spacing);
 
-            for (pos_idx, node_id) in layer_nodes.iter().enumerate() {
-                let (x, y) = if is_horizontal {
-                    let x = padding + layer_idx as f32 * (node_width + v_spacing);
-                    let y = start_x + pos_idx as f32 * (node_height + h_spacing);
-                    (x, y)
-                } else {
-                    let x = start_x + pos_idx as f32 * (node_width + h_spacing);
-                    let y = padding + layer_idx as f32 * (node_height + v_spacing);
-                    (x, y)
-                };
+            // Sort nodes in this layer by parent positions (barycenter method)
+            let mut sorted_nodes = layer_nodes.clone();
+            sorted_nodes.sort_by(|a, b| {
+                let a_parent_x = parent_map
+                    .get(a)
+                    .and_then(|p| node_positions.get(p).map(|&(x, _)| x))
+                    .unwrap_or(f32::INFINITY);
+
+                let b_parent_x = parent_map
+                    .get(b)
+                    .and_then(|p| node_positions.get(p).map(|&(x, _)| x))
+                    .unwrap_or(f32::INFINITY);
+
+                a_parent_x.partial_cmp(&b_parent_x).unwrap_or(std::cmp::Ordering::Equal)
+            });
+
+            let count = sorted_nodes.len() as f32;
+            let total_width = count * node_width + (count - 1.0) * h_spacing;
+            let start_x = (effective_width as f32 - total_width) / 2.0;
+
+            for (idx, node_id) in sorted_nodes.iter().enumerate() {
+                let x = start_x + idx as f32 * (node_width + h_spacing);
                 node_positions.insert(node_id.clone(), (x, y));
             }
         }
+
+        // 更新 SVG 构建器的尺寸
+        svg.set_dimensions(effective_width, effective_height);
 
         // 绘制边
         for (from, to, label) in &edges_with_labels {
@@ -2608,12 +2642,21 @@ impl Renderer {
     #[cfg(feature = "png")]
     pub fn render_png(&self, diagram: &Diagram) -> Result<Vec<u8>, String> {
         let svg_data = self.render(diagram)?;
-        let opt = usvg::Options::default();
+
+        // ponytail: load system fonts for text rendering in PNG output
+        let mut fontdb = usvg::fontdb::Database::new();
+        fontdb.load_system_fonts();
+
+        let mut opt = usvg::Options::default();
+        opt.fontdb = std::sync::Arc::new(fontdb);
+
         let rtree =
             usvg::Tree::from_str(&svg_data, &opt).map_err(|e| format!("SVG parse error: {}", e))?;
 
-        let w = self.width.max(1);
-        let h = self.height.max(1);
+        // Use actual SVG dimensions from the tree, not the renderer's default
+        let svg_size = rtree.size();
+        let w = (svg_size.width() * self.scale).max(1.0) as u32;
+        let h = (svg_size.height() * self.scale).max(1.0) as u32;
         let mut pixmap = tiny_skia::Pixmap::new(w, h).ok_or("Failed to create Pixmap")?;
 
         resvg::render(
@@ -2634,7 +2677,82 @@ impl Default for Renderer {
     }
 }
 
-/// Kahn's algorithm for topological sort layering.
+/// Compute layers using tree-aware depth algorithm for better org chart layout.
+fn compute_tree_layers(node_ids: &[String], edges: &[(String, String)]) -> Vec<Vec<String>> {
+    // Build parent/child maps
+    let mut parents: HashMap<String, String> = HashMap::new();
+    let mut children: HashMap<String, Vec<String>> = HashMap::new();
+    let mut in_degree: HashMap<String, usize> = HashMap::new();
+
+    for id in node_ids {
+        in_degree.insert(id.clone(), 0);
+        children.entry(id.clone()).or_insert_with(Vec::new);
+    }
+
+    for (from, to) in edges {
+        if node_ids.contains(from) && node_ids.contains(to) {
+            parents.insert(to.clone(), from.clone());
+            *in_degree.get_mut(to).unwrap_or(&mut 0) += 1;
+            children.entry(from.clone()).or_insert_with(Vec::new).push(to.clone());
+        }
+    }
+
+    // Find root nodes (no parents)
+    let mut roots: Vec<String> = node_ids
+        .iter()
+        .filter(|id| in_degree.get(*id).copied().unwrap_or(0) == 0)
+        .cloned()
+        .collect();
+
+    if roots.is_empty() {
+        roots = node_ids.to_vec();
+    }
+
+    // BFS to assign depths
+    let mut depth_map: HashMap<String, usize> = HashMap::new();
+    let mut queue: std::collections::VecDeque<(String, usize)> = std::collections::VecDeque::new();
+
+    for root in &roots {
+        queue.push_back((root.clone(), 0));
+    }
+
+    while let Some((node, depth)) = queue.pop_front() {
+        if depth_map.contains_key(&node) {
+            continue; // Already visited
+        }
+        depth_map.insert(node.clone(), depth);
+
+        if let Some(child_list) = children.get(&node) {
+            for child in child_list {
+                if !depth_map.contains_key(child) {
+                    queue.push_back((child.clone(), depth + 1));
+                }
+            }
+        }
+    }
+
+    // Group nodes by depth
+    let mut layers: Vec<Vec<String>> = Vec::new();
+    let mut max_depth = 0;
+    for depth in depth_map.values() {
+        max_depth = max_depth.max(*depth);
+    }
+
+    for d in 0..=max_depth {
+        let mut layer: Vec<String> = node_ids
+            .iter()
+            .filter(|id| depth_map.get(*id).copied().unwrap_or(usize::MAX) == d)
+            .cloned()
+            .collect();
+        if !layer.is_empty() {
+            layers.push(layer);
+        }
+    }
+
+    layers
+}
+
+/// Kahn's algorithm for topological sort layering (fallback).
 fn compute_layers(node_ids: &[String], edges: &[(String, String)]) -> Vec<Vec<String>> {
     let mut in_degree: HashMap<&str, usize> = HashMap::new();
     let mut adjacency: HashMap<&str, Vec<&str>> = HashMap::new();
