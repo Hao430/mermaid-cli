@@ -3001,12 +3001,13 @@ fn process_seq_stmts(
             Statement::Deactivate { participant } => {
                 if let Some(&start_y) = activations.get(participant) {
                     if let Some(&cx) = center_map.get(participant.as_str()) {
+                        // 绘制激活框（activation box）— 显示参与者的活跃周期
                         svg.add_rect(
-                            cx - 5.0,
+                            cx - 4.5,
                             start_y,
-                            10.0,
+                            9.0,
                             *y_pos - start_y,
-                            "fill:#e8e8e8;stroke:#666;stroke-width:1",
+                            "fill:#f5f5f5;stroke:#999;stroke-width:1.5",
                         );
                     }
                 }
