@@ -2918,7 +2918,20 @@ fn process_seq_stmts(
                 statements,
             } => {
                 let block_start = *y_pos - 10.0;
-                let blk_x = start_x - 20.0;
+
+                // 计算条件框的左右边界（横跨所有参与者）
+                let blk_left = if let Some(min_x) = center_map.values().min_by(|a, b| a.partial_cmp(b).unwrap()) {
+                    min_x - box_width / 2.0 - 20.0
+                } else {
+                    start_x - 20.0
+                };
+
+                let blk_right = if let Some(max_x) = center_map.values().max_by(|a, b| a.partial_cmp(b).unwrap()) {
+                    max_x + box_width / 2.0 + 20.0
+                } else {
+                    start_x + box_width + 20.0
+                };
+
                 process_seq_stmts(
                     svg,
                     center_map,
@@ -2930,23 +2943,51 @@ fn process_seq_stmts(
                     start_x,
                 );
                 let block_end = *y_pos;
+
+                // 画完整的条件框：上、左、右、下四条边
+                // 上边
                 svg.add_line(
-                    blk_x,
+                    blk_left,
                     block_start,
-                    blk_x,
-                    block_end,
-                    "stroke:gray;stroke-width:1",
+                    blk_right,
+                    block_start,
+                    "stroke:#666;stroke-width:1.5",
                 );
+                // 左边
+                svg.add_line(
+                    blk_left,
+                    block_start,
+                    blk_left,
+                    block_end,
+                    "stroke:#666;stroke-width:1.5",
+                );
+                // 右边
+                svg.add_line(
+                    blk_right,
+                    block_start,
+                    blk_right,
+                    block_end,
+                    "stroke:#666;stroke-width:1.5",
+                );
+                // 下边
+                svg.add_line(
+                    blk_left,
+                    block_end,
+                    blk_right,
+                    block_end,
+                    "stroke:#666;stroke-width:1.5",
+                );
+
                 let block_label = if let Some(cond) = condition {
                     format!("{} [{}]", keyword, cond)
                 } else {
                     keyword.clone()
                 };
                 svg.add_text(
-                    start_x - 16.0,
+                    blk_left + 4.0,
                     block_start + 4.0,
                     &block_label,
-                    "text-anchor:end;font-size:10px;font-family:Arial",
+                    "text-anchor:start;font-size:10px;font-family:Arial;font-weight:bold",
                 );
                 *y_pos += 10.0;
             }

@@ -18,10 +18,9 @@ sequenceDiagram
     OAApp->>Finance: 转至财务审核
     activate Finance
     Finance->>Finance: 验证发票
-    opt 财务批准
+    alt 财务批准通过
         Finance->>OAApp: ✓ 确认通过
-    end
-    opt 财务驳回
+    else 财务驳回
         Finance->>OAApp: ✗ 驳回处理
     end
     deactivate Finance
