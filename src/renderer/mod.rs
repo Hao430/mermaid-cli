@@ -2991,7 +2991,8 @@ fn process_seq_stmts(
                     &block_label,
                     "text-anchor:start;font-size:10px;font-family:Arial;font-weight:bold",
                 );
-                *y_pos += 10.0;
+                // 条件框后增加更多间距，防止后续消息被框的下边界遮挡
+                *y_pos += line_height;
             }
             Statement::Activate { participant } => {
                 activations.insert(participant.clone(), *y_pos);
