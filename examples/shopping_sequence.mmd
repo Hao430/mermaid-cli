@@ -1,0 +1,52 @@
+sequenceDiagram
+    participant Customer as 顾客
+    participant App as 购物应用
+    participant Product as 商品服务
+    participant Order as 订单系统
+    participant Payment as 支付系统
+    participant Warehouse as 仓库
+    participant Delivery as 快递
+
+    Customer->>App: 浏览商品
+    App->>Product: 查询商品
+    Product->>App: 返回商品列表
+    App->>Customer: 显示商品
+
+    Customer->>App: 选择商品加入购物车
+    App->>App: 更新购物车
+
+    Customer->>App: 下单
+    activate App
+    App->>Order: 创建订单
+    activate Order
+    Order->>Product: 检查库存
+    Product->>Order: 库存充足
+    Order->>App: 订单创建成功
+    deactivate Order
+    App->>Customer: 确认订单
+
+    Customer->>App: 立即支付
+    App->>Payment: 发起支付请求
+    activate Payment
+
+    alt 支付成功
+        Payment->>Order: 确认支付
+        Order->>Warehouse: 打包商品
+        activate Warehouse
+        Warehouse->>Delivery: 交付快递
+        deactivate Warehouse
+        Delivery->>Customer: 发货通知
+        Customer->>Order: 确认收货
+        Order->>Customer: 订单完成
+    else 支付失败
+        Payment->>Customer: 支付失败
+        Payment->>Order: 取消订单
+    end
+
+    deactivate Payment
+    deactivate App
+
+    Customer->>App: 查看订单
+    App->>Order: 查询订单详情
+    Order->>App: 返回订单信息
+    App->>Customer: 显示订单状态
