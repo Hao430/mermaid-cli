@@ -1,0 +1,42 @@
+sequenceDiagram
+    participant Employee as 员工
+    participant OAApp as OA系统
+    participant Manager as 经理
+    participant Finance as 财务
+    participant Accountant as 会计
+    participant Bank as 银行
+
+    Employee->>OAApp: 提交报销申请
+    OAApp->>OAApp: 系统验证
+    OAApp->>Manager: 转至经理审批
+
+    activate Manager
+    Manager->>Manager: 审查申请
+    Manager->>OAApp: 同意/驳回
+    deactivate Manager
+
+    OAApp->>Finance: 转至财务审核
+    activate Finance
+    Finance->>Finance: 验证发票
+
+    alt 财务批准
+        Finance->>OAApp: 确认通过
+    else 财务驳回
+        Finance->>OAApp: 驳回
+    end
+    deactivate Finance
+
+    OAApp->>Accountant: 转账务处理
+    activate Accountant
+    Accountant->>Accountant: 成本核算
+    Accountant->>Accountant: 记入财务系统
+    Accountant->>Bank: 发起转账
+    deactivate Accountant
+
+    activate Bank
+    Bank->>Bank: 处理转账
+    Bank->>Employee: 转账成功
+    deactivate Bank
+
+    Employee->>OAApp: 查看结果
+    OAApp->>Employee: 完成通知
