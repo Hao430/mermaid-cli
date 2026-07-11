@@ -1,33 +1,25 @@
 flowchart TD
-    Start([开始结账]) --> A["1️⃣ 验证购物车"]
-    A --> B{"购物车<br/>有效?"}
-    B -->|否| Err1["❌ 返回修改"]
-    Err1 --> End([结束])
+    Start([开始]) --> Step1["验证购物车"]
+    Step1 --> Decision1{有效?}
+    Decision1 -->|否| Error1["❌ 返回修改"]
+    Error1 --> End([结束])
+    Decision1 -->|是| Step2["计算价格"]
 
-    B -->|是| C["2️⃣ 计算价格"]
-    C --> D{"价格<br/>正确?"}
-    D -->|否| Err2["❌ 重新计算"]
-    Err2 --> End
+    Step2 --> Decision2{正确?}
+    Decision2 -->|否| Error2["❌ 重新计算"]
+    Error2 --> End
+    Decision2 -->|是| Step3["创建订单"]
 
-    D -->|是| E["3️⃣ 创建订单"]
-    E --> F{"订单<br/>创建?"}
-    F -->|否| Err3["❌ 系统错误"]
-    Err3 --> End
+    Step3 --> Decision3{成功?}
+    Decision3 -->|否| Error3["❌ 系统错误"]
+    Error3 --> End
+    Decision3 -->|是| Step4["发起支付"]
 
-    F -->|是| G["4️⃣ 发起支付"]
-    G --> H{"支付<br/>成功?"}
-    H -->|否| Err4["❌ 支付失败"]
-    Err4 --> End
+    Step4 --> Decision4{支付成功?}
+    Decision4 -->|否| Error4["❌ 支付失败"]
+    Error4 --> End
+    Decision4 -->|是| Step5["订单确认"]
 
-    H -->|是| I["5️⃣ 订单确认"]
-    I --> J["6️⃣ 发送通知"]
-    J --> K["✅ 结账完成"]
-    K --> End
-
-    style Start fill:#90EE90,stroke:#333,stroke-width:2px
-    style End fill:#FFB6C6,stroke:#333,stroke-width:2px
-    style K fill:#87CEEB,stroke:#333,stroke-width:2px
-    style Err1 fill:#FFD700,stroke:#333,stroke-width:1.5px
-    style Err2 fill:#FFD700,stroke:#333,stroke-width:1.5px
-    style Err3 fill:#FF6347,stroke:#333,stroke-width:1.5px
-    style Err4 fill:#FF6347,stroke:#333,stroke-width:1.5px
+    Step5 --> Step6["发送通知"]
+    Step6 --> Success["✅ 完成"]
+    Success --> End
