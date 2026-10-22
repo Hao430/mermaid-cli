@@ -1,6 +1,6 @@
 {
   "name": "@hao430/mermaid-cli",
-  "version": "0.1.0-alpha",
+  "version": "0.2.1-alpha",
   "description": "High-performance Mermaid diagram renderer (WASM) - 100x faster than mmdc, zero browser dependency",
   "keywords": [
     "mermaid",

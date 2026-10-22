@@ -339,7 +339,12 @@ async function __wbg_init(module_or_path) {
     const imports = __wbg_get_imports();
 
     if (typeof module_or_path === 'string' || (typeof Request === 'function' && module_or_path instanceof Request) || (typeof URL === 'function' && module_or_path instanceof URL)) {
-        module_or_path = fetch(module_or_path);
+        if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+            const fs = await import('node:fs');
+            module_or_path = fs.readFileSync(module_or_path);
+        } else {
+            module_or_path = fetch(module_or_path);
+        }
     }
 
     const { instance, module } = await __wbg_load(await module_or_path, imports);
