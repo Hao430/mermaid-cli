@@ -47,7 +47,8 @@ pub fn render(code: &str) -> Result<String, JsValue> {
 #[wasm_bindgen]
 pub fn parse(code: &str) -> Result<String, JsValue> {
     let diagram = crate::parse(code).map_err(|e| JsValue::from_str(&format!("{:?}", e)))?;
-    let json = serde_json::to_string_pretty(&diagram).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let json =
+        serde_json::to_string_pretty(&diagram).map_err(|e| JsValue::from_str(&e.to_string()))?;
     Ok(json)
 }
 
@@ -60,18 +61,44 @@ pub fn check(code: &str) -> String {
         Ok(result) => {
             #[cfg(feature = "json")]
             {
-                let json = serde_json::to_string(&result).unwrap_or_default();
-                return json;
+                serde_json::to_string(&result).unwrap_or_default()
             }
             #[cfg(not(feature = "json"))]
             {
                 if result.valid {
                     r#"{"valid":true,"errors":[]}"#.to_string()
                 } else {
-                    format!(r#"{{"valid":false,"errors":[{{"message":"{}"}}]}}"#, result.errors.first().map(|e| e.to_string()).unwrap_or_default())
+                    format!(
+                        r#"{{"valid":false,"errors":[{{"message":"{}"}}]}}"#,
+                        result
+                            .errors
+                            .first()
+                            .map(|e| e.to_string())
+                            .unwrap_or_default()
+                    )
                 }
             }
         }
         Err(e) => format!(r#"{{"valid":false,"errors":[{{"message":"{}"}}]}}"#, e),
+    }
+}
+
+/// Auto-fix common syntax errors in Mermaid source code.
+///
+/// Returns JSON with `{ "fixed": string, "fixes": string[] }`.
+#[wasm_bindgen]
+pub fn fix(code: &str) -> String {
+    let (fixed, fixes) = crate::fix(code);
+    #[cfg(feature = "json")]
+    {
+        serde_json::to_string(&serde_json::json!({
+            "fixed": fixed,
+            "fixes": fixes,
+        }))
+        .unwrap_or_else(|_| format!(r#"{{"fixed":{:?},"fixes":[]}}"#, fixed))
+    }
+    #[cfg(not(feature = "json"))]
+    {
+        format!(r#"{{"fixed":{:?},"fixes":[]}}"#, fixed)
     }
 }
