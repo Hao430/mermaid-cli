@@ -5,6 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 ![Version](https://img.shields.io/badge/version-v0.2.1--alpha-green)
 ![Rust](https://img.shields.io/badge/Rust-1.70+-orange)
+[![Online Studio](https://img.shields.io/badge/Playground-Online%20Studio-blueviolet)](./site/playground.html)
 ![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
 
 ## ⚡ 核心优势

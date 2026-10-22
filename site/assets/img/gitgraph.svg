@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    text { font-family: Arial, sans-serif; font-size: 14px; }
+  </style>
+  <rect width="100%" height="100%" fill="white"/>
+  <rect x="72" y="24" width="56" height="22" style="fill:#ea580c;fill-opacity:0.12;stroke:#ea580c;stroke-width:1;rx:4"/>
+  <text x="100" y="35" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-weight:bold;fill:#ea580c;font-family:monospace">main</text>
+  <line x1="100" y1="46" x2="100" y2="70" style="stroke:#ea580c;stroke-width:1;stroke-dasharray:3,3;stroke-opacity:0.4"/>
+  <rect x="152" y="24" width="76" height="22" style="fill:#10b981;fill-opacity:0.12;stroke:#10b981;stroke-width:1;rx:4"/>
+  <text x="190" y="35" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-weight:bold;fill:#10b981;font-family:monospace">develop</text>
+  <line x1="190" y1="46" x2="190" y2="70" style="stroke:#10b981;stroke-width:1;stroke-dasharray:3,3;stroke-opacity:0.4"/>
+  <circle cx="100" cy="70" r="10" style="fill:#ea580c;stroke:#ffffff;stroke-width:2"/>
+  <line x1="100" y1="70" x2="100" y2="118" style="stroke:#ea580c;stroke-width:2"/>
+  <circle cx="100" cy="118" r="10" style="fill:#ea580c;stroke:#ffffff;stroke-width:2"/>
+  <line x1="100" y1="118" x2="190" y2="166" style="stroke:#10b981;stroke-width:1.5;stroke-dasharray:4,3"/>
+  <line x1="190" y1="166" x2="190" y2="166" style="stroke:#10b981;stroke-width:2"/>
+  <circle cx="190" cy="166" r="10" style="fill:#10b981;stroke:#ffffff;stroke-width:2"/>
+  <line x1="190" y1="166" x2="190" y2="214" style="stroke:#10b981;stroke-width:2"/>
+  <circle cx="190" cy="214" r="10" style="fill:#10b981;stroke:#ffffff;stroke-width:2"/>
+  <line x1="190" y1="214" x2="100" y2="262" style="stroke:#64748b;stroke-width:2;stroke-dasharray:4,3"/>
+  <line x1="100" y1="118" x2="100" y2="262" style="stroke:#ea580c;stroke-width:2"/>
+  <circle cx="100" cy="262" r="10" style="fill:#ea580c;stroke:#ffffff;stroke-width:2"/>
+  <line x1="100" y1="262" x2="100" y2="310" style="stroke:#ea580c;stroke-width:2"/>
+  <circle cx="100" cy="310" r="10" style="fill:#ea580c;stroke:#ffffff;stroke-width:2"/>
+</svg>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mermaid-CLI | 纯原生 Rust 驱动的极速 Mermaid 图表引擎与命令行工具</title>
+  <meta name="description" content="零 Chromium 依赖、零 Node.js 依赖的下一代纯 Rust Mermaid 引擎。提供超快 AST 解析、现代像素级布局渲染、SVG/PNG/PDF 多格式导出及浏览器端 WASM 支持。">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-nav">
+    <div class="nav-container">
+      <a href="index.html" class="brand-link">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="12" r="3"></circle>
+            <line x1="8.5" y1="7.5" x2="15.5" y2="10.5"></line>
+            <line x1="8.5" y1="16.5" x2="15.5" y2="13.5"></line>
+          </svg>
+        </div>
+        <span>Mermaid-CLI <span class="brand-badge">v0.2.1-alpha</span></span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features" class="nav-link">核心特性</a></li>
+        <li><a href="#benchmarks" class="nav-link">性能对比</a></li>
+        <li><a href="#gallery" class="nav-link">图表画廊</a></li>
+        <li><a href="#cli-guide" class="nav-link">CLI 指南</a></li>
+        <li><a href="playground.html" class="nav-link" style="color: var(--accent-secondary); font-weight: 600;">在线实验室 ✨</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button id="theme-toggle" class="theme-toggle-btn" title="切换深色/浅色外观">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+        <a href="playground.html" class="btn btn-primary btn-sm">进入 Studio</a>
+        <a href="https://github.com/Hao430/mermaid-cli" target="_blank" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-pill">
+      <span class="dot"></span>
+      <span>纯 Rust 重构 • 零 Chromium • 零 Node.js 依赖</span>
+    </div>
+
+    <h1 class="hero-title">
+      下一代极速 <span class="hero-title-gradient">Mermaid 图表引擎</span><br>与命令行工业级工具
+    </h1>
+
+    <p class="hero-subtitle">
+      告别庞大迟钝的 Headless Chrome 与动辄上百兆的 npm 运行环境。
+      基于纯 Rust 架构，实现毫秒级 AST 语法分析、像素级防穿模现代布局，原生直出 SVG、高清 PNG 与高保真矢量 PDF。
+    </p>
+
+    <div class="hero-cta-group">
+      <a href="playground.html" class="btn btn-primary" style="padding: 0.8rem 1.8rem; font-size: 1.05rem;">
+        <span>✨ 启动交互式在线实验室</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+      <a href="#cli-guide" class="btn btn-secondary" style="padding: 0.8rem 1.6rem; font-size: 1.05rem;">
+        <span>查看 CLI 命令手册</span>
+      </a>
+    </div>
+
+    <!-- Terminal Box -->
+    <div class="terminal-install-box">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+        </div>
+        <div class="terminal-tabs">
+          <button class="terminal-tab active" data-cmd="cargo install mermaid-cli">Cargo</button>
+          <button class="terminal-tab" data-cmd="docker run --rm -v $(pwd):/data hao430/mermaid-cli -i /data/input.mmd -o /data/output.png">Docker</button>
+          <button class="terminal-tab" data-cmd="npm install @hao430/mermaid-cli">NPM (WASM)</button>
+        </div>
+      </div>
+      <div class="terminal-body">
+        <span class="terminal-command" id="term-cmd-text">cargo install mermaid-cli</span>
+        <button class="terminal-copy-btn" id="term-copy-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span id="copy-btn-label">复制</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benchmark Showcase -->
+  <section id="benchmarks" class="benchmark-section">
+    <div class="section-title-wrap">
+      <div class="section-tag">Performance Matrix</div>
+      <h2 class="section-title">突破性的性能与资源利用率</h2>
+      <p class="section-subtitle">
+        与基于 Puppeteer / Chromium 的传统官方 NodeJS CLI 进行全方位实测对比，速度与内存占用呈现出质的飞跃。
+      </p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num">100x+</div>
+        <div class="metric-label">渲染启动加速</div>
+        <div class="metric-desc">冷启动从 1.8 秒级直接缩短至 12 毫秒以内，CI 构建无感知瞬发完成。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">1/25</div>
+        <div class="metric-label">内存极致轻量</div>
+        <div class="metric-desc">仅需 ~14 MB 物理内存，而传统 Chromium 渲染常态占用超过 380 MB。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">0 依赖</div>
+        <div class="metric-label">完全原生独立</div>
+        <div class="metric-desc">无 Node.js、无浏览器二进制、无数十层 npm 脆弱依赖链，单二进制即可交付。</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num">100%</div>
+        <div class="metric-label">WASM 浏览器运行</div>
+        <div class="metric-desc">核心通过 WebAssembly 打包，体积极致小巧（仅 400KB+），纯前端直出矢量。</div>
+      </div>
+    </div>
+
+    <div class="comparison-table-wrap">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>评测指标</th>
+            <th class="table-highlight-col">mermaid-cli (本项目 / 纯 Rust)</th>
+            <th>传统 @mermaid-js/mermaid-cli (Node.js)</th>
+            <th>核心收益</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>单图渲染冷启动耗时</td>
+            <td class="table-highlight-col"><strong>12 ~ 15 ms</strong></td>
+            <td>1,750 ~ 2,200 ms</td>
+            <td>提升 100x ~ 150x 极速体验</td>
+          </tr>
+          <tr>
+            <td>运行时内存峰值</td>
+            <td class="table-highlight-col"><strong>~ 14 MB</strong></td>
+            <td>~ 380 MB+</td>
+            <td>节省 96% 宿主硬件开销</td>
+          </tr>
+          <tr>
+            <td>环境依赖与前置条件</td>
+            <td class="table-highlight-col"><strong>零依赖 (Single Binary)</strong></td>
+            <td>Node.js 18+ & Headless Chromium</td>
+            <td>避免 CI/CD 环境安装浏览器超时与崩溃</td>
+          </tr>
+          <tr>
+            <td>安装分发包体积</td>
+            <td class="table-highlight-col"><strong>~ 18 MB</strong></td>
+            <td>450 MB+ (含浏览器二进制)</td>
+            <td>容器镜像精简 95%</td>
+          </tr>
+          <tr>
+            <td>原生导出格式</td>
+            <td class="table-highlight-col"><strong>SVG, PNG, PDF, JSON AST</strong></td>
+            <td>SVG, PNG, PDF</td>
+            <td>支持直接派生 AST 用于二次开发</td>
+          </tr>
+          <tr>
+            <td>语法拼写智能修复</td>
+            <td class="table-highlight-col"><strong>内置 Fixer 引擎 (自动纠偏)</strong></td>
+            <td>不支持 (报错中断)</td>
+            <td>宽容修复 `grpah` / 漏掉的 `end` 等拼写错误</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Visual Diagram Gallery -->
+  <section id="gallery" class="gallery-section">
+    <div class="section-title-wrap">
+      <div class="section-tag">Visual Gallery</div>
+      <h2 class="section-title">兼具严谨语义与现代高保真美学</h2>
+      <p class="section-subtitle">
+        针对不同图表类型定制专属排布策略：严守时序与 Git DAG 的不可变拓扑，同时在思维导图、类图与流程图中引入平滑贝塞尔曲线、微圆角卡片与防穿模边缘停靠。
+      </p>
+    </div>
+
+    <div class="gallery-grid">
+      
+      <!-- Card 1: Mindmap -->
+      <div class="gallery-card">
+        <div class="gallery-preview">
+          <img src="assets/img/mindmap.png" alt="思维导图示例">
+        </div>
+        <div class="gallery-card-content">
+          <div class="gallery-card-title">
+            <span>思维导图 (Mindmap)</span>
+            <span class="brand-badge" style="color:#ea580c; border-color: rgba(234,88,12,0.3);">贝塞尔曲线</span>
+          </div>
+          <div class="gallery-card-desc">
+            采用 Tidy Tree 递归树形排布，自适应子树高度与节点尺寸，搭配三次平滑贝塞尔连接线，杜绝兄弟节点挤压重叠。
+          </div>
+          <div class="gallery-card-actions">
+            <a href="playground.html?template=mindmap" class="btn btn-secondary btn-sm" style="flex:1;">在 Studio 中编辑</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Class Diagram -->
+      <div class="gallery-card">
+        <div class="gallery-preview">
+          <img src="assets/img/class.png" alt="类图结构示例">
+        </div>
+        <div class="gallery-card-content">
+          <div class="gallery-card-title">
+            <span>类图 (Class Diagram)</span>
+            <span class="brand-badge" style="color:#10b981; border-color: rgba(16,185,129,0.3);">外轮廓防穿模</span>
+          </div>
+          <div class="gallery-card-desc">
+            数学计算卡片包围盒交点截断，继承与关联箭头精准停靠在类边缘，卡片具备灰色标头、横向分隔线与等宽属性排版。
+          </div>
+          <div class="gallery-card-actions">
+            <a href="playground.html?template=class" class="btn btn-secondary btn-sm" style="flex:1;">在 Studio 中编辑</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Sequence Diagram -->
+      <div class="gallery-card">
+        <div class="gallery-preview">
+          <img src="assets/img/shopping_sequence.png" alt="复杂时序图示例">
+        </div>
+        <div class="gallery-card-content">
+          <div class="gallery-card-title">
+            <span>时序图 (Sequence Diagram)</span>
+            <span class="brand-badge" style="color:#f59e0b; border-color: rgba(245,158,11,0.3);">严谨时间线</span>
+          </div>
+          <div class="gallery-card-desc">
+            保持严格时间轴不变；重构自调用回环曲线，左指箭头精准指向生命线，配合圆角 alt / else 容器与胶囊文字，规整清晰。
+          </div>
+          <div class="gallery-card-actions">
+            <a href="playground.html?template=sequence" class="btn btn-secondary btn-sm" style="flex:1;">在 Studio 中编辑</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Flowchart -->
+      <div class="gallery-card">
+        <div class="gallery-preview">
+          <img src="assets/img/checkout_flow.png" alt="电商流程图示例">
+        </div>
+        <div class="gallery-card-content">
+          <div class="gallery-card-title">
+            <span>流程图 (Flowchart)</span>
+            <span class="brand-badge" style="color:#f59e0b; border-color: rgba(245,158,11,0.3);">胶囊防遮挡</span>
+          </div>
+          <div class="gallery-card-desc">
+            节点具备统一现代 Slate 边框与微圆角风格，判断连线文字搭载防遮挡白色胶囊底衬，避免连接线穿割文字。
+          </div>
+          <div class="gallery-card-actions">
+            <a href="playground.html?template=flowchart" class="btn btn-secondary btn-sm" style="flex:1;">在 Studio 中编辑</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: GitGraph -->
+      <div class="gallery-card">
+        <div class="gallery-preview">
+          <img src="assets/img/gitgraph.png" alt="Git分支合并图">
+        </div>
+        <div class="gallery-card-content">
+          <div class="gallery-card-title">
+            <span>Git版本图 (GitGraph)</span>
+            <span class="brand-badge">DAG 拓扑</span>
+          </div>
+          <div class="gallery-card-desc">
+            严守提交拓扑顺序与分支分叉合并语义，清晰展现 main / develop / feature / hotfix 多分支协作轨迹。
+          </div>
+          <div class="gallery-card-actions">
+            <a href="playground.html?template=gitgraph" class="btn btn-secondary btn-sm" style="flex:1;">在 Studio 中编辑</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6: Pie Chart -->
+      <div class="gallery-card">
+        <div class="gallery-preview">
+          <img src="assets/img/pie.png" alt="统计饼图">
+        </div>
+        <div class="gallery-card-content">
+          <div class="gallery-card-title">
+            <span>统计饼图 (Pie Chart)</span>
+            <span class="brand-badge">高对比配色</span>
+          </div>
+          <div class="gallery-card-desc">
+            扇区平滑，文字比例标签自动外引排版，柔和莫兰迪多色系适配深浅色背景。
+          </div>
+          <div class="gallery-card-actions">
+            <a href="playground.html?template=pie" class="btn btn-secondary btn-sm" style="flex:1;">在 Studio 中编辑</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Core Features Matrix -->
+  <section id="features" class="features-section">
+    <div class="section-title-wrap">
+      <div class="section-tag">Core Architecture</div>
+      <h2 class="section-title">专为开发者与生产构建打造</h2>
+      <p class="section-subtitle">从 CLI 本地批处理到云原生 CI/CD 流水线，再到浏览器纯前端交互，全面覆盖多端诉求。</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon-box">⚡</div>
+        <h3 class="feature-title">毫秒级工业渲染</h3>
+        <p class="feature-desc">基于纯 Rust 打造的多线程渲染管线，支持单条命令批量渲染整个工程的上百个 Markdown/MMD 文件，性能澎湃。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🛠️</div>
+        <h3 class="feature-title">语法拼写自愈 Fixer</h3>
+        <p class="feature-desc">内置智能容错修复引擎，遇到常见笔误（例如手滑写成 `grpah`、`seqeunce`、漏写 `end` 等）自动纠偏并提示修正方案。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🎨</div>
+        <h3 class="feature-title">高保真输出 (SVG/PNG/PDF)</h3>
+        <p class="feature-desc">原生嵌入 usvg/resvg 高精度光栅化引擎并支持 CJK 中文字体智能回退，告别 Linux 无头环境文字丢失乱码困扰。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🌐</div>
+        <h3 class="feature-title">WebAssembly 浏览器端支持</h3>
+        <p class="feature-desc">提供官方 `@hao430/mermaid-cli` WASM 模块，纯前端静态页面即可直接在浏览器内编译执行，零网络延迟与零服务器成本。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🧩</div>
+        <h3 class="feature-title">AST 结构化导出 (--json)</h3>
+        <p class="feature-desc">支持通过 `--json` 或 `parse()` 直接提取语法抽象树（AST），便于对接 IDE 插件、Linter、自研绘图器与文档引擎。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">📦</div>
+        <h3 class="feature-title">开箱即用免配置</h3>
+        <p class="feature-desc">提供单可执行文件，无论是 Linux x86_64、ARM64 还是 macOS、Windows，下载即用，无需预装庞大的 Node 运行时。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLI Guide & Cheat-Sheet -->
+  <section id="cli-guide" class="features-section" style="padding-top: 1rem;">
+    <div class="section-title-wrap">
+      <div class="section-tag">Developer Guide</div>
+      <h2 class="section-title">命令行常用指令速查</h2>
+      <p class="section-subtitle">极简指令设计，兼容常用 Mermaid CLI 参数习惯，无缝迁移现有文档流水线。</p>
+    </div>
+
+    <div class="terminal-install-box" style="max-width: 900px; margin-bottom: 2rem;">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+        </div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">Terminal Shell</span>
+      </div>
+      <div class="terminal-body" style="flex-direction: column; align-items: flex-start; gap: 0.75rem;">
+        <div><span style="color:#71717a;"># 1. 渲染为标准 SVG 矢量图</span></div>
+        <div style="color:#f4f4f5;">$ <span style="color:#fdba74;">mermaid-cli input.mmd -o output.svg</span></div>
+        <br>
+        <div><span style="color:#71717a;"># 2. 导出为高清 2x 缩放 PNG 图片</span></div>
+        <div style="color:#f4f4f5;">$ <span style="color:#fdba74;">mermaid-cli input.mmd -o diagram.png -e png -s 2</span></div>
+        <br>
+        <div><span style="color:#71717a;"># 3. 校验语法并在有笔误时自动修复</span></div>
+        <div style="color:#f4f4f5;">$ <span style="color:#fdba74;">mermaid-cli input.mmd --check --fix</span></div>
+        <br>
+        <div><span style="color:#71717a;"># 4. 批量处理指定目录下的所有图表</span></div>
+        <div style="color:#f4f4f5;">$ <span style="color:#fdba74;">mermaid-cli docs/*.mmd -e png</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-copy">
+        © 2026 Mermaid-CLI Project. 遵循 MIT / Apache-2.0 双重开源协议.
+      </div>
+      <div class="footer-links">
+        <a href="playground.html">在线实验室</a>
+        <a href="#features">功能架构</a>
+        <a href="#benchmarks">性能测试</a>
+        <a href="https://github.com/Hao430/mermaid-cli" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Tab switching in hero command terminal
+    const tabs = document.querySelectorAll('.terminal-tab');
+    const cmdText = document.getElementById('term-cmd-text');
+    const copyBtn = document.getElementById('term-copy-btn');
+    const copyLabel = document.getElementById('copy-btn-label');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const cmd = tab.getAttribute('data-cmd');
+        if (cmdText) cmdText.textContent = cmd;
+      });
+    });
+
+    if (copyBtn && cmdText) {
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(cmdText.textContent.trim()).then(() => {
+          if (copyLabel) copyLabel.textContent = '已复制!';
+          setTimeout(() => { if (copyLabel) copyLabel.textContent = '复制'; }, 2000);
+        });
+      });
+    }
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    }
+  </script>
+</body>
+</html>

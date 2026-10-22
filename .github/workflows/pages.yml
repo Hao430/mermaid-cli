@@ -1,0 +1,56 @@
+name: Deploy Official Site & Studio to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "site/**"
+      - "src/**"
+      - "Cargo.*"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen-cli
+        run: |
+          cargo install wasm-bindgen-cli --version 0.2.126 --locked
+
+      - name: Build WebAssembly Module
+        run: |
+          cargo build --target wasm32-unknown-unknown --release --no-default-features --features wasm,json
+          wasm-bindgen --target web --out-dir site/wasm target/wasm32-unknown-unknown/release/mermaid_cli.wasm
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    text { font-family: Arial, sans-serif; font-size: 14px; }
+  </style>
+  <rect width="100%" height="100%" fill="white"/>
+  <rect x="50" y="50" width="180" height="128" style="fill:#ffffff;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <rect x="50" y="50" width="180" height="32" style="fill:#f1f5f9;stroke:none;rx:6"/>
+  <rect x="50" y="76" width="180" height="6" style="fill:#f1f5f9;stroke:none"/>
+  <line x1="50" y1="82" x2="230" y2="82" style="stroke:#cbd5e1;stroke-width:1"/>
+  <text x="140" y="67" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#0f172a;font-family:Arial, sans-serif">Animal</text>
+  <text x="60" y="99" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+age: int</text>
+  <text x="60" y="121" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+gender: String</text>
+  <text x="60" y="143" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+isMammal: bool</text>
+  <text x="60" y="165" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+mate</text>
+  <rect x="300" y="50" width="180" height="106" style="fill:#ffffff;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <rect x="300" y="50" width="180" height="32" style="fill:#f1f5f9;stroke:none;rx:6"/>
+  <rect x="300" y="76" width="180" height="6" style="fill:#f1f5f9;stroke:none"/>
+  <line x1="300" y1="82" x2="480" y2="82" style="stroke:#cbd5e1;stroke-width:1"/>
+  <text x="390" y="67" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#0f172a;font-family:Arial, sans-serif">Duck</text>
+  <text x="310" y="99" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+beakColor: String</text>
+  <text x="310" y="121" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+swim</text>
+  <text x="310" y="143" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+quack</text>
+  <rect x="50" y="238" width="180" height="84" style="fill:#ffffff;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <rect x="50" y="238" width="180" height="32" style="fill:#f1f5f9;stroke:none;rx:6"/>
+  <rect x="50" y="264" width="180" height="6" style="fill:#f1f5f9;stroke:none"/>
+  <line x1="50" y1="270" x2="230" y2="270" style="stroke:#cbd5e1;stroke-width:1"/>
+  <text x="140" y="255" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#0f172a;font-family:Arial, sans-serif">Fish</text>
+  <text x="60" y="287" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">-sizeInFeet: int</text>
+  <text x="60" y="309" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">-canEat</text>
+  <rect x="300" y="238" width="180" height="84" style="fill:#ffffff;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <rect x="300" y="238" width="180" height="32" style="fill:#f1f5f9;stroke:none;rx:6"/>
+  <rect x="300" y="264" width="180" height="6" style="fill:#f1f5f9;stroke:none"/>
+  <line x1="300" y1="270" x2="480" y2="270" style="stroke:#cbd5e1;stroke-width:1"/>
+  <text x="390" y="255" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#0f172a;font-family:Arial, sans-serif">Zebra</text>
+  <text x="310" y="287" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+is_wild: bool</text>
+  <text x="310" y="309" style="dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace">+run</text>
+  <line x1="230" y1="114" x2="290.12122" y2="104.552376" style="stroke:#475569;stroke-width:1.5;fill:none"/>
+  <polygon points="300,103 290.8974,109.49176 289.34503,99.61299" style="fill:#ffffff;stroke:#475569;stroke-width:1.5"/>
+  <line x1="140" y1="178" x2="140" y2="228" style="stroke:#475569;stroke-width:1.5;fill:none"/>
+  <polygon points="140,238 135,228 145,228" style="fill:#ffffff;stroke:#475569;stroke-width:1.5"/>
+  <line x1="140" y1="178" x2="380.27612" y2="235.66628" style="stroke:#475569;stroke-width:1.5;fill:none"/>
+  <polygon points="390,238 379.10925,240.52821 381.443,230.80434" style="fill:#ffffff;stroke:#475569;stroke-width:1.5"/>
+</svg>
