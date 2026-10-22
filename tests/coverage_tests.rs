@@ -311,7 +311,10 @@ fn test_very_large_flowchain() {
 #[test]
 fn test_diagram_with_only_comments() {
     let result = render("graph TD\n%% comment only\n%% another");
-    assert!(result.is_ok() || result.is_err(), "Comments only is allowed to fail");
+    assert!(
+        result.is_ok() || result.is_err(),
+        "Comments only is allowed to fail"
+    );
 }
 
 #[test]
@@ -346,7 +349,12 @@ fn test_multiple_diagram_files() {
     assert_eq!(codes.len(), 25, "Should have 25 chart types");
     for (i, code) in codes.iter().enumerate() {
         let result = render(code);
-        assert!(result.is_ok(), "Chart type #{} should render: {}", i, &code[..code.len().min(40)]);
+        assert!(
+            result.is_ok(),
+            "Chart type #{} should render: {}",
+            i,
+            &code[..code.len().min(40)]
+        );
     }
 }
 
@@ -562,7 +570,10 @@ fn test_fix_sequnce_typo() {
 #[test]
 fn test_fix_partcipant_typo() {
     let (fixed, fixes) = fix("sequenceDiagram\npartcipant A");
-    assert!(!fixed.contains("partcipant"), "fix should replace partcipant");
+    assert!(
+        !fixed.contains("partcipant"),
+        "fix should replace partcipant"
+    );
     assert!(!fixes.is_empty(), "should report fixes");
 }
 
@@ -690,7 +701,13 @@ fn test_render_50_consecutive() {
 
 #[test]
 fn test_render_mixed_types_consecutive() {
-    let types = ["graph TD; A-->B", "sequenceDiagram\nA->B: hi", "pie\n\"A\":50", "classDiagram\nclass A", "stateDiagram\n[*]-->S"];
+    let types = [
+        "graph TD; A-->B",
+        "sequenceDiagram\nA->B: hi",
+        "pie\n\"A\":50",
+        "classDiagram\nclass A",
+        "stateDiagram\n[*]-->S",
+    ];
     for _ in 0..10 {
         for t in &types {
             let r = render(t);
@@ -840,7 +857,10 @@ fn test_parse_large_invalid_input() {
 #[test]
 fn test_svg_contains_xml_declaration() {
     let svg = render("graph TD; A-->B").unwrap();
-    assert!(svg.starts_with("<?xml"), "SVG should start with XML declaration");
+    assert!(
+        svg.starts_with("<?xml"),
+        "SVG should start with XML declaration"
+    );
 }
 
 #[test]
@@ -878,13 +898,18 @@ fn test_svg_has_text_for_label() {
 #[test]
 fn test_svg_has_line_or_path() {
     let svg = render("graph TD; A-->B").unwrap();
-    assert!(svg.contains("<line") || svg.contains("<path"), "Should have line or path for edge");
+    assert!(
+        svg.contains("<line") || svg.contains("<path"),
+        "Should have line or path for edge"
+    );
 }
 
 // --- C4 context variations ---
 #[test]
 fn test_c4_deployment() {
-    let r = render("C4Deployment\nPerson(u,\"User\")\nNode(server,\"Server\")\nRel(u,server,\"connects\")");
+    let r = render(
+        "C4Deployment\nPerson(u,\"User\")\nNode(server,\"Server\")\nRel(u,server,\"connects\")",
+    );
     assert!(r.is_ok() || r.is_err(), "C4 deployment should not panic");
 }
 
@@ -971,7 +996,10 @@ fn test_check_treemap_valid() {
 #[test]
 fn test_check_sankey_valid() {
     let r = check("sankey\n  A->B:100").unwrap();
-    assert!(r.valid || r.has_errors() == false, "sankey should be valid or have minor errors");
+    assert!(
+        r.valid || !r.has_errors(),
+        "sankey should be valid or have minor errors"
+    );
 }
 
 #[test]

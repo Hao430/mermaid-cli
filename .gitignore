@@ -3,3 +3,7 @@
 output.svg
 output2.svg
 test_diagram.mmd
+*.bak
+*.backup
+*.mybackup
+test_user_visual/

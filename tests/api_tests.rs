@@ -1565,11 +1565,8 @@ fn test_parse_error_types() {
     ];
     for (code, _desc) in &cases {
         let result = parse(code);
-        // Should either error or produce a partial diagram
-        match result {
-            Ok(_) => {}  // Partial parse is acceptable
-            Err(_) => {} // Error is also acceptable
-        }
+        // Should either error or produce a partial diagram (both acceptable)
+        let _ = result;
     }
 }
 
@@ -1822,7 +1819,7 @@ fn test_markdown_extract_weird_spacing() {
     let md = "text\n```   mermaid   \ngraph TD\nA-->B\n   ```   \nend";
     let blocks = extract_mermaid_blocks(md);
     assert!(
-        blocks.len() == 1 || blocks.len() == 0,
+        blocks.len() == 1 || blocks.is_empty(),
         "Should handle weird spacing"
     );
 }
@@ -4031,13 +4028,11 @@ fn test_treemap_large_values() {
 }
 
 #[test]
-#[test]
 fn test_treemap_invalid_missing_colon() {
     let result = check("treemap\nNoColon");
     assert!(result.is_ok());
 }
 
-#[test]
 #[test]
 fn test_treemap_invalid_non_numeric_value() {
     let result = check("treemap\nA: abc");
@@ -4268,7 +4263,6 @@ fn test_mindmap_multiple_roots() {
 }
 
 // --- GitGraph edge cases ---
-#[test]
 #[test]
 fn test_gitgraph_two_branches() {
     let result = render(
@@ -4649,9 +4643,8 @@ fn test_render_empty_statements_graceful() {
     for t in &empty_types {
         let result = render(t);
         // Should either produce SVG or error, but not panic
-        match result {
-            Ok(svg) => assert!(svg.contains("<svg"), "{} empty should produce SVG", t),
-            Err(_) => {} // Error is acceptable for empty diagrams
+        if let Ok(svg) = result {
+            assert!(svg.contains("<svg"), "{} empty should produce SVG", t);
         }
     }
 }
@@ -4860,7 +4853,11 @@ fn test_svg_well_formed_all_types() {
         let svg = render(code).unwrap_or_else(|_| panic!("{} should render", name));
         let opens = svg.matches("<svg").count();
         let closes = svg.matches("</svg>").count();
-        assert_eq!(opens, closes, "{}: balanced svg tags ({} vs {})", name, opens, closes);
+        assert_eq!(
+            opens, closes,
+            "{}: balanced svg tags ({} vs {})",
+            name, opens, closes
+        );
         assert!(svg.starts_with("<?xml"), "{}: XML declaration", name);
         assert!(svg.contains("</svg>"), "{}: closing tag", name);
     }
@@ -4943,7 +4940,6 @@ fn test_flowchart_fan_out() {
 }
 
 // --- Nested quotes ---
-#[test]
 #[test]
 fn test_sequence_quoted_labels() {
     let result = render("sequenceDiagram\nA->B: Hello said Alice");

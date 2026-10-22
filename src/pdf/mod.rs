@@ -42,12 +42,11 @@ impl PdfWriter {
         ));
 
         // Object 4: Content stream (references the XObject)
-        let stream_content = format!(
-            "q\n\
+        let stream_content = "q\n\
              1 0 0 1 0 0 cm\n\
              /X0 Do\n\
              Q\n"
-        );
+        .to_string();
         let obj4_offset = pdf.len();
         pdf.push_str("4 0 obj\n");
         pdf.push_str(&format!(
@@ -76,7 +75,7 @@ impl PdfWriter {
         // ── Cross-reference table ──
         let xref_offset = pdf.len();
         pdf.push_str("xref\n");
-        pdf.push_str(&format!("0 6\n"));
+        pdf.push_str("0 6\n");
         pdf.push_str("0000000000 65535 f \n");
         pdf.push_str(&format!("{:010} 00000 n \n", obj1_offset));
         pdf.push_str(&format!("{:010} 00000 n \n", obj2_offset));

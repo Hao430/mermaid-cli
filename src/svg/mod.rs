@@ -106,10 +106,7 @@ impl SvgBuilder {
         } else {
             // Multiple lines: use tspan elements
             let line_height = 16.0; // Approximate line height
-            let mut element = format!(
-                r#"  <text x="{}" y="{}" style="{}">"#,
-                x, y, style
-            );
+            let mut element = format!(r#"  <text x="{}" y="{}" style="{}">"#, x, y, style);
 
             for (i, line) in lines.iter().enumerate() {
                 let dy = if i == 0 { 0.0 } else { line_height };

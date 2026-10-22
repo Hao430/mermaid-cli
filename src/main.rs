@@ -37,12 +37,28 @@ fn main() {
         }
         _ => {
             let show_fixes = args.contains(&"--show-fixes".to_string());
-            // Collect all input files (multiple files can be specified)
+            // Collect all input files (skipping flags and their arguments)
             let mut input_files = Vec::new();
-            for (i, arg) in args.iter().enumerate().skip(1) {
-                if !arg.starts_with('-') && (arg.ends_with(".mmd") || arg.ends_with(".md") || !arg.contains('.') == false) {
-                    input_files.push((i, arg.clone()));
+            let mut i = 1;
+            while i < args.len() {
+                let arg = &args[i];
+                if arg.starts_with('-') {
+                    match arg.as_str() {
+                        "-e" | "--outputFormat" | "-o" | "--output" | "-C" | "--cssFile" | "-c"
+                        | "--configFile" | "-t" | "--theme" | "-w" | "--width" | "-H"
+                        | "--height" | "-s" | "--scale" | "-b" | "--backgroundColor"
+                        | "--svgId" | "-j" | "--jobs" => {
+                            i += 2;
+                            continue;
+                        }
+                        _ => {
+                            i += 1;
+                            continue;
+                        }
+                    }
                 }
+                input_files.push((i, arg.clone()));
+                i += 1;
             }
 
             if input_files.is_empty() {
@@ -255,7 +271,11 @@ fn handle_file_render(args: &[String], show_fixes: bool) {
         if let Some(cfg_theme) = config.theme {
             renderer = renderer.with_theme(&cfg_theme);
         }
-        if let Some(cfg_bg) = config.theme_variables.as_ref().and_then(|tv| tv.primary_color.as_ref()) {
+        if let Some(cfg_bg) = config
+            .theme_variables
+            .as_ref()
+            .and_then(|tv| tv.primary_color.as_ref())
+        {
             renderer = renderer.with_background_color(cfg_bg);
         }
     }
@@ -523,7 +543,11 @@ fn handle_stdin_render(args: &[String], show_fixes: bool) {
         if let Some(cfg_theme) = config.theme {
             renderer = renderer.with_theme(&cfg_theme);
         }
-        if let Some(cfg_bg) = config.theme_variables.as_ref().and_then(|tv| tv.primary_color.as_ref()) {
+        if let Some(cfg_bg) = config
+            .theme_variables
+            .as_ref()
+            .and_then(|tv| tv.primary_color.as_ref())
+        {
             renderer = renderer.with_background_color(cfg_bg);
         }
     }
@@ -792,7 +816,7 @@ fn render_files_parallel(
     let (tx, rx) = mpsc::channel();
 
     // Process in chunks
-    let chunk_size = (files.len() + num_jobs - 1) / num_jobs;
+    let chunk_size = files.len().div_ceil(num_jobs);
 
     for chunk in files.chunks(chunk_size) {
         let chunk = chunk.to_vec();
@@ -949,13 +973,16 @@ fn handle_multi_file_render(args: &[String], input_files: Vec<(usize, String)>, 
     }
 
     // Check if output is a directory
-    let output_dir = args.iter().zip(args.iter().skip(1))
+    let output_dir = args
+        .iter()
+        .zip(args.iter().skip(1))
         .find(|(a, _)| a == &&"-o".to_string() || a == &&"--output".to_string())
-        .and_then(|(_, b)| Some(b.clone()));
+        .map(|(_, b)| b.clone());
 
-    let output_is_dir = output_dir.as_ref().map(|d| {
-        std::path::Path::new(d).is_dir()
-    }).unwrap_or(false);
+    let output_is_dir = output_dir
+        .as_ref()
+        .map(|d| std::path::Path::new(d).is_dir())
+        .unwrap_or(false);
 
     let total = input_files.len();
     if !quiet {
@@ -981,23 +1008,30 @@ fn handle_multi_file_render(args: &[String], input_files: Vec<(usize, String)>, 
         // Adjust output filename if needed
         if output_is_dir {
             let input_path = std::path::Path::new(input_file);
-            let file_stem = input_path.file_stem()
+            let file_stem = input_path
+                .file_stem()
                 .and_then(|s| s.to_str())
                 .unwrap_or("output");
 
-            let output_ext = args.iter().zip(args.iter().skip(1))
+            let output_ext = args
+                .iter()
+                .zip(args.iter().skip(1))
                 .find(|(a, _)| a == &&"-e".to_string() || a == &&"--outputFormat".to_string())
                 .map(|(_, e)| e.as_str())
                 .unwrap_or("svg");
 
-            let output_file = format!("{}/{}.{}",
+            let output_file = format!(
+                "{}/{}.{}",
                 output_dir.as_ref().unwrap(),
                 file_stem,
                 output_ext
             );
 
             // Update output path in args
-            if let Some(pos) = file_args.iter().position(|a| a == &"-o".to_string() || a == &"--output".to_string()) {
+            if let Some(pos) = file_args
+                .iter()
+                .position(|a| a == &"-o".to_string() || a == &"--output".to_string())
+            {
                 if pos + 1 < file_args.len() {
                     file_args[pos + 1] = output_file;
                 }

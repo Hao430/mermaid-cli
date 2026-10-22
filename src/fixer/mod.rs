@@ -120,14 +120,11 @@ impl Fixer {
         let trimmed = fixed.trim_start();
         let is_sequence = trimmed.starts_with("sequenceDiagram") || trimmed.starts_with("zenuml");
         let is_class = trimmed.starts_with("classDiagram");
-        let is_flowchart = trimmed.starts_with("graph") || trimmed.starts_with("flowchart");
 
         if is_sequence {
             self.fix_sequence(&mut fixed, &mut fixes);
         } else if is_class {
             self.fix_class(&mut fixed, &mut fixes);
-        } else if is_flowchart {
-            self.fix_flowchart(&mut fixed, &mut fixes);
         } else {
             self.fix_flowchart(&mut fixed, &mut fixes);
         }

@@ -1,16 +1,13 @@
 /// Performance benchmarks for mermaid-cli
 /// Compares render times for various diagram types and batch sizes
-
 use std::fs;
 use std::time::{Duration, Instant};
 
 fn load_test_diagrams() -> Vec<String> {
     let fixtures_path = "tests/fixtures/diagrams.json";
-    let content = fs::read_to_string(fixtures_path)
-        .expect("Failed to read fixtures");
+    let content = fs::read_to_string(fixtures_path).expect("Failed to read fixtures");
 
-    let json: serde_json::Value = serde_json::from_str(&content)
-        .expect("Failed to parse fixtures");
+    let json: serde_json::Value = serde_json::from_str(&content).expect("Failed to parse fixtures");
 
     json.as_object()
         .expect("Fixtures must be an object")
@@ -46,10 +43,7 @@ fn bench_single_diagram() {
 #[ignore] // Run with: cargo test bench_ -- --ignored --nocapture
 fn bench_batch_10_diagrams() {
     let diagrams = load_test_diagrams();
-    let batch: Vec<&str> = diagrams.iter()
-        .take(10)
-        .map(|s| s.as_str())
-        .collect();
+    let batch: Vec<&str> = diagrams.iter().take(10).map(|s| s.as_str()).collect();
 
     let start = Instant::now();
     for diagram in &batch {
@@ -67,7 +61,8 @@ fn bench_batch_10_diagrams() {
 #[ignore] // Run with: cargo test bench_ -- --ignored --nocapture
 fn bench_batch_100_diagrams() {
     let diagrams = load_test_diagrams();
-    let batch: Vec<&str> = diagrams.iter()
+    let batch: Vec<&str> = diagrams
+        .iter()
         .cycle()
         .take(100)
         .map(|s| s.as_str())
@@ -131,7 +126,7 @@ fn bench_all_diagram_types() {
     let start = Instant::now();
     let mut count = 0;
     for diagram in diagrams {
-        if let Ok(_) = mermaid_cli::render(&diagram) {
+        if mermaid_cli::render(&diagram).is_ok() {
             count += 1;
         }
     }
@@ -139,8 +134,10 @@ fn bench_all_diagram_types() {
 
     println!("Successfully rendered: {}", count);
     println!("Total time: {:.2}ms", total.as_secs_f64() * 1000.0);
-    println!("Average per diagram: {:.2}ms",
-             (total.as_secs_f64() * 1000.0) / count as f64);
+    println!(
+        "Average per diagram: {:.2}ms",
+        (total.as_secs_f64() * 1000.0) / count as f64
+    );
 }
 
 #[test]
@@ -166,8 +163,10 @@ fn compare_render_times() {
 
     println!("Single render: {:.2}ms", single.as_secs_f64() * 1000.0);
     println!("100 renders: {:.2}ms total", batch.as_secs_f64() * 1000.0);
-    println!("100 renders: {:.2}ms average",
-             (batch.as_secs_f64() * 1000.0) / 100.0);
+    println!(
+        "100 renders: {:.2}ms average",
+        (batch.as_secs_f64() * 1000.0) / 100.0
+    );
 
     // Expected comparison with mmdc
     println!("\n--- Expected vs mmdc ---");

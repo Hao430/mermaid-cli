@@ -1,16 +1,14 @@
 /// Snapshot tests for all diagram types
 /// Verifies that all diagram types render successfully and produce valid SVG
-
 use std::fs;
 
 // Load test fixtures
 fn load_fixtures() -> Vec<(String, serde_json::Value)> {
     let fixtures_path = "tests/fixtures/diagrams.json";
-    let content = fs::read_to_string(fixtures_path)
-        .expect("Failed to read fixtures file");
+    let content = fs::read_to_string(fixtures_path).expect("Failed to read fixtures file");
 
-    let json: serde_json::Value = serde_json::from_str(&content)
-        .expect("Failed to parse fixtures JSON");
+    let json: serde_json::Value =
+        serde_json::from_str(&content).expect("Failed to parse fixtures JSON");
 
     json.as_object()
         .expect("Fixtures must be an object")
@@ -27,10 +25,15 @@ fn test_all_diagram_types_render() {
     for (name, fixture) in fixtures {
         let input = fixture["input"]
             .as_str()
-            .expect(&format!("No input for {}", name));
+            .unwrap_or_else(|| panic!("No input for {}", name));
 
         let result = mermaid_cli::render(input);
-        assert!(result.is_ok(), "Render failed for {}: {:?}", name, result.err());
+        assert!(
+            result.is_ok(),
+            "Render failed for {}: {:?}",
+            name,
+            result.err()
+        );
 
         let svg = result.unwrap();
         assert!(!svg.is_empty(), "Empty SVG for {}", name);
@@ -55,7 +58,11 @@ fn test_all_diagrams_produce_valid_svg() {
 #[test]
 fn test_diagram_count() {
     let fixtures = load_fixtures();
-    assert_eq!(fixtures.len(), 30, "Expected 30 test fixtures (15 supported types × 2)");
+    assert_eq!(
+        fixtures.len(),
+        30,
+        "Expected 30 test fixtures (15 supported types × 2)"
+    );
 }
 
 #[test]
@@ -71,8 +78,19 @@ fn test_all_diagram_types_covered() {
 
     // Verify we have tests for key diagram types
     let required_types = vec![
-        "flowchart", "sequence", "pie", "class", "state", "er", "gantt",
-        "mindmap", "gitgraph", "timeline", "journey", "kanban", "venn"
+        "flowchart",
+        "sequence",
+        "pie",
+        "class",
+        "state",
+        "er",
+        "gantt",
+        "mindmap",
+        "gitgraph",
+        "timeline",
+        "journey",
+        "kanban",
+        "venn",
     ];
 
     for required_type in required_types {
@@ -93,12 +111,17 @@ fn test_svg_no_errors() {
         let svg = mermaid_cli::render(input).unwrap();
 
         // Check for common error indicators in SVG
-        assert!(!svg.to_lowercase().contains("error"),
-            "{}: SVG contains 'error' text", name);
-        assert!(!svg.contains("undefined"),
-            "{}: SVG contains 'undefined'", name);
-        assert!(!svg.contains("NaN"),
-            "{}: SVG contains 'NaN'", name);
+        assert!(
+            !svg.to_lowercase().contains("error"),
+            "{}: SVG contains 'error' text",
+            name
+        );
+        assert!(
+            !svg.contains("undefined"),
+            "{}: SVG contains 'undefined'",
+            name
+        );
+        assert!(!svg.contains("NaN"), "{}: SVG contains 'NaN'", name);
     }
 }
 
@@ -154,6 +177,10 @@ mod performance_checks {
         let avg_time = elapsed.as_millis() as f64 / fixtures.len() as f64;
 
         println!("Average render time: {:.2}ms per diagram", avg_time);
-        assert!(avg_time < 100.0, "Average render time too slow: {:.2}ms", avg_time);
+        assert!(
+            avg_time < 100.0,
+            "Average render time too slow: {:.2}ms",
+            avg_time
+        );
     }
 }
