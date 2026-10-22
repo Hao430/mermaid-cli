@@ -1,9 +1,50 @@
+# Rust build output
 /target
-.claude/
+
+# Secrets & Environment variables
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.token
+*.secret
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System artifacts
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs & Temporary debug outputs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+tmp/
+temp/
+coverage/
+
+# Local test & scratch diagrams
 output.svg
 output2.svg
 test_diagram.mmd
+test_user_visual/
+
+# Backup files
 *.bak
 *.backup
 *.mybackup
-test_user_visual/
+
+# Local AI agent & assistant caches
+.claude/
+.codebuddy/
