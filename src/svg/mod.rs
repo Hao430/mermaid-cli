@@ -144,6 +144,32 @@ impl SvgBuilder {
         self.elements.push(element);
     }
 
+    /// Add a directional arrowhead pointing to (tip_x, tip_y) along direction vector (dx, dy)
+    pub fn add_directional_arrow(&mut self, tip_x: f32, tip_y: f32, dx: f32, dy: f32, style: &str) {
+        let size = 8.0_f32;
+        let half_width = 4.5_f32;
+        // Perpendicular vector (-dy, dx)
+        let perp_x = -dy;
+        let perp_y = dx;
+        let base_x = tip_x - dx * size;
+        let base_y = tip_y - dy * size;
+        let p1_x = base_x + perp_x * half_width;
+        let p1_y = base_y + perp_y * half_width;
+        let p2_x = base_x - perp_x * half_width;
+        let p2_y = base_y - perp_y * half_width;
+
+        self.track_bounds(tip_x, tip_y);
+        self.track_bounds(p1_x, p1_y);
+        self.track_bounds(p2_x, p2_y);
+
+        let points = format!(
+            "{:.1},{:.1} {:.1},{:.1} {:.1},{:.1}",
+            tip_x, tip_y, p1_x, p1_y, p2_x, p2_y
+        );
+        let element = format!(r#"  <polygon points="{}" style="{}"/>"#, points, style);
+        self.elements.push(element);
+    }
+
     pub fn add_path(&mut self, d: &str, style: &str) {
         // 从 path 数据中提取 (x, y) 坐标
         let mut is_x = true;
@@ -209,12 +235,16 @@ impl SvgBuilder {
         svg.push_str(&format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
 <svg width="{}" height="{}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <style>
+  <style>{}
     text {{ font-family: Arial, sans-serif; font-size: 14px; }}
   </style>{}
   <rect width="100%" height="100%" fill="{}"/>
 "#,
-            width, height, extra_css, self.background_color
+            width,
+            height,
+            crate::renderer::theme::DEFAULT_CSS_VARIABLES,
+            extra_css,
+            self.background_color
         ));
 
         for element in self.elements {

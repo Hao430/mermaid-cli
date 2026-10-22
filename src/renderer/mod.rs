@@ -3,6 +3,9 @@ use crate::parser::{Diagram, NodeShape, Statement, Subgraph};
 use crate::svg::SvgBuilder;
 use std::collections::{HashMap, HashSet};
 
+pub mod routing;
+pub mod theme;
+
 pub struct Renderer {
     width: u32,
     height: u32,
@@ -261,55 +264,55 @@ impl Renderer {
                 let sg_w = max_x - min_x + 2.0 * padding_x;
                 let sg_h = max_y - min_y + padding_top + padding_bottom;
 
-                svg.add_rect(
-                    sg_x,
-                    sg_y,
-                    sg_w,
-                    sg_h,
-                    "fill:#f8fafc;stroke:#cbd5e1;stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8",
-                );
+                svg.add_rect(sg_x, sg_y, sg_w, sg_h, &theme::default_subgraph_style());
 
                 if let Some(title) = &sg.title {
                     svg.add_text(
                         sg_x + 15.0,
                         sg_y + 18.0,
                         title,
-                        "text-anchor:start;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#475569;font-family:Arial, sans-serif",
+                        &theme::default_subgraph_title_style(),
                     );
                 }
             }
         }
 
-        // 绘制边
+        // 绘制边 (使用 Ondine 式圆角正交连线路由算法)
         for (from, to, label) in &edges_with_labels {
             if let (Some(&(x1, y1)), Some(&(x2, y2))) =
                 (node_positions.get(from), node_positions.get(to))
             {
-                let cx1 = x1 + node_width / 2.0;
-                let cy1 = y1 + node_height / 2.0;
-                let cx2 = x2 + node_width / 2.0;
-                let cy2 = y2 + node_height / 2.0;
+                let routed = routing::route_orthogonal_edge(
+                    (x1, y1, node_width, node_height),
+                    (x2, y2, node_width, node_height),
+                    8.0,
+                );
 
-                svg.add_line(cx1, cy1, cx2, cy2, "stroke:#475569;stroke-width:1.5");
-                svg.add_arrow(cx2, cy2);
+                svg.add_path(&routed.path_data, &theme::default_edge_style());
+
+                let (tip_x, tip_y, dx, dy) = routed.arrow;
+                svg.add_directional_arrow(
+                    tip_x,
+                    tip_y,
+                    dx,
+                    dy,
+                    &format!("fill:{};stroke:none", theme::default_arrowhead_fill()),
+                );
 
                 if let Some(edge_label) = label {
                     let text_chars = edge_label.chars().count() as f32;
                     let lw = (text_chars * 12.0 + 14.0).max(36.0);
-                    let label_x = (cx1 + cx2) / 2.0 - lw / 2.0;
-                    let label_y = (cy1 + cy2) / 2.0 - 9.0;
-                    svg.add_rect(
-                        label_x,
-                        label_y,
-                        lw,
-                        18.0,
-                        "fill:#ffffff;stroke:#cbd5e1;stroke-width:1;rx:4;ry:4",
-                    );
+                    let label_x = routed.label_pos.0 - lw / 2.0;
+                    let label_y = routed.label_pos.1 - 9.0;
+                    svg.add_rect(label_x, label_y, lw, 18.0, &theme::default_pill_style());
                     svg.add_text(
-                        (cx1 + cx2) / 2.0,
-                        (cy1 + cy2) / 2.0 + 4.0,
+                        routed.label_pos.0,
+                        routed.label_pos.1 + 4.0,
                         edge_label,
-                        "text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:#475569;font-family:Arial, sans-serif",
+                        &format!(
+                            "text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:{};font-family:Arial, sans-serif",
+                            theme::default_pill_text_fill()
+                        ),
                     );
                 }
             }
@@ -358,16 +361,10 @@ impl Renderer {
                         }
                         (s, color)
                     } else {
-                        (
-                            "fill:#ffffff;stroke:#334155;stroke-width:1.5".to_string(),
-                            "#0f172a".to_string(),
-                        )
+                        (theme::default_node_style(), theme::default_text_fill())
                     }
                 } else {
-                    (
-                        "fill:#ffffff;stroke:#334155;stroke-width:1.5".to_string(),
-                        "#0f172a".to_string(),
-                    )
+                    (theme::default_node_style(), theme::default_text_fill())
                 };
 
                 match shape {
