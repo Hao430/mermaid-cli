@@ -335,12 +335,11 @@ impl Lexer {
                 TokenType::Keyword(ident)
             }
             "TD" | "BT" | "LR" | "RL" => TokenType::Keyword(ident),
-            "end" | "subgraph" | "participant" | "Note" | "note" | "as" | "alt" | "loop"
-            | "opt" | "par" | "else" | "activate" | "deactivate" | "title" | "class"
-            | "annotation" | "interface" | "abstract" | "namespace" | "state" | "section"
-            | "dateFormat" | "excludes" | "cssClass" | "callback" | "link" | "click" => {
-                TokenType::Keyword(ident)
-            }
+            "end" | "subgraph" | "participant" | "actor" | "autonumber" | "Note" | "note"
+            | "as" | "alt" | "loop" | "opt" | "par" | "else" | "activate" | "deactivate"
+            | "title" | "class" | "annotation" | "interface" | "abstract" | "namespace"
+            | "state" | "section" | "dateFormat" | "excludes" | "cssClass" | "callback"
+            | "link" | "click" => TokenType::Keyword(ident),
             _ => TokenType::Identifier(ident),
         };
 

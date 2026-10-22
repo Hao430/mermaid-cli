@@ -736,8 +736,17 @@ impl Parser {
         let token = self.peek()?.clone();
 
         match &token.token_type {
-            // participant declaration
-            TokenType::Keyword(k) if k == "participant" => {
+            // autonumber directive: skip rest of line
+            TokenType::Keyword(k) if k == "autonumber" => {
+                let line = token.line;
+                let _ = self.advance();
+                while !self.is_at_end() && self.peek()?.line == line {
+                    let _ = self.advance();
+                }
+                Ok(None)
+            }
+            // participant or actor declaration
+            TokenType::Keyword(k) if k == "participant" || k == "actor" => {
                 let _ = self.advance();
                 let id = self.parse_node_id()?;
                 // optional: `as Label` (no colon)
@@ -766,6 +775,13 @@ impl Parser {
                                             text.push(' ');
                                         }
                                         text.push_str(kw);
+                                        let _ = self.advance();
+                                    }
+                                    TokenType::String(s) => {
+                                        if !text.is_empty() {
+                                            text.push(' ');
+                                        }
+                                        text.push_str(s);
                                         let _ = self.advance();
                                     }
                                     _ => break,
@@ -3664,6 +3680,22 @@ mod tests {
                 assert_eq!(label.as_deref(), Some("Alice"));
             }
             _ => panic!("Expected Participant"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_actor_and_autonumber() {
+        let code =
+            "sequenceDiagram\n    autonumber\n    actor User as 终端用户\n    User->>App: Hello";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        assert_eq!(diagram.diagram_type, DiagramType::Sequence);
+        match &diagram.statements[0] {
+            Statement::Participant { id, label } => {
+                assert_eq!(id, "User");
+                assert_eq!(label.as_deref(), Some("终端用户"));
+            }
+            _ => panic!("Expected Participant/Actor"),
         }
     }
 
