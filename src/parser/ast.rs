@@ -63,6 +63,14 @@ pub enum Statement {
         to: String,
         label: Option<String>,
     },
+    StyleClassDef {
+        name: String,
+        styles: String,
+    },
+    ClassAssign {
+        nodes: Vec<String>,
+        class_name: String,
+    },
     // Sequence diagram
     Participant {
         id: String,
@@ -618,6 +626,17 @@ impl Diagram {
                     nodes.insert(from.clone());
                     nodes.insert(to.clone());
                 }
+                Statement::StyleClassDef { .. } | Statement::ClassAssign { .. } => {}
+            }
+        }
+        for sg in &self.subgraphs {
+            for stmt in &sg.statements {
+                if let Statement::NodeDef { id, .. } = stmt {
+                    nodes.insert(id.clone());
+                } else if let Statement::EdgeDef { from, to, .. } = stmt {
+                    nodes.insert(from.clone());
+                    nodes.insert(to.clone());
+                }
             }
         }
         nodes.into_iter().collect()
@@ -844,6 +863,18 @@ impl Diagram {
                     node_map.entry(from.clone()).or_insert_with(|| from.clone());
                     node_map.entry(to.clone()).or_insert_with(|| to.clone());
                 }
+                Statement::StyleClassDef { .. } | Statement::ClassAssign { .. } => {}
+            }
+        }
+        for sg in &self.subgraphs {
+            for stmt in &sg.statements {
+                if let Statement::NodeDef { id, label, .. } = stmt {
+                    let display = label.clone().unwrap_or_else(|| id.clone());
+                    node_map.insert(id.clone(), display);
+                } else if let Statement::EdgeDef { from, to, .. } = stmt {
+                    node_map.entry(from.clone()).or_insert_with(|| from.clone());
+                    node_map.entry(to.clone()).or_insert_with(|| to.clone());
+                }
             }
         }
         node_map.into_iter().collect()
@@ -856,6 +887,13 @@ impl Diagram {
                 edges.push((from.clone(), to.clone()));
             }
         }
+        for sg in &self.subgraphs {
+            for stmt in &sg.statements {
+                if let Statement::EdgeDef { from, to, .. } = stmt {
+                    edges.push((from.clone(), to.clone()));
+                }
+            }
+        }
         edges
     }
 
@@ -865,6 +903,13 @@ impl Diagram {
         for stmt in &self.statements {
             if let Statement::EdgeDef { from, to, label } = stmt {
                 edges.push((from.clone(), to.clone(), label.clone()));
+            }
+        }
+        for sg in &self.subgraphs {
+            for stmt in &sg.statements {
+                if let Statement::EdgeDef { from, to, label } = stmt {
+                    edges.push((from.clone(), to.clone(), label.clone()));
+                }
             }
         }
         edges

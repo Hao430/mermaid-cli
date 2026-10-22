@@ -1,5 +1,5 @@
 use crate::parser::{ArrowType, ClassVisibility, DiagramType, NotePosition};
-use crate::parser::{Diagram, NodeShape, Statement};
+use crate::parser::{Diagram, NodeShape, Statement, Subgraph};
 use crate::svg::SvgBuilder;
 use std::collections::{HashMap, HashSet};
 
@@ -97,23 +97,50 @@ impl Renderer {
     fn render_flowchart(&self, diagram: &Diagram) -> Result<String, String> {
         let mut svg = self.setup_svg_builder();
 
-        // 构建节点信息：ID → (label, shape)
+        // 构建节点信息：ID → (label, shape) 以及样式定义
         let mut node_info: HashMap<String, (String, NodeShape)> = HashMap::new();
-        for stmt in &diagram.statements {
-            if let Statement::NodeDef { id, label, shape } = stmt {
-                let display = label.clone().unwrap_or_else(|| id.clone());
-                node_info.insert(id.clone(), (display, shape.clone()));
+        let mut class_defs: HashMap<String, String> = HashMap::new();
+        let mut node_classes: HashMap<String, String> = HashMap::new();
+
+        let mut process_stmt = |stmt: &Statement| match stmt {
+            Statement::NodeDef { id, label, shape } => {
+                if let Some(existing) = node_info.get_mut(id) {
+                    if let Some(lbl) = label {
+                        existing.0 = lbl.clone();
+                    }
+                    if *shape != NodeShape::Rect {
+                        existing.1 = shape.clone();
+                    }
+                } else {
+                    let display = label.clone().unwrap_or_else(|| id.clone());
+                    node_info.insert(id.clone(), (display, shape.clone()));
+                }
             }
-        }
-        // 添加只有 EdgeDef 引用但没有 NodeDef 的节点
-        for stmt in &diagram.statements {
-            if let Statement::EdgeDef { from, to, .. } = stmt {
+            Statement::EdgeDef { from, to, .. } => {
                 node_info
                     .entry(from.clone())
                     .or_insert_with(|| (from.clone(), NodeShape::Rect));
                 node_info
                     .entry(to.clone())
                     .or_insert_with(|| (to.clone(), NodeShape::Rect));
+            }
+            Statement::StyleClassDef { name, styles } => {
+                class_defs.insert(name.clone(), styles.clone());
+            }
+            Statement::ClassAssign { nodes, class_name } => {
+                for node in nodes {
+                    node_classes.insert(node.clone(), class_name.clone());
+                }
+            }
+            _ => {}
+        };
+
+        for stmt in &diagram.statements {
+            process_stmt(stmt);
+        }
+        for sg in &diagram.subgraphs {
+            for stmt in &sg.statements {
+                process_stmt(stmt);
             }
         }
 
@@ -122,7 +149,7 @@ impl Renderer {
 
         // ponytail: use tree-aware layout for org charts; fallback to topological sort for DAGs
         let node_ids: Vec<String> = node_info.keys().cloned().collect();
-        let layers = compute_tree_layers(&node_ids, &edges);
+        let layers = compute_tree_layers(&node_ids, &edges, &diagram.subgraphs);
 
         // 布局参数（紧凑树形布局以最小化连线交叉）
         let node_width = 130.0;
@@ -192,6 +219,67 @@ impl Renderer {
         // 更新 SVG 构建器的尺寸
         svg.set_dimensions(effective_width, effective_height);
 
+        // 绘制 subgraph 背景（在边和节点之前绘制）
+        for sg in &diagram.subgraphs {
+            let mut sg_node_ids = HashSet::new();
+            for stmt in &sg.statements {
+                match stmt {
+                    Statement::NodeDef { id, .. } => {
+                        sg_node_ids.insert(id.clone());
+                    }
+                    Statement::EdgeDef { from, to, .. } => {
+                        sg_node_ids.insert(from.clone());
+                        sg_node_ids.insert(to.clone());
+                    }
+                    _ => {}
+                }
+            }
+
+            let mut min_x = f32::INFINITY;
+            let mut min_y = f32::INFINITY;
+            let mut max_x = f32::NEG_INFINITY;
+            let mut max_y = f32::NEG_INFINITY;
+            let mut has_node = false;
+
+            for id in &sg_node_ids {
+                if let Some(&(nx, ny)) = node_positions.get(id) {
+                    min_x = min_x.min(nx);
+                    min_y = min_y.min(ny);
+                    max_x = max_x.max(nx + node_width);
+                    max_y = max_y.max(ny + node_height);
+                    has_node = true;
+                }
+            }
+
+            if has_node {
+                let padding_x = 20.0;
+                let padding_bottom = 20.0;
+                let padding_top = if sg.title.is_some() { 36.0 } else { 20.0 };
+
+                let sg_x = min_x - padding_x;
+                let sg_y = min_y - padding_top;
+                let sg_w = max_x - min_x + 2.0 * padding_x;
+                let sg_h = max_y - min_y + padding_top + padding_bottom;
+
+                svg.add_rect(
+                    sg_x,
+                    sg_y,
+                    sg_w,
+                    sg_h,
+                    "fill:#f8fafc;stroke:#cbd5e1;stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8",
+                );
+
+                if let Some(title) = &sg.title {
+                    svg.add_text(
+                        sg_x + 15.0,
+                        sg_y + 18.0,
+                        title,
+                        "text-anchor:start;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#475569;font-family:Arial, sans-serif",
+                    );
+                }
+            }
+        }
+
         // 绘制边
         for (from, to, label) in &edges_with_labels {
             if let (Some(&(x1, y1)), Some(&(x2, y2))) =
@@ -227,61 +315,60 @@ impl Renderer {
             }
         }
 
-        // 绘制 subgraph 背景
-        for sg in &diagram.subgraphs {
-            let sg_stmts = &sg.statements;
-            if sg_stmts.is_empty() {
-                continue;
-            }
-            let mut min_x = self.width as f32;
-            let mut min_y = self.height as f32;
-            let mut max_x = 0.0_f32;
-            let mut max_y = 0.0_f32;
-            let mut has_node = false;
-
-            for stmt in sg_stmts {
-                if let Statement::NodeDef { id, .. } = stmt {
-                    if let Some(&(nx, ny)) = node_positions.get(id) {
-                        min_x = min_x.min(nx);
-                        min_y = min_y.min(ny);
-                        max_x = max_x.max(nx + node_width);
-                        max_y = max_y.max(ny + node_height);
-                        has_node = true;
-                    }
-                }
-            }
-
-            if has_node {
-                let sg_padding = 10.0;
-                let sg_x = min_x - sg_padding;
-                let sg_y = min_y - sg_padding;
-                let sg_w = max_x - min_x + 2.0 * sg_padding;
-                let sg_h = max_y - min_y + 2.0 * sg_padding;
-
-                svg.add_rect(
-                    sg_x,
-                    sg_y,
-                    sg_w,
-                    sg_h,
-                    "fill:#f0f0f0;stroke:#999;stroke-width:1;rx:5;",
-                );
-                if let Some(title) = &sg.title {
-                    svg.add_text(
-                        sg_x + 10.0,
-                        sg_y + 15.0,
-                        title,
-                        "font-size:12px;font-weight:bold;font-family:Arial",
-                    );
-                }
-            }
-        }
-
         // 绘制节点
         for (node_id, (display_label, shape)) in &node_info {
             if let Some(&(x, y)) = node_positions.get(node_id) {
                 let cx = x + node_width / 2.0;
                 let cy = y + node_height / 2.0;
-                let style = "fill:#ffffff;stroke:#334155;stroke-width:1.5";
+
+                let class_name = node_classes.get(node_id).map(|s| s.as_str()).or_else(|| {
+                    if class_defs.contains_key("default") {
+                        Some("default")
+                    } else {
+                        None
+                    }
+                });
+
+                let (shape_style, text_fill) = if let Some(cname) = class_name {
+                    if let Some(style_decl) = class_defs.get(cname) {
+                        let (props, others) = parse_class_style(style_decl);
+                        let fill = props
+                            .get("fill")
+                            .cloned()
+                            .unwrap_or_else(|| "#ffffff".to_string());
+                        let stroke = props
+                            .get("stroke")
+                            .cloned()
+                            .unwrap_or_else(|| "#334155".to_string());
+                        let stroke_width = props
+                            .get("stroke-width")
+                            .cloned()
+                            .unwrap_or_else(|| "1.5".to_string());
+                        let color = props
+                            .get("color")
+                            .cloned()
+                            .unwrap_or_else(|| "#0f172a".to_string());
+                        let mut s = format!(
+                            "fill:{};stroke:{};stroke-width:{}",
+                            fill, stroke, stroke_width
+                        );
+                        if !others.is_empty() {
+                            s.push(';');
+                            s.push_str(&others.join(";"));
+                        }
+                        (s, color)
+                    } else {
+                        (
+                            "fill:#ffffff;stroke:#334155;stroke-width:1.5".to_string(),
+                            "#0f172a".to_string(),
+                        )
+                    }
+                } else {
+                    (
+                        "fill:#ffffff;stroke:#334155;stroke-width:1.5".to_string(),
+                        "#0f172a".to_string(),
+                    )
+                };
 
                 match shape {
                     NodeShape::Rect => {
@@ -290,7 +377,7 @@ impl Renderer {
                             y,
                             node_width,
                             node_height,
-                            &format!("{};rx:6;ry:6", style),
+                            &format!("{};rx:6;ry:6", shape_style),
                         );
                     }
                     NodeShape::Circle => {
@@ -299,7 +386,7 @@ impl Renderer {
                             y,
                             node_width,
                             node_height,
-                            &format!("{};rx:10;ry:10", style),
+                            &format!("{};rx:10;ry:10", shape_style),
                         );
                     }
                     NodeShape::Diamond => {
@@ -315,20 +402,27 @@ impl Renderer {
                                 cx - node_width / 2.0,
                                 cy
                             ),
-                            style,
+                            &shape_style,
                         );
                     }
                     NodeShape::Rounded => {
+                        let rx = (node_height / 2.0).min(32.5);
                         svg.add_rect(
                             x,
                             y,
                             node_width,
                             node_height,
-                            &format!("{};rx:20;ry:20", style),
+                            &format!("{};rx:{};ry:{}", shape_style, rx, rx),
                         );
                     }
                     NodeShape::Subroutine => {
-                        svg.add_rect(x, y, node_width, node_height, &format!("{};rx:4", style));
+                        svg.add_rect(
+                            x,
+                            y,
+                            node_width,
+                            node_height,
+                            &format!("{};rx:4", shape_style),
+                        );
                         let inset = 6.0;
                         svg.add_rect(
                             x + inset,
@@ -339,13 +433,13 @@ impl Renderer {
                         );
                     }
                     NodeShape::Cylinder => {
-                        svg.add_rect(x, y + 10.0, node_width, node_height - 10.0, style);
-                        svg.add_ellipse(cx, y + 10.0, node_width / 2.0, 10.0, style);
+                        svg.add_rect(x, y + 10.0, node_width, node_height - 10.0, &shape_style);
+                        svg.add_ellipse(cx, y + 10.0, node_width / 2.0, 10.0, &shape_style);
                     }
                     NodeShape::DoubleCircle => {
                         let outer_r = node_height / 2.0;
                         let inner_r = outer_r - 5.0;
-                        svg.add_circle(cx, cy, outer_r, style);
+                        svg.add_circle(cx, cy, outer_r, &shape_style);
                         svg.add_circle(
                             cx,
                             cy,
@@ -354,7 +448,7 @@ impl Renderer {
                         );
                     }
                     NodeShape::Flag => {
-                        svg.add_rect(x + 15.0, y, node_width - 15.0, node_height, style);
+                        svg.add_rect(x + 15.0, y, node_width - 15.0, node_height, &shape_style);
                         svg.add_path(
                             &format!(
                                 "M {} {} L {} {} L {} {} Z",
@@ -365,7 +459,7 @@ impl Renderer {
                                 x,
                                 y + node_height
                             ),
-                            style,
+                            &shape_style,
                         );
                     }
                 }
@@ -374,7 +468,10 @@ impl Renderer {
                     cx,
                     cy,
                     display_label,
-                    "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#0f172a;font-family:Arial, sans-serif",
+                    &format!(
+                        "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:{};font-family:Arial, sans-serif",
+                        text_fill
+                    ),
                 );
             }
         }
@@ -2989,71 +3086,270 @@ impl Default for Renderer {
     }
 }
 
-/// Compute layers using tree-aware depth algorithm for better org chart layout.
-fn compute_tree_layers(node_ids: &[String], edges: &[(String, String)]) -> Vec<Vec<String>> {
-    // Build parent/child maps
-    let mut parents: HashMap<String, String> = HashMap::new();
-    let mut children: HashMap<String, Vec<String>> = HashMap::new();
-    let mut in_degree: HashMap<String, usize> = HashMap::new();
-
-    for id in node_ids {
-        in_degree.insert(id.clone(), 0);
-        children.entry(id.clone()).or_default();
+fn parse_class_style(style_str: &str) -> (HashMap<String, String>, Vec<String>) {
+    let mut props = HashMap::new();
+    let mut other_styles = Vec::new();
+    for part in style_str.split(&[',', ';'][..]) {
+        let trimmed = part.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        if let Some((k, v)) = trimmed.split_once(':') {
+            let key = k.trim().to_lowercase();
+            let val = v.trim().to_string();
+            match key.as_str() {
+                "fill" | "stroke" | "stroke-width" | "color" => {
+                    props.insert(key, val);
+                }
+                _ => {
+                    other_styles.push(format!("{}:{}", key, val));
+                }
+            }
+        }
     }
+    (props, other_styles)
+}
 
+/// Compute layers using tree-aware depth algorithm for better org chart layout.
+fn compute_tree_layers(
+    node_ids: &[String],
+    edges: &[(String, String)],
+    subgraphs: &[Subgraph],
+) -> Vec<Vec<String>> {
+    let node_set: HashSet<&str> = node_ids.iter().map(|s| s.as_str()).collect();
+
+    // 1. Detect back-edges (cycles) using DFS
+    let mut adj: HashMap<&str, Vec<&str>> = HashMap::new();
     for (from, to) in edges {
-        if node_ids.contains(from) && node_ids.contains(to) {
-            parents.insert(to.clone(), from.clone());
-            *in_degree.get_mut(to).unwrap_or(&mut 0) += 1;
-            children.entry(from.clone()).or_default().push(to.clone());
+        if node_set.contains(from.as_str()) && node_set.contains(to.as_str()) {
+            adj.entry(from.as_str()).or_default().push(to.as_str());
         }
     }
 
-    // Find root nodes (no parents)
-    let mut roots: Vec<String> = node_ids
+    let mut visited: HashSet<&str> = HashSet::new();
+    let mut on_stack: HashSet<&str> = HashSet::new();
+    let mut back_edges: HashSet<(&str, &str)> = HashSet::new();
+
+    fn dfs<'a>(
+        u: &'a str,
+        adj: &HashMap<&str, Vec<&'a str>>,
+        visited: &mut HashSet<&'a str>,
+        on_stack: &mut HashSet<&'a str>,
+        back_edges: &mut HashSet<(&'a str, &'a str)>,
+    ) {
+        visited.insert(u);
+        on_stack.insert(u);
+        if let Some(neighbors) = adj.get(u) {
+            for &v in neighbors {
+                if on_stack.contains(v) {
+                    back_edges.insert((u, v));
+                } else if !visited.contains(v) {
+                    dfs(v, adj, visited, on_stack, back_edges);
+                }
+            }
+        }
+        on_stack.remove(u);
+    }
+
+    // Start DFS from in-degree 0 nodes first
+    let mut in_degrees: HashMap<&str, usize> = HashMap::new();
+    for id in node_ids {
+        in_degrees.insert(id.as_str(), 0);
+    }
+    for (from, to) in edges {
+        if node_set.contains(from.as_str()) && node_set.contains(to.as_str()) {
+            *in_degrees.entry(to.as_str()).or_insert(0) += 1;
+        }
+    }
+    let mut roots: Vec<&str> = node_ids
         .iter()
-        .filter(|id| in_degree.get(*id).copied().unwrap_or(0) == 0)
-        .cloned()
+        .map(|s| s.as_str())
+        .filter(|&id| *in_degrees.get(id).unwrap_or(&0) == 0)
         .collect();
 
     if roots.is_empty() {
-        roots = node_ids.to_vec();
+        roots = node_ids.iter().map(|s| s.as_str()).collect();
     }
 
-    // BFS to assign depths
-    let mut depth_map: HashMap<String, usize> = HashMap::new();
-    let mut queue: std::collections::VecDeque<(String, usize)> = std::collections::VecDeque::new();
-
-    for root in &roots {
-        queue.push_back((root.clone(), 0));
-    }
-
-    while let Some((node, depth)) = queue.pop_front() {
-        if depth_map.contains_key(&node) {
-            continue; // Already visited
+    for &r in &roots {
+        if !visited.contains(r) {
+            dfs(r, &adj, &mut visited, &mut on_stack, &mut back_edges);
         }
-        depth_map.insert(node.clone(), depth);
+    }
+    for id in node_ids {
+        if !visited.contains(id.as_str()) {
+            dfs(
+                id.as_str(),
+                &adj,
+                &mut visited,
+                &mut on_stack,
+                &mut back_edges,
+            );
+        }
+    }
 
-        if let Some(child_list) = children.get(&node) {
-            for child in child_list {
-                if !depth_map.contains_key(child) {
-                    queue.push_back((child.clone(), depth + 1));
+    // 2. Build forward DAG (excluding back-edges)
+    let mut dag_adj: HashMap<&str, Vec<&str>> = HashMap::new();
+    let mut dag_in_degree: HashMap<&str, usize> = HashMap::new();
+    for id in node_ids {
+        dag_in_degree.insert(id.as_str(), 0);
+        dag_adj.entry(id.as_str()).or_default();
+    }
+    for (from, to) in edges {
+        if node_set.contains(from.as_str())
+            && node_set.contains(to.as_str())
+            && !back_edges.contains(&(from.as_str(), to.as_str()))
+        {
+            dag_adj.entry(from.as_str()).or_default().push(to.as_str());
+            *dag_in_degree.entry(to.as_str()).or_insert(0) += 1;
+        }
+    }
+
+    // 3. Topological sort on DAG to compute longest path depths
+    let mut zero_in: std::collections::VecDeque<&str> = std::collections::VecDeque::new();
+    for (id, deg) in &dag_in_degree {
+        if *deg == 0 {
+            zero_in.push_back(*id);
+        }
+    }
+
+    let mut depth_map: HashMap<&str, usize> = HashMap::new();
+    for &id in &zero_in {
+        depth_map.insert(id, 0);
+    }
+
+    while let Some(u) = zero_in.pop_front() {
+        let u_depth = *depth_map.get(u).unwrap_or(&0);
+        if let Some(neighbors) = dag_adj.get(u) {
+            for &v in neighbors {
+                let v_depth = depth_map.entry(v).or_insert(0);
+                *v_depth = (*v_depth).max(u_depth + 1);
+
+                let deg = dag_in_degree.get_mut(v).unwrap();
+                *deg -= 1;
+                if *deg == 0 {
+                    zero_in.push_back(v);
                 }
             }
         }
     }
 
-    // Group nodes by depth
-    let mut layers: Vec<Vec<String>> = Vec::new();
-    let mut max_depth = 0;
-    for depth in depth_map.values() {
-        max_depth = max_depth.max(*depth);
+    // Ensure all nodes have a depth
+    for id in node_ids {
+        depth_map.entry(id.as_str()).or_insert(0);
     }
 
+    // 4. Align subgraphs so downstream subgraphs start after upstream finishes
+    if !subgraphs.is_empty() {
+        let mut node_to_sg: HashMap<&str, usize> = HashMap::new();
+        let mut sg_nodes: HashMap<usize, Vec<&str>> = HashMap::new();
+        for (sg_idx, sg) in subgraphs.iter().enumerate() {
+            for stmt in &sg.statements {
+                match stmt {
+                    Statement::NodeDef { id, .. } => {
+                        node_to_sg.insert(id.as_str(), sg_idx);
+                        sg_nodes.entry(sg_idx).or_default().push(id.as_str());
+                    }
+                    Statement::EdgeDef { from, to, .. } => {
+                        node_to_sg.insert(from.as_str(), sg_idx);
+                        node_to_sg.insert(to.as_str(), sg_idx);
+                        sg_nodes.entry(sg_idx).or_default().push(from.as_str());
+                        sg_nodes.entry(sg_idx).or_default().push(to.as_str());
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        let mut sg_adj: HashMap<usize, HashSet<usize>> = HashMap::new();
+        for (from, to) in edges {
+            if !back_edges.contains(&(from.as_str(), to.as_str())) {
+                if let (Some(&sg_from), Some(&sg_to)) =
+                    (node_to_sg.get(from.as_str()), node_to_sg.get(to.as_str()))
+                {
+                    if sg_from != sg_to {
+                        sg_adj.entry(sg_from).or_default().insert(sg_to);
+                    }
+                }
+            }
+        }
+
+        for _ in 0..subgraphs.len() {
+            for (&sg_from, to_set) in &sg_adj {
+                let max_from = sg_nodes
+                    .get(&sg_from)
+                    .and_then(|nodes| nodes.iter().map(|n| *depth_map.get(n).unwrap_or(&0)).max())
+                    .unwrap_or(0);
+
+                for &sg_to in to_set {
+                    let min_to = sg_nodes
+                        .get(&sg_to)
+                        .and_then(|nodes| {
+                            nodes.iter().map(|n| *depth_map.get(n).unwrap_or(&0)).min()
+                        })
+                        .unwrap_or(0);
+
+                    if min_to <= max_from {
+                        let diff = max_from + 1 - min_to;
+                        let mut to_shift = HashSet::new();
+                        let mut q = std::collections::VecDeque::new();
+                        q.push_back(sg_to);
+                        to_shift.insert(sg_to);
+                        while let Some(curr) = q.pop_front() {
+                            if let Some(nexts) = sg_adj.get(&curr) {
+                                for &nxt in nexts {
+                                    if to_shift.insert(nxt) {
+                                        q.push_back(nxt);
+                                    }
+                                }
+                            }
+                        }
+                        for shifted_sg in to_shift {
+                            if let Some(nodes) = sg_nodes.get(&shifted_sg) {
+                                for n in nodes {
+                                    if let Some(d) = depth_map.get_mut(n) {
+                                        *d += diff;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Re-relax downstream forward edges
+        for _ in 0..node_ids.len() {
+            let mut changed = false;
+            for (from, to) in edges {
+                if !back_edges.contains(&(from.as_str(), to.as_str())) {
+                    if let Some(&d_from) = depth_map.get(from.as_str()) {
+                        if let Some(d_to) = depth_map.get_mut(to.as_str()) {
+                            if *d_to < d_from + 1 {
+                                *d_to = d_from + 1;
+                                changed = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+    }
+
+    // Group nodes by depth
+    let mut max_depth = 0;
+    for &d in depth_map.values() {
+        max_depth = max_depth.max(d);
+    }
+
+    let mut layers: Vec<Vec<String>> = Vec::new();
     for d in 0..=max_depth {
         let layer: Vec<String> = node_ids
             .iter()
-            .filter(|id| depth_map.get(*id).copied().unwrap_or(usize::MAX) == d)
+            .filter(|id| *depth_map.get(id.as_str()).unwrap_or(&usize::MAX) == d)
             .cloned()
             .collect();
         if !layer.is_empty() {
@@ -3728,5 +4024,25 @@ mod tests {
         };
         let svg = Renderer::new().render(&diagram).unwrap();
         assert!(svg.contains("Decision"));
+    }
+
+    #[test]
+    fn test_order_flow_render() {
+        let code = include_str!("../../examples/order_flow.mmd");
+        let mut parser = crate::parser::Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        let svg = Renderer::new().render(&diagram).unwrap();
+        assert!(svg.contains("用户提交订单"));
+        assert!(svg.contains("风控校验与订单创建"));
+        assert!(svg.contains("库存预占"));
+        assert!(svg.contains("支付处理"));
+        assert!(svg.contains("仓储调度与履约"));
+        assert!(svg.contains("签收与售后"));
+        // Assert class styles are applied
+        assert!(svg.contains("#1f77b4"));
+        assert!(svg.contains("#fff3cd"));
+        assert!(svg.contains("#e7f1ff"));
+        assert!(svg.contains("#f8d7da"));
+        assert!(svg.contains("#d4edda"));
     }
 }

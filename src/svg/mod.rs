@@ -90,8 +90,12 @@ impl SvgBuilder {
     pub fn add_text(&mut self, x: f32, y: f32, text: &str, style: &str) {
         self.track_bounds(x, y);
 
-        // Handle <br/> tags by splitting into tspan elements
-        let lines: Vec<&str> = text.split("<br/>").collect();
+        // Normalize <br/>, <br>, <br /> to \n
+        let normalized = text
+            .replace("<br/>", "\n")
+            .replace("<br />", "\n")
+            .replace("<br>", "\n");
+        let lines: Vec<&str> = normalized.split('\n').collect();
 
         if lines.len() == 1 {
             // Simple case: no line breaks
@@ -107,9 +111,10 @@ impl SvgBuilder {
             // Multiple lines: use tspan elements
             let line_height = 16.0; // Approximate line height
             let mut element = format!(r#"  <text x="{}" y="{}" style="{}">"#, x, y, style);
+            let start_dy = -((lines.len() - 1) as f32 * line_height) / 2.0;
 
             for (i, line) in lines.iter().enumerate() {
-                let dy = if i == 0 { 0.0 } else { line_height };
+                let dy = if i == 0 { start_dy } else { line_height };
                 element.push_str(&format!(
                     r#"<tspan x="{}" dy="{}">{}</tspan>"#,
                     x,
@@ -140,10 +145,21 @@ impl SvgBuilder {
     }
 
     pub fn add_path(&mut self, d: &str, style: &str) {
-        // 从 path 数据中粗略提取最大坐标
+        // 从 path 数据中提取 (x, y) 坐标
+        let mut is_x = true;
+        let mut cur_x = 0.0_f32;
         for part in d.split_whitespace() {
             if let Ok(val) = part.parse::<f32>() {
-                self.track_bounds(val, val);
+                if is_x {
+                    cur_x = val;
+                    is_x = false;
+                } else {
+                    self.track_bounds(cur_x, val);
+                    is_x = true;
+                }
+            } else {
+                // 命令字母（如 M, L, Z 等）
+                is_x = true;
             }
         }
         let element = format!(r#"  <path d="{}" style="{}"/>"#, d, style);

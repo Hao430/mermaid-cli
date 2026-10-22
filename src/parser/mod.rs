@@ -455,12 +455,14 @@ impl Parser {
             return Ok(vec![]);
         }
 
-        let token = self.peek()?;
+        let token = self.peek()?.clone();
         match &token.token_type {
             TokenType::Keyword(k) if k == "end" => {
                 let _ = self.advance();
                 Ok(vec![])
             }
+            TokenType::Keyword(k) if k == "classDef" => self.parse_class_def(),
+            TokenType::Keyword(k) if k == "class" => self.parse_class_assign(),
             TokenType::Identifier(_) => self.parse_node_or_edge_statements(),
             TokenType::Semicolon => {
                 let _ = self.advance();
@@ -470,6 +472,112 @@ impl Parser {
                 let _ = self.advance();
                 Ok(vec![])
             }
+        }
+    }
+
+    fn parse_class_def(&mut self) -> Result<Vec<Statement>, ParseError> {
+        let line = self.peek()?.line;
+        let _ = self.advance(); // consume "classDef"
+
+        let raw_line = self._source.lines().nth(line).unwrap_or("").to_string();
+        let line_without_comment = if let Some(idx) = raw_line.find("%%") {
+            &raw_line[..idx]
+        } else {
+            &raw_line
+        };
+        let trimmed = line_without_comment.trim().trim_end_matches(';').trim();
+
+        let mut class_name = String::new();
+        let mut styles = String::new();
+
+        if let Some(pos) = trimmed.find("classDef") {
+            let after_keyword = trimmed[pos + "classDef".len()..].trim();
+            if let Some(space_idx) = after_keyword.find(|c: char| c.is_whitespace()) {
+                class_name = after_keyword[..space_idx].trim().to_string();
+                styles = after_keyword[space_idx..].trim().to_string();
+            } else {
+                class_name = after_keyword.to_string();
+            }
+        }
+
+        while !self.is_at_end()
+            && self
+                .peek()
+                .map(|t| t.line == line && !matches!(t.token_type, TokenType::Semicolon))
+                .unwrap_or(false)
+        {
+            let _ = self.advance();
+        }
+        if !self.is_at_end()
+            && self
+                .peek()
+                .map(|t| matches!(t.token_type, TokenType::Semicolon))
+                .unwrap_or(false)
+        {
+            let _ = self.advance();
+        }
+
+        if !class_name.is_empty() {
+            Ok(vec![Statement::StyleClassDef {
+                name: class_name,
+                styles,
+            }])
+        } else {
+            Ok(vec![])
+        }
+    }
+
+    fn parse_class_assign(&mut self) -> Result<Vec<Statement>, ParseError> {
+        let line = self.peek()?.line;
+        let _ = self.advance(); // consume "class"
+
+        let raw_line = self._source.lines().nth(line).unwrap_or("").to_string();
+        let line_without_comment = if let Some(idx) = raw_line.find("%%") {
+            &raw_line[..idx]
+        } else {
+            &raw_line
+        };
+        let trimmed = line_without_comment.trim().trim_end_matches(';').trim();
+
+        let mut nodes = Vec::new();
+        let mut class_name = String::new();
+
+        if let Some(pos) = trimmed.find("class") {
+            let after_keyword = trimmed[pos + "class".len()..].trim();
+            let words: Vec<&str> = after_keyword.split_whitespace().collect();
+            if words.len() >= 2 {
+                class_name = words[words.len() - 1].to_string();
+                let nodes_part = words[..words.len() - 1].join(" ");
+                for part in nodes_part.split(',') {
+                    let id = part.trim();
+                    if !id.is_empty() {
+                        nodes.push(id.to_string());
+                    }
+                }
+            }
+        }
+
+        while !self.is_at_end()
+            && self
+                .peek()
+                .map(|t| t.line == line && !matches!(t.token_type, TokenType::Semicolon))
+                .unwrap_or(false)
+        {
+            let _ = self.advance();
+        }
+        if !self.is_at_end()
+            && self
+                .peek()
+                .map(|t| matches!(t.token_type, TokenType::Semicolon))
+                .unwrap_or(false)
+        {
+            let _ = self.advance();
+        }
+
+        if !nodes.is_empty() && !class_name.is_empty() {
+            Ok(vec![Statement::ClassAssign { nodes, class_name }])
+        } else {
+            Ok(vec![])
         }
     }
 
@@ -490,6 +598,19 @@ impl Parser {
             });
         }
 
+        // 检查源节点是否有 :::className
+        if let Ok(colon_token) = self.peek() {
+            if matches!(&colon_token.token_type, TokenType::Keyword(k) if k == ":::") {
+                let _ = self.advance();
+                if let Ok(cname) = self.parse_node_id() {
+                    stmts.push(Statement::ClassAssign {
+                        nodes: vec![from_id.clone()],
+                        class_name: cname,
+                    });
+                }
+            }
+        }
+
         // 检查是否是边定义（有箭头）
         if let Ok(arrow_token) = self.peek() {
             if matches!(arrow_token.token_type, TokenType::Arrow) {
@@ -501,6 +622,18 @@ impl Parser {
                 let to_id = self.parse_node_id()?;
                 // 解析目标节点的形状和标签
                 let (to_label, to_shape) = self.parse_optional_shape_and_label()?;
+                // 检查目标节点是否有 :::className
+                if let Ok(colon_token) = self.peek() {
+                    if matches!(&colon_token.token_type, TokenType::Keyword(k) if k == ":::") {
+                        let _ = self.advance();
+                        if let Ok(cname) = self.parse_node_id() {
+                            stmts.push(Statement::ClassAssign {
+                                nodes: vec![to_id.clone()],
+                                class_name: cname,
+                            });
+                        }
+                    }
+                }
                 // 如果目标节点有标签或非默认形状，添加 NodeDef
                 if to_label.is_some() || to_shape != NodeShape::Rect {
                     stmts.push(Statement::NodeDef {
@@ -694,14 +827,36 @@ impl Parser {
     fn read_edge_label_text(&mut self) -> Result<String, ParseError> {
         // 累积文本直到遇到 | 或行尾
         let mut text = String::new();
+        let mut last_line: Option<usize> = None;
+        let mut last_end_col: usize = 0;
+
         while !self.is_at_end() {
             let token = self.peek()?.clone();
+            if matches!(token.token_type, TokenType::Pipe) {
+                break;
+            }
+            if let Some(l) = last_line {
+                if token.line == l && token.column > last_end_col && !text.is_empty() {
+                    text.push(' ');
+                }
+            }
+            last_line = Some(token.line);
+            last_end_col = token.column + token.raw.len();
+
             match &token.token_type {
-                TokenType::Pipe => break,
                 TokenType::Keyword(k) => text.push_str(k),
                 TokenType::Identifier(id) => text.push_str(id),
                 TokenType::String(s) => text.push_str(s),
-                _ => break,
+                TokenType::LessThan => text.push('<'),
+                TokenType::GreaterThan => text.push('>'),
+                TokenType::LeftBracket => text.push('['),
+                TokenType::RightBracket => text.push(']'),
+                TokenType::LeftParen => text.push('('),
+                TokenType::RightParen => text.push(')'),
+                TokenType::LeftBrace => text.push('{'),
+                TokenType::RightBrace => text.push('}'),
+                TokenType::Semicolon => text.push(';'),
+                _ => text.push_str(&token.raw),
             }
             let _ = self.advance();
         }
@@ -1059,22 +1214,68 @@ impl Parser {
 
     /// Parse a subgraph block: `subgraph [title]\n...end`
     fn parse_subgraph(&mut self) -> Result<Subgraph, ParseError> {
-        // 解析 subgraph 的 ID 或标题
-        let id = if let Ok(token) = self.peek() {
+        let (id, title) = if let Ok(token) = self.peek() {
             match &token.token_type {
-                TokenType::Identifier(id) => {
-                    let id = id.clone();
+                TokenType::String(s) => {
+                    let title = s.clone();
                     let _ = self.advance();
-                    id
+                    let id = format!("sg_{}", self.subgraph_counter());
+                    (id, Some(title))
                 }
-                _ => format!("sg_{}", self.subgraph_counter()),
+                TokenType::Identifier(first_id) => {
+                    let first_id = first_id.clone();
+                    let _ = self.advance();
+                    if let Ok(next) = self.peek() {
+                        if matches!(next.token_type, TokenType::LeftBracket) {
+                            let _ = self.advance(); // consume `[`
+                            let mut title_text = String::new();
+                            while !self.is_at_end() {
+                                if let Ok(t) = self.peek() {
+                                    if matches!(t.token_type, TokenType::RightBracket) {
+                                        break;
+                                    }
+                                    match &t.token_type {
+                                        TokenType::String(s) => {
+                                            title_text = s.clone();
+                                            let _ = self.advance();
+                                            break;
+                                        }
+                                        TokenType::Identifier(s) | TokenType::Keyword(s) => {
+                                            if !title_text.is_empty() {
+                                                title_text.push(' ');
+                                            }
+                                            title_text.push_str(s);
+                                            let _ = self.advance();
+                                        }
+                                        _ => {
+                                            let _ = self.advance();
+                                        }
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                            let _ = self.expect_right_bracket();
+                            let t = if title_text.is_empty() {
+                                Some(first_id.clone())
+                            } else {
+                                Some(title_text)
+                            };
+                            (first_id, t)
+                        } else {
+                            (first_id.clone(), Some(first_id))
+                        }
+                    } else {
+                        (first_id.clone(), Some(first_id))
+                    }
+                }
+                _ => (format!("sg_{}", self.subgraph_counter()), None),
             }
         } else {
-            format!("sg_{}", self.subgraph_counter())
+            (format!("sg_{}", self.subgraph_counter()), None)
         };
 
         let mut sub_statements = Vec::new();
-        let title = None;
 
         // 解析内部的语句
         while !self.is_at_end() {
@@ -1090,9 +1291,17 @@ impl Parser {
                     }
                 }
             }
-            let stmts = self.parse_statements()?;
-            for stmt in stmts {
-                sub_statements.push(stmt);
+            match self.parse_statements() {
+                Ok(stmts) => {
+                    for stmt in stmts {
+                        sub_statements.push(stmt);
+                    }
+                }
+                Err(_) => {
+                    if !self.is_at_end() {
+                        let _ = self.advance();
+                    }
+                }
             }
         }
 

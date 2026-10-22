@@ -196,12 +196,24 @@ impl Lexer {
                 }
             }
             ':' => {
-                self.advance();
-                Token {
-                    token_type: TokenType::Keyword(":".to_string()),
-                    line: start_line,
-                    column: start_column,
-                    raw: ":".to_string(),
+                if self.peek(1) == Some(':') && self.peek(2) == Some(':') {
+                    self.advance();
+                    self.advance();
+                    self.advance();
+                    Token {
+                        token_type: TokenType::Keyword(":::".to_string()),
+                        line: start_line,
+                        column: start_column,
+                        raw: ":::".to_string(),
+                    }
+                } else {
+                    self.advance();
+                    Token {
+                        token_type: TokenType::Keyword(":".to_string()),
+                        line: start_line,
+                        column: start_column,
+                        raw: ":".to_string(),
+                    }
                 }
             }
             _ => {
@@ -337,9 +349,9 @@ impl Lexer {
             "TD" | "BT" | "LR" | "RL" => TokenType::Keyword(ident),
             "end" | "subgraph" | "participant" | "actor" | "autonumber" | "Note" | "note"
             | "as" | "alt" | "loop" | "opt" | "par" | "else" | "activate" | "deactivate"
-            | "title" | "class" | "annotation" | "interface" | "abstract" | "namespace"
-            | "state" | "section" | "dateFormat" | "excludes" | "cssClass" | "callback"
-            | "link" | "click" => TokenType::Keyword(ident),
+            | "title" | "class" | "classDef" | "annotation" | "interface" | "abstract"
+            | "namespace" | "state" | "section" | "dateFormat" | "excludes" | "cssClass"
+            | "callback" | "link" | "click" => TokenType::Keyword(ident),
             _ => TokenType::Identifier(ident),
         };
 
