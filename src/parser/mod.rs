@@ -2328,27 +2328,59 @@ impl Parser {
         let mut node_counter: usize = 0;
         let result = Self::build_mindmap_level(
             &mut parsed_nodes.into_iter().peekable(),
-            0,
+            None,
             &mut node_counter,
         );
         Ok(result)
     }
 
+    fn clean_mindmap_label(raw: &str) -> String {
+        let trimmed = raw.trim();
+        if let Some(start) = trimmed.find("((") {
+            if let Some(end) = trimmed.rfind("))") {
+                if end > start + 2 {
+                    return trimmed[start + 2..end].trim().to_string();
+                }
+            }
+        }
+        if let Some(start) = trimmed.find('[') {
+            if let Some(end) = trimmed.rfind(']') {
+                if end > start + 1 {
+                    return trimmed[start + 1..end].trim().to_string();
+                }
+            }
+        }
+        if let Some(start) = trimmed.find('(') {
+            if let Some(end) = trimmed.rfind(')') {
+                if end > start + 1 {
+                    return trimmed[start + 1..end].trim().to_string();
+                }
+            }
+        }
+        if let Some(rest) = trimmed.strip_prefix("root ") {
+            return rest.trim().to_string();
+        }
+        trimmed.to_string()
+    }
+
     /// Recursively build mindmap nodes at a given indentation level.
     fn build_mindmap_level(
         iter: &mut std::iter::Peekable<impl Iterator<Item = (usize, String)>>,
-        parent_level: usize,
+        parent_level: Option<usize>,
         counter: &mut usize,
     ) -> Vec<Statement> {
         let mut children = Vec::new();
         while let Some(&(level, _)) = iter.peek() {
-            if level <= parent_level {
-                break;
+            if let Some(p_level) = parent_level {
+                if level <= p_level {
+                    break;
+                }
             }
-            let (_, label) = iter.next().unwrap();
+            let (_, raw_label) = iter.next().unwrap();
+            let label = Self::clean_mindmap_label(&raw_label);
             let id = format!("mm{}", *counter);
             *counter += 1;
-            let sub_children = Self::build_mindmap_level(iter, level, counter);
+            let sub_children = Self::build_mindmap_level(iter, Some(level), counter);
             children.push(Statement::MindmapNode {
                 id,
                 label,
@@ -2382,7 +2414,7 @@ impl Parser {
                 continue;
             }
 
-            let parts: Vec<&str> = trimmed.splitn(2, |c| c == ' ' || c == '\t').collect();
+            let parts: Vec<&str> = trimmed.splitn(2, [' ', '\t']).collect();
             let cmd = parts[0];
             let rest = parts.get(1).map(|s| s.trim()).unwrap_or("");
 
@@ -2517,8 +2549,8 @@ impl Parser {
             }
             if trimmed.starts_with("title ") {
                 continue; // Title is handled by Diagram.title in parser dispatch
-            } else if trimmed.starts_with("section ") {
-                let name = trimmed["section ".len()..].trim().to_string();
+            } else if let Some(stripped) = trimmed.strip_prefix("section ") {
+                let name = stripped.trim().to_string();
                 statements.push(Statement::TimelineSection { name });
             } else if let Some(pos) = trimmed.find(':') {
                 let time = trimmed[..pos].trim().to_string();
@@ -2553,8 +2585,8 @@ impl Parser {
             }
             if trimmed.starts_with("title ") {
                 continue; // Title handled by parser dispatch
-            } else if trimmed.starts_with("section ") {
-                let name = trimmed["section ".len()..].trim().to_string();
+            } else if let Some(stripped) = trimmed.strip_prefix("section ") {
+                let name = stripped.trim().to_string();
                 statements.push(Statement::JourneySection { name });
             } else if let Some(pos1) = trimmed.find(':') {
                 let rest = &trimmed[pos1 + 1..];
@@ -2738,14 +2770,14 @@ impl Parser {
             if trimmed.is_empty() || trimmed.starts_with("title") {
                 continue;
             }
-            if trimmed.starts_with("root ") {
+            if let Some(stripped) = trimmed.strip_prefix("root ") {
                 statements.push(Statement::IshikawaRoot {
-                    label: trimmed[5..].trim().to_string(),
+                    label: stripped.trim().to_string(),
                 });
                 in_category = false;
-            } else if trimmed.starts_with("category ") {
+            } else if let Some(stripped) = trimmed.strip_prefix("category ") {
                 statements.push(Statement::IshikawaCategory {
-                    label: trimmed[9..].trim().to_string(),
+                    label: stripped.trim().to_string(),
                 });
                 in_category = true;
             } else if in_category && !trimmed.is_empty() {
@@ -2855,26 +2887,20 @@ impl Parser {
                 continue;
             }
 
-            if t.starts_with("requirement ") {
+            if let Some(stripped) = t.strip_prefix("requirement ") {
                 in_block = true;
                 is_req = true;
-                cur_name = t["requirement ".len()..]
-                    .trim_end_matches('{')
-                    .trim()
-                    .to_string();
+                cur_name = stripped.trim_end_matches('{').trim().to_string();
                 cur_id.clear();
                 cur_text.clear();
                 cur_risk.clear();
                 cur_vm.clear();
                 continue;
             }
-            if t.starts_with("element ") {
+            if let Some(stripped) = t.strip_prefix("element ") {
                 in_block = true;
                 is_req = false;
-                let name = t["element ".len()..]
-                    .trim_end_matches('{')
-                    .trim()
-                    .to_string();
+                let name = stripped.trim_end_matches('{').trim().to_string();
                 // element type is inside the block, so defer creation
                 cur_name = name;
                 continue;
@@ -3085,15 +3111,15 @@ impl Parser {
             if t.is_empty() {
                 continue;
             }
-            if t.starts_with("service ") {
-                let rest = t["service ".len()..].trim();
+            if let Some(stripped) = t.strip_prefix("service ") {
+                let rest = stripped.trim();
                 if let Some(paren) = rest.find('(') {
                     let id = rest[..paren].trim().to_string();
                     let label = rest[paren + 1..].trim_end_matches(')').trim().to_string();
                     stmts.push(Statement::ArchService { id, label });
                 }
-            } else if t.starts_with("database ") {
-                let rest = t["database ".len()..].trim();
+            } else if let Some(stripped) = t.strip_prefix("database ") {
+                let rest = stripped.trim();
                 if let Some(paren) = rest.find('[') {
                     let id = rest[..paren].trim().to_string();
                     let inner = rest[paren..].trim();
@@ -3106,8 +3132,8 @@ impl Parser {
                         .to_string();
                     stmts.push(Statement::ArchDatabase { id, label });
                 }
-            } else if t.starts_with("queue ") {
-                let rest = t["queue ".len()..].trim();
+            } else if let Some(stripped) = t.strip_prefix("queue ") {
+                let rest = stripped.trim();
                 if let Some(paren) = rest.find('(') {
                     let id = rest[..paren].trim().to_string();
                     let label = rest[paren + 1..].trim_end_matches(')').trim().to_string();
@@ -4214,7 +4240,7 @@ mod tests {
     fn test_parse_error_location() {
         let mut parser = Parser::new("invalid%content%%");
         let err = parser.parse().err().unwrap();
-        assert!(err.message.len() > 0, "Error should have a message");
+        assert!(!err.message.is_empty(), "Error should have a message");
     }
 
     #[test]
@@ -4263,7 +4289,7 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.diagram_type, DiagramType::Er);
-        assert!(diagram.statements.len() >= 1);
+        assert!(!diagram.statements.is_empty());
     }
 
     #[test]
@@ -4412,7 +4438,7 @@ mod tests {
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.diagram_type, DiagramType::Flowchart);
         // Should parse without crashing; second 'graph' is treated as content
-        assert!(diagram.get_edges().len() >= 1);
+        assert!(!diagram.get_edges().is_empty());
     }
 
     #[test]

@@ -128,15 +128,18 @@ impl Renderer {
         let node_width = 130.0;
         let node_height = 65.0;
         let h_spacing = 40.0;
-        let v_spacing = 80.0;  // 减小垂直间距让线更短
+        let v_spacing = 80.0; // 减小垂直间距让线更短
         let padding = 40.0;
 
         // ponytail: calculate required canvas size based on content, not viewport
         let max_nodes_in_layer = layers.iter().map(|l| l.len()).max().unwrap_or(1) as f32;
         let num_layers = layers.len() as f32;
 
-        let required_width = max_nodes_in_layer * node_width + (max_nodes_in_layer - 1.0) * h_spacing + 2.0 * padding;
-        let required_height = num_layers * node_height + (num_layers - 1.0) * v_spacing + 2.0 * padding;
+        let required_width = max_nodes_in_layer * node_width
+            + (max_nodes_in_layer - 1.0) * h_spacing
+            + 2.0 * padding;
+        let required_height =
+            num_layers * node_height + (num_layers - 1.0) * v_spacing + 2.0 * padding;
 
         let effective_width = required_width.max(self.width as f32) as u32;
         let effective_height = required_height.max(self.height as f32) as u32;
@@ -149,7 +152,7 @@ impl Renderer {
             parent_map.insert(to.clone(), from.clone());
             children_map
                 .entry(from.clone())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(to.clone());
         }
 
@@ -171,7 +174,9 @@ impl Renderer {
                     .and_then(|p| node_positions.get(p).map(|&(x, _)| x))
                     .unwrap_or(f32::INFINITY);
 
-                a_parent_x.partial_cmp(&b_parent_x).unwrap_or(std::cmp::Ordering::Equal)
+                a_parent_x
+                    .partial_cmp(&b_parent_x)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             });
 
             let count = sorted_nodes.len() as f32;
@@ -197,18 +202,26 @@ impl Renderer {
                 let cx2 = x2 + node_width / 2.0;
                 let cy2 = y2 + node_height / 2.0;
 
-                svg.add_line(cx1, cy1, cx2, cy2, "stroke:black;stroke-width:2");
+                svg.add_line(cx1, cy1, cx2, cy2, "stroke:#475569;stroke-width:1.5");
                 svg.add_arrow(cx2, cy2);
 
                 if let Some(edge_label) = label {
-                    let label_x = (cx1 + cx2) / 2.0 - 20.0;
-                    let label_y = (cy1 + cy2) / 2.0 - 8.0;
-                    svg.add_rect(label_x, label_y, 40.0, 16.0, "fill:white;stroke:none;");
+                    let text_chars = edge_label.chars().count() as f32;
+                    let lw = (text_chars * 12.0 + 14.0).max(36.0);
+                    let label_x = (cx1 + cx2) / 2.0 - lw / 2.0;
+                    let label_y = (cy1 + cy2) / 2.0 - 9.0;
+                    svg.add_rect(
+                        label_x,
+                        label_y,
+                        lw,
+                        18.0,
+                        "fill:#ffffff;stroke:#cbd5e1;stroke-width:1;rx:4;ry:4",
+                    );
                     svg.add_text(
-                        label_x + 20.0,
-                        label_y + 8.0,
+                        (cx1 + cx2) / 2.0,
+                        (cy1 + cy2) / 2.0 + 4.0,
                         edge_label,
-                        "text-anchor:middle;dominant-baseline:middle;font-size:10px;font-family:Arial",
+                        "text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:#475569;font-family:Arial, sans-serif",
                     );
                 }
             }
@@ -268,14 +281,26 @@ impl Renderer {
             if let Some(&(x, y)) = node_positions.get(node_id) {
                 let cx = x + node_width / 2.0;
                 let cy = y + node_height / 2.0;
-                let style = "fill:white;stroke:black;stroke-width:2";
+                let style = "fill:#ffffff;stroke:#334155;stroke-width:1.5";
 
                 match shape {
                     NodeShape::Rect => {
-                        svg.add_rect(x, y, node_width, node_height, style);
+                        svg.add_rect(
+                            x,
+                            y,
+                            node_width,
+                            node_height,
+                            &format!("{};rx:6;ry:6", style),
+                        );
                     }
                     NodeShape::Circle => {
-                        svg.add_rect(x, y, node_width, node_height, &format!("{};rx:10", style));
+                        svg.add_rect(
+                            x,
+                            y,
+                            node_width,
+                            node_height,
+                            &format!("{};rx:10;ry:10", style),
+                        );
                     }
                     NodeShape::Diamond => {
                         svg.add_path(
@@ -294,17 +319,23 @@ impl Renderer {
                         );
                     }
                     NodeShape::Rounded => {
-                        svg.add_rect(x, y, node_width, node_height, &format!("{};rx:20", style));
+                        svg.add_rect(
+                            x,
+                            y,
+                            node_width,
+                            node_height,
+                            &format!("{};rx:20;ry:20", style),
+                        );
                     }
                     NodeShape::Subroutine => {
-                        svg.add_rect(x, y, node_width, node_height, style);
+                        svg.add_rect(x, y, node_width, node_height, &format!("{};rx:4", style));
                         let inset = 6.0;
                         svg.add_rect(
                             x + inset,
                             y + inset,
                             node_width - 2.0 * inset,
                             node_height - 2.0 * inset,
-                            "fill:white;stroke:black;stroke-width:1",
+                            "fill:#ffffff;stroke:#94a3b8;stroke-width:1",
                         );
                     }
                     NodeShape::Cylinder => {
@@ -315,7 +346,12 @@ impl Renderer {
                         let outer_r = node_height / 2.0;
                         let inner_r = outer_r - 5.0;
                         svg.add_circle(cx, cy, outer_r, style);
-                        svg.add_circle(cx, cy, inner_r, "fill:white;stroke:black;stroke-width:1");
+                        svg.add_circle(
+                            cx,
+                            cy,
+                            inner_r,
+                            "fill:#ffffff;stroke:#94a3b8;stroke-width:1",
+                        );
                     }
                     NodeShape::Flag => {
                         svg.add_rect(x + 15.0, y, node_width - 15.0, node_height, style);
@@ -338,7 +374,7 @@ impl Renderer {
                     cx,
                     cy,
                     display_label,
-                    "text-anchor:middle;dominant-baseline:middle;font-family:Arial",
+                    "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#0f172a;font-family:Arial, sans-serif",
                 );
             }
         }
@@ -439,7 +475,7 @@ impl Renderer {
                 lifeline_top,
                 *cx_val,
                 y_pos + 10.0,
-                "stroke:black;stroke-width:1;stroke-dasharray:4,4",
+                "stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4",
             );
         }
 
@@ -451,20 +487,20 @@ impl Renderer {
                 top_margin,
                 box_width,
                 box_height,
-                "fill:white;stroke:black;stroke-width:1;rx:4",
+                "fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6",
             );
             svg.add_text(
                 *cx,
-                top_margin + box_height / 2.0,
+                top_margin + box_height / 2.0 + 1.0,
                 display_name,
-                "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-family:Arial",
+                "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif",
             );
             if *display_name != *id {
                 svg.add_text(
                     *cx,
-                    top_margin + box_height + 4.0,
+                    top_margin + box_height + 12.0,
                     id,
-                    "text-anchor:middle;font-size:9px;fill:gray;font-family:Arial",
+                    "text-anchor:middle;font-size:10px;fill:#64748b;font-family:Arial, sans-serif",
                 );
             }
         }
@@ -551,6 +587,7 @@ impl Renderer {
         svg.build()
     }
 
+    #[allow(clippy::type_complexity)]
     fn render_class(&self, diagram: &Diagram) -> String {
         let mut svg = self.setup_svg_builder();
 
@@ -601,83 +638,174 @@ impl Renderer {
         }
 
         let class_w = 180.0;
-        let header_h = 30.0;
+        let header_h = 32.0;
         let member_h = 22.0;
-        let spacing_x = 60.0;
-        let spacing_y = 80.0;
+        let spacing_x = 70.0;
+        let spacing_y = 60.0;
         let start_x = 50.0;
         let start_y = 50.0;
 
-        let class_list: Vec<&String> = classes.keys().collect();
+        let mut class_list: Vec<&String> = classes.keys().collect();
+        class_list.sort();
         let cols = ((class_list.len() as f32).sqrt().ceil() as usize).max(1);
+
+        // Compute row max heights
+        let mut row_heights: Vec<f32> = Vec::new();
+        for (i, class_name) in class_list.iter().enumerate() {
+            let row = i / cols;
+            let members = &classes[*class_name].1;
+            let h = header_h + members.len() as f32 * member_h + 8.0;
+            if row >= row_heights.len() {
+                row_heights.push(h);
+            } else {
+                row_heights[row] = row_heights[row].max(h);
+            }
+        }
+
+        let mut row_y_starts: Vec<f32> = Vec::new();
+        let mut curr_y = start_y;
+        for &rh in &row_heights {
+            row_y_starts.push(curr_y);
+            curr_y += rh + spacing_y;
+        }
+
+        let mut class_rects: HashMap<String, (f32, f32, f32, f32)> = HashMap::new();
 
         for (i, class_name) in class_list.iter().enumerate() {
             let col = i % cols;
             let row = i / cols;
             let x = start_x + col as f32 * (class_w + spacing_x);
-            let y = start_y + row as f32 * (header_h + spacing_y);
+            let y = row_y_starts[row];
 
-            let (_stereotype, members) = &classes[class_name.to_owned()];
-            let total_h = header_h + members.len() as f32 * member_h;
+            let (_stereotype, members) = &classes[*class_name];
+            let total_h = header_h + members.len() as f32 * member_h + 8.0;
+            class_rects.insert((*class_name).clone(), (x, y, class_w, total_h));
 
+            // Outer class card with modern styling and rounded corners
             svg.add_rect(
                 x,
                 y,
                 class_w,
                 total_h,
-                "fill:white;stroke:black;stroke-width:1",
+                "fill:#ffffff;stroke:#64748b;stroke-width:1.5;rx:6",
             );
+
+            // Header background pill/block
+            svg.add_rect(x, y, class_w, header_h, "fill:#f1f5f9;stroke:none;rx:6");
+            // Patch bottom corners of header to be square
+            svg.add_rect(
+                x,
+                y + header_h - 6.0,
+                class_w,
+                6.0,
+                "fill:#f1f5f9;stroke:none",
+            );
+            // Header divider line
             svg.add_line(
                 x,
                 y + header_h,
                 x + class_w,
                 y + header_h,
-                "stroke:black;stroke-width:1",
+                "stroke:#cbd5e1;stroke-width:1",
             );
 
             svg.add_text(
-                x + class_w / 2.0, y + header_h / 2.0, class_name,
-                "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:bold;font-family:Arial",
+                x + class_w / 2.0,
+                y + header_h / 2.0 + 1.0,
+                class_name,
+                "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:#0f172a;font-family:Arial, sans-serif",
             );
 
             for (j, (_, member_text, _)) in members.iter().enumerate() {
                 svg.add_text(
-                    x + 8.0,
-                    y + header_h + j as f32 * member_h + member_h / 2.0,
+                    x + 10.0,
+                    y + header_h + 6.0 + j as f32 * member_h + member_h / 2.0,
                     member_text,
-                    "dominant-baseline:middle;font-size:11px;font-family:monospace",
+                    "dominant-baseline:middle;font-size:11px;fill:#334155;font-family:monospace",
                 );
             }
         }
 
+        // Adjust canvas dimensions to fit classes
+        let max_w = start_x + cols as f32 * (class_w + spacing_x);
+        let max_h = curr_y + 40.0;
+        svg.set_dimensions(
+            max_w.max(self.width as f32) as u32,
+            max_h.max(self.height as f32) as u32,
+        );
+
+        // Draw relationships with obstacle-avoiding boundary connections
         for stmt in &diagram.statements {
             if let Statement::ClassRelation {
                 from, to, label, ..
             } = stmt
             {
-                let pos_from = class_list.iter().position(|n| *n == from);
-                let pos_to = class_list.iter().position(|n| *n == to);
-                if let (Some(ifrom), Some(ito)) = (pos_from, pos_to) {
-                    let col_from = ifrom % cols;
-                    let row_from = ifrom / cols;
-                    let col_to = ito % cols;
-                    let row_to = ito / cols;
-                    let x1 = start_x + col_from as f32 * (class_w + spacing_x) + class_w / 2.0;
-                    let y1 = start_y + row_from as f32 * (header_h + spacing_y);
-                    let x2 = start_x + col_to as f32 * (class_w + spacing_x) + class_w / 2.0;
-                    let y2 = start_y + row_to as f32 * (header_h + spacing_y);
-                    svg.add_line(x1, y1, x2, y2, "stroke:black;stroke-width:1;fill:none");
+                if let (Some(&(x1, y1, w1, h1)), Some(&(x2, y2, w2, h2))) =
+                    (class_rects.get(from), class_rects.get(to))
+                {
+                    let cx1 = x1 + w1 / 2.0;
+                    let cy1 = y1 + h1 / 2.0;
+                    let cx2 = x2 + w2 / 2.0;
+                    let cy2 = y2 + h2 / 2.0;
+
+                    // Choose boundary connection points based on relative position
+                    let (start_pt, end_pt) = if (y2 + h2) <= y1 + 5.0 {
+                        // `to` is above `from`
+                        ((cx1, y1), (cx2, y2 + h2))
+                    } else if y2 >= (y1 + h1 - 5.0) {
+                        // `to` is below `from`
+                        ((cx1, y1 + h1), (cx2, y2))
+                    } else if cx2 > cx1 {
+                        // `to` is to the right
+                        ((x1 + w1, cy1), (x2, cy2))
+                    } else {
+                        // `to` is to the left
+                        ((x1, cy1), (x2 + w2, cy2))
+                    };
+
+                    let dx = end_pt.0 - start_pt.0;
+                    let dy = end_pt.1 - start_pt.1;
+                    let len = (dx * dx + dy * dy).sqrt().max(1.0);
+                    let ux = dx / len;
+                    let uy = dy / len;
+                    let nx = -uy;
+                    let ny = ux;
+
+                    let arrow_len = 10.0;
+                    let arrow_w = 5.0;
+                    let line_end_x = end_pt.0 - ux * arrow_len;
+                    let line_end_y = end_pt.1 - uy * arrow_len;
+
+                    svg.add_line(
+                        start_pt.0,
+                        start_pt.1,
+                        line_end_x,
+                        line_end_y,
+                        "stroke:#475569;stroke-width:1.5;fill:none",
+                    );
+
                     if let Some(lbl) = label {
                         svg.add_text(
-                            (x1 + x2) / 2.0,
-                            (y1 + y2) / 2.0 - 6.0,
+                            (start_pt.0 + end_pt.0) / 2.0,
+                            (start_pt.1 + end_pt.1) / 2.0 - 6.0,
                             lbl,
-                            "text-anchor:middle;font-size:10px;font-family:Arial",
+                            "text-anchor:middle;font-size:10px;fill:#475569;font-family:Arial, sans-serif",
                         );
                     }
+
+                    // Open inheritance triangle at target boundary
+                    let p1 = end_pt;
+                    let p2 = (
+                        end_pt.0 - ux * arrow_len + nx * arrow_w,
+                        end_pt.1 - uy * arrow_len + ny * arrow_w,
+                    );
+                    let p3 = (
+                        end_pt.0 - ux * arrow_len - nx * arrow_w,
+                        end_pt.1 - uy * arrow_len - ny * arrow_w,
+                    );
                     svg.add_polygon(
-                        &[(x2, y2 - 6.0), (x2 - 6.0, y2), (x2, y2 + 6.0)],
-                        "fill:white;stroke:black;stroke-width:1",
+                        &[p1, p2, p3],
+                        "fill:#ffffff;stroke:#475569;stroke-width:1.5",
                     );
                 }
             }
@@ -778,7 +906,7 @@ impl Renderer {
             );
         }
 
-        for (name, _label) in &state_labels {
+        for name in state_labels.keys() {
             if name == "[*]" {
                 continue;
             }
@@ -943,6 +1071,7 @@ impl Renderer {
         svg.build()
     }
 
+    #[allow(clippy::type_complexity)]
     fn render_gantt(&self, diagram: &Diagram) -> String {
         let mut svg = self.setup_svg_builder();
 
@@ -1024,61 +1153,127 @@ impl Renderer {
     fn render_mindmap(&self, diagram: &Diagram) -> String {
         let mut svg = self.setup_svg_builder();
 
-        fn render_mm_node(svg: &mut SvgBuilder, label: &str, x: f32, y: f32) {
-            svg.add_rect(
-                x - 60.0,
-                y - 15.0,
-                120.0,
-                30.0,
-                "fill:#e8f4f8;stroke:#45b7d1;stroke-width:1;rx:5",
-            );
-            svg.add_text(
-                x,
-                y + 4.0,
-                label,
-                "text-anchor:middle;font-size:13px;font-family:Arial",
-            );
+        struct NodePos {
+            label: String,
+            depth: usize,
+            x: f32,
+            y: f32,
+            w: f32,
+            h: f32,
+            children: Vec<usize>,
         }
 
-        let cx = self.width as f32 / 2.0;
-        let mut root_y = 50.0;
-        let mut found = false;
-
-        for stmt in &diagram.statements {
+        fn layout_tree(
+            node: &Statement,
+            depth: usize,
+            leaf_y: &mut f32,
+            nodes: &mut Vec<NodePos>,
+        ) -> usize {
             if let Statement::MindmapNode {
-                id: _,
-                label,
-                children,
-            } = stmt
+                label, children, ..
+            } = node
             {
-                found = true;
-                render_mm_node(&mut svg, label, cx, root_y);
-                root_y += 60.0;
-                let mut child_x = 100.0;
-                let child_spacing = 80.0;
-                for child in children {
-                    if let Statement::MindmapNode { label: cl, .. } = child {
-                        svg.add_line(
-                            cx,
-                            root_y - 30.0,
-                            child_x + 60.0,
-                            root_y - 15.0,
-                            "stroke:#999;stroke-width:1",
-                        );
-                        render_mm_node(&mut svg, cl, child_x + 60.0, root_y - 15.0);
-                        child_x += child_spacing;
+                let text_chars = label.chars().count() as f32;
+                let w = (text_chars * 13.0 + 36.0).clamp(100.0, 220.0);
+                let h = 34.0;
+                let x = 60.0 + depth as f32 * 210.0;
+                let my_idx = nodes.len();
+                nodes.push(NodePos {
+                    label: label.clone(),
+                    depth,
+                    x,
+                    y: 0.0,
+                    w,
+                    h,
+                    children: Vec::new(),
+                });
+
+                if children.is_empty() {
+                    let y = *leaf_y;
+                    *leaf_y += 50.0;
+                    nodes[my_idx].y = y;
+                } else {
+                    let mut child_indices = Vec::new();
+                    let mut sum_y = 0.0;
+                    for child in children {
+                        let c_idx = layout_tree(child, depth + 1, leaf_y, nodes);
+                        child_indices.push(c_idx);
+                        sum_y += nodes[c_idx].y;
                     }
+                    nodes[my_idx].children = child_indices;
+                    nodes[my_idx].y = sum_y / children.len() as f32;
                 }
+                my_idx
+            } else {
+                0
             }
         }
 
-        if !found {
+        let mut nodes: Vec<NodePos> = Vec::new();
+        let mut leaf_y = 60.0;
+
+        for stmt in &diagram.statements {
+            if matches!(stmt, Statement::MindmapNode { .. }) {
+                layout_tree(stmt, 0, &mut leaf_y, &mut nodes);
+            }
+        }
+
+        if nodes.is_empty() {
+            let cx = self.width as f32 / 2.0;
+            svg.add_rect(
+                cx - 80.0,
+                self.height as f32 / 2.0 - 25.0,
+                160.0,
+                50.0,
+                "fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:8",
+            );
             svg.add_text(
                 cx,
-                self.height as f32 / 2.0,
-                "mindmap",
-                "text-anchor:middle;font-size:14px;font-family:Arial",
+                self.height as f32 / 2.0 + 4.0,
+                "Mindmap",
+                "text-anchor:middle;font-size:14px;font-weight:bold;fill:#0f172a;font-family:Arial, sans-serif",
             );
+            return svg.build();
+        }
+
+        // Adjust dimensions to fit content
+        let max_x = nodes.iter().map(|n| n.x + n.w).fold(0.0_f32, f32::max) + 60.0;
+        let max_y = leaf_y.max(self.height as f32);
+        svg.set_dimensions(max_x.max(self.width as f32) as u32, max_y as u32);
+
+        // Draw curved connector lines from parents to children
+        for node in &nodes {
+            let p_x = node.x + node.w;
+            let p_y = node.y;
+            for &c_idx in &node.children {
+                let c_node = &nodes[c_idx];
+                let c_x = c_node.x;
+                let c_y = c_node.y;
+                let mid_x = (p_x + c_x) / 2.0;
+                let path = format!(
+                    "M {} {} C {} {}, {} {}, {} {}",
+                    p_x, p_y, mid_x, p_y, mid_x, c_y, c_x, c_y
+                );
+                svg.add_path(&path, "stroke:#94a3b8;stroke-width:1.5;fill:none");
+            }
+        }
+
+        // Draw nodes with modern color hierarchy
+        for node in &nodes {
+            let (fill, stroke, text_color, font_size, font_weight, rx) = match node.depth {
+                0 => ("#ea580c", "#c2410c", "#ffffff", "13px", "bold", "17"),
+                1 => ("#fff7ed", "#ea580c", "#9a3412", "12px", "bold", "8"),
+                _ => ("#ffffff", "#e4e4e7", "#27272a", "11px", "normal", "6"),
+            };
+
+            let rect_style = format!("fill:{};stroke:{};stroke-width:1.5;rx:{}", fill, stroke, rx);
+            svg.add_rect(node.x, node.y - node.h / 2.0, node.w, node.h, &rect_style);
+
+            let text_style = format!(
+                "text-anchor:middle;dominant-baseline:middle;font-size:{};font-weight:{};fill:{};font-family:Arial, sans-serif",
+                font_size, font_weight, text_color
+            );
+            svg.add_text(node.x + node.w / 2.0, node.y, &node.label, &text_style);
         }
 
         svg.build()
@@ -1088,66 +1283,118 @@ impl Renderer {
         let mut svg = self.setup_svg_builder();
 
         let start_x = 100.0;
-        let start_y = 50.0;
-        let spacing_y = 40.0;
-        let branch_colors = ["#45b7d1", "#ff6b6b", "#96ceb4", "#a29bfe", "#fdcb6e"];
+        let start_y = 70.0;
+        let spacing_y = 48.0;
+        let branch_colors = ["#ea580c", "#10b981", "#f59e0b", "#475569", "#0d9488"];
 
         let mut branches: HashMap<String, usize> = HashMap::new();
         branches.insert("main".to_string(), 0);
         let mut current_branch = "main".to_string();
         let mut commit_count: usize = 0;
+        let mut last_commit_y: HashMap<String, f32> = HashMap::new();
+
+        // First pass: collect branches
+        for stmt in &diagram.statements {
+            if let Statement::GitBranch { name } = stmt {
+                if !branches.contains_key(name) {
+                    let col = branches.len();
+                    branches.insert(name.clone(), col);
+                }
+            }
+        }
+
+        // Draw branch header badges at the top
+        for (name, &col) in &branches {
+            let x = start_x + col as f32 * 90.0;
+            let color = branch_colors[col % branch_colors.len()];
+            let badge_w = (name.len() as f32 * 8.0 + 20.0).max(56.0);
+            svg.add_rect(
+                x - badge_w / 2.0,
+                24.0,
+                badge_w,
+                22.0,
+                &format!(
+                    "fill:{};fill-opacity:0.12;stroke:{};stroke-width:1;rx:4",
+                    color, color
+                ),
+            );
+            svg.add_text(
+                x,
+                35.0,
+                name,
+                &format!("text-anchor:middle;dominant-baseline:middle;font-size:11px;font-weight:bold;fill:{};font-family:monospace", color),
+            );
+            // Subtle branch guideline
+            svg.add_line(
+                x,
+                46.0,
+                x,
+                start_y,
+                &format!(
+                    "stroke:{};stroke-width:1;stroke-dasharray:3,3;stroke-opacity:0.4",
+                    color
+                ),
+            );
+        }
 
         for stmt in &diagram.statements {
             match stmt {
                 Statement::GitCommit { id, tag, .. } => {
                     let col = *branches.get(&current_branch).unwrap_or(&0);
-                    let x = start_x + col as f32 * 80.0;
+                    let x = start_x + col as f32 * 90.0;
                     let y = start_y + commit_count as f32 * spacing_y;
                     let color = branch_colors[col % branch_colors.len()];
 
+                    // Line from previous commit on same branch
+                    if let Some(&prev_y) = last_commit_y.get(&current_branch) {
+                        svg.add_line(x, prev_y, x, y, &format!("stroke:{};stroke-width:2", color));
+                    }
+                    last_commit_y.insert(current_branch.clone(), y);
+
+                    // Commit node
                     svg.add_circle(
                         x,
                         y,
-                        12.0,
-                        &format!("fill:{};stroke:#333;stroke-width:1", color),
+                        10.0,
+                        &format!("fill:{};stroke:#ffffff;stroke-width:2", color),
                     );
 
-                    if commit_count > 0 {
-                        let prev_y = start_y + (commit_count - 1) as f32 * spacing_y;
-                        svg.add_line(x, prev_y, x, y, &format!("stroke:{};stroke-width:2", color));
-                    }
                     if let Some(tag_str) = tag {
                         svg.add_text(
-                            x + 20.0,
+                            x + 18.0,
                             y + 4.0,
                             tag_str,
-                            "font-size:9px;font-family:Arial;fill:#666",
+                            "font-size:10px;font-family:Arial, sans-serif;fill:#475569;font-weight:bold",
                         );
                     }
                     if let Some(id_str) = id {
                         svg.add_text(
-                            x,
-                            y - 18.0,
+                            x - 16.0,
+                            y + 4.0,
                             id_str,
-                            "text-anchor:middle;font-size:9px;font-family:monospace;fill:#999",
+                            "text-anchor:end;font-size:10px;font-family:monospace;fill:#64748b",
                         );
                     }
                     commit_count += 1;
                 }
                 Statement::GitBranch { name } => {
-                    if !branches.contains_key(name) {
-                        let col = branches.len();
-                        branches.insert(name.clone(), col);
+                    // Fork branch from parent's last commit
+                    if let Some(&parent_y) = last_commit_y.get(&current_branch) {
+                        let parent_col = *branches.get(&current_branch).unwrap_or(&0);
+                        let parent_x = start_x + parent_col as f32 * 90.0;
+                        let child_col = *branches.get(name).unwrap_or(&0);
+                        let child_x = start_x + child_col as f32 * 90.0;
+                        let child_y = start_y + commit_count as f32 * spacing_y;
+                        let color = branch_colors[child_col % branch_colors.len()];
+                        svg.add_line(
+                            parent_x,
+                            parent_y,
+                            child_x,
+                            child_y,
+                            &format!("stroke:{};stroke-width:1.5;stroke-dasharray:4,3", color),
+                        );
+                        last_commit_y.insert(name.clone(), child_y);
                     }
-                    let col = *branches.get(name).unwrap_or(&0);
-                    let x = start_x + col as f32 * 80.0;
-                    let y = start_y + commit_count as f32 * spacing_y;
-                    svg.add_text(
-                        x,
-                        y + 4.0,
-                        name,
-                        "text-anchor:middle;font-size:10px;font-family:monospace;fill:#666",
-                    );
                 }
                 Statement::GitCheckout { name } => {
                     current_branch = name.clone();
@@ -1155,21 +1402,51 @@ impl Renderer {
                 Statement::GitMerge { branch, .. } => {
                     let col_from = *branches.get(branch).unwrap_or(&0);
                     let col_to = *branches.get(&current_branch).unwrap_or(&0);
-                    let x_from = start_x + col_from as f32 * 80.0;
+                    let x_from = start_x + col_from as f32 * 90.0;
+                    let x_to = start_x + col_to as f32 * 90.0;
                     let y = start_y + commit_count as f32 * spacing_y;
-                    let x_to = start_x + col_to as f32 * 80.0;
+
+                    let from_y = last_commit_y.get(branch).copied().unwrap_or(y - spacing_y);
                     svg.add_line(
                         x_from,
-                        y - spacing_y,
+                        from_y,
                         x_to,
                         y,
-                        "stroke:#666;stroke-width:2;stroke-dasharray:4,2",
+                        "stroke:#64748b;stroke-width:2;stroke-dasharray:4,3",
+                    );
+
+                    // Commit node on destination branch
+                    let to_color = branch_colors[col_to % branch_colors.len()];
+                    if let Some(&prev_y) = last_commit_y.get(&current_branch) {
+                        svg.add_line(
+                            x_to,
+                            prev_y,
+                            x_to,
+                            y,
+                            &format!("stroke:{};stroke-width:2", to_color),
+                        );
+                    }
+                    last_commit_y.insert(current_branch.clone(), y);
+
+                    svg.add_circle(
+                        x_to,
+                        y,
+                        10.0,
+                        &format!("fill:{};stroke:#ffffff;stroke-width:2", to_color),
                     );
                     commit_count += 1;
                 }
                 _ => {}
             }
         }
+
+        // Adjust dimensions dynamically
+        let max_w = start_x + (branches.len() as f32) * 90.0 + 80.0;
+        let max_h = start_y + (commit_count as f32) * spacing_y + 40.0;
+        svg.set_dimensions(
+            max_w.max(self.width as f32) as u32,
+            max_h.max(self.height as f32) as u32,
+        );
 
         svg.build()
     }
@@ -1243,6 +1520,7 @@ impl Renderer {
         svg.build()
     }
 
+    #[allow(clippy::type_complexity)]
     fn render_journey(&self, diagram: &Diagram) -> String {
         let mut svg = self.setup_svg_builder();
 
@@ -1334,6 +1612,7 @@ impl Renderer {
         svg.build()
     }
 
+    #[allow(clippy::type_complexity)]
     fn render_kanban(&self, diagram: &Diagram) -> String {
         let mut svg = self.setup_svg_builder();
 
@@ -1621,7 +1900,7 @@ impl Renderer {
             svg.add_polygon(&points, "fill:none;stroke:#ddd;stroke-width:1");
         }
 
-        for i in 0..n {
+        for (i, (axis_name, _)) in axes.iter().take(n).enumerate() {
             let angle =
                 2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
             let ex = cx + max_r * angle.cos() as f32;
@@ -1631,15 +1910,15 @@ impl Renderer {
             let lr = max_r + 25.0;
             let lx = cx + lr * angle.cos() as f32;
             let ly = cy + lr * angle.sin() as f32;
-            svg.add_text(lx, ly, &axes[i].0,
+            svg.add_text(lx, ly, axis_name,
                          "text-anchor:middle;dominant-baseline:middle;font-size:12px;font-weight:bold;font-family:Arial");
         }
 
         let mut data_points = Vec::new();
-        for i in 0..n {
+        for (i, (_, val)) in axes.iter().take(n).enumerate() {
             let angle =
                 2.0 * std::f64::consts::PI * i as f64 / n as f64 - std::f64::consts::PI / 2.0;
-            let value = axes[i].1.max(0.0).min(100.0);
+            let value = val.clamp(0.0, 100.0);
             let r = max_r * (value / 100.0) as f32;
             let px = cx + r * angle.cos() as f32;
             let py = cy + r * angle.sin() as f32;
@@ -2123,6 +2402,7 @@ impl Renderer {
         let indent = 60.0;
         let colors = ["#e8f4f8", "#ffe8cc", "#d5f5e3", "#f5e6f0", "#e8e8f8"];
 
+        #[allow(clippy::too_many_arguments)]
         fn render_node(
             svg: &mut SvgBuilder,
             stmts: &[Statement],
@@ -2221,7 +2501,7 @@ impl Renderer {
         let eh = 60.0;
         let hs = 40.0;
         let vs = 30.0;
-        let cols = 3usize.max(1);
+        let cols = 3usize;
 
         let mut pos: std::collections::HashMap<String, (f32, f32)> =
             std::collections::HashMap::new();
@@ -2408,7 +2688,6 @@ impl Renderer {
         let ph = self.height as f32 - 2.0 * m;
         let n = cats.len().max(1);
         let bw = pw / n as f32;
-        let _range = (y_max - y_max).max(1.0);
 
         // Y axis
         svg.add_line(m, m, m, m + ph, "stroke:#333;stroke-width:2");
@@ -2632,13 +2911,56 @@ impl Renderer {
     #[cfg(feature = "png")]
     pub fn render_png(&self, diagram: &Diagram) -> Result<Vec<u8>, String> {
         let svg_data = self.render(diagram)?;
+        // Ensure generic fallback font families are available for cross-platform rendering
+        let svg_data = svg_data
+            .replace("font-family:Arial", "font-family:Arial, sans-serif")
+            .replace("font-family: Arial", "font-family: Arial, sans-serif");
 
-        // ponytail: load system fonts for text rendering in PNG output
+        // Load system fonts for text rendering in PNG output
         let mut fontdb = usvg::fontdb::Database::new();
         fontdb.load_system_fonts();
 
-        let mut opt = usvg::Options::default();
-        opt.fontdb = std::sync::Arc::new(fontdb);
+        // Select best available sans-serif font (preferring CJK fonts for Chinese support)
+        let mut sans_family = "sans-serif".to_string();
+        for candidate in &[
+            "Noto Sans CJK SC",
+            "Noto Sans SC",
+            "PingFang SC",
+            "Microsoft YaHei",
+            "WenQuanYi Micro Hei",
+            "DejaVu Sans",
+            "Arial",
+        ] {
+            if fontdb
+                .faces()
+                .any(|f| f.families.iter().any(|(fam, _)| fam == candidate))
+            {
+                fontdb.set_sans_serif_family(*candidate);
+                sans_family = (*candidate).to_string();
+                break;
+            }
+        }
+
+        for candidate in &[
+            "Noto Sans Mono CJK SC",
+            "DejaVu Sans Mono",
+            "Courier New",
+            "monospace",
+        ] {
+            if fontdb
+                .faces()
+                .any(|f| f.families.iter().any(|(fam, _)| fam == candidate))
+            {
+                fontdb.set_monospace_family(*candidate);
+                break;
+            }
+        }
+
+        let mut opt = usvg::Options {
+            fontdb: std::sync::Arc::new(fontdb),
+            ..Default::default()
+        };
+        opt.font_family = sans_family;
 
         let rtree =
             usvg::Tree::from_str(&svg_data, &opt).map_err(|e| format!("SVG parse error: {}", e))?;
@@ -2651,7 +2973,7 @@ impl Renderer {
 
         resvg::render(
             &rtree,
-            tiny_skia::Transform::from_scale(self.scale as f32, self.scale as f32),
+            tiny_skia::Transform::from_scale(self.scale, self.scale),
             &mut pixmap.as_mut(),
         );
 
@@ -2676,14 +2998,14 @@ fn compute_tree_layers(node_ids: &[String], edges: &[(String, String)]) -> Vec<V
 
     for id in node_ids {
         in_degree.insert(id.clone(), 0);
-        children.entry(id.clone()).or_insert_with(Vec::new);
+        children.entry(id.clone()).or_default();
     }
 
     for (from, to) in edges {
         if node_ids.contains(from) && node_ids.contains(to) {
             parents.insert(to.clone(), from.clone());
             *in_degree.get_mut(to).unwrap_or(&mut 0) += 1;
-            children.entry(from.clone()).or_insert_with(Vec::new).push(to.clone());
+            children.entry(from.clone()).or_default().push(to.clone());
         }
     }
 
@@ -2815,6 +3137,7 @@ fn flatten_seq_stmts(stmts: &[Statement]) -> Vec<Statement> {
 }
 
 /// Process sequence diagram statements recursively.
+#[allow(clippy::too_many_arguments)]
 fn process_seq_stmts(
     svg: &mut SvgBuilder,
     center_map: &HashMap<&str, f32>,
@@ -2836,46 +3159,83 @@ fn process_seq_stmts(
                 let cx1 = center_map.get(from.as_str()).copied().unwrap_or(0.0);
                 let cx2 = center_map.get(to.as_str()).copied().unwrap_or(0.0);
 
-                let style = match arrow_type {
-                    ArrowType::Dashed | ArrowType::DashedCross | ArrowType::DashedOpen => {
-                        "stroke:black;stroke-width:2;stroke-dasharray:8,4;fill:none"
-                    }
-                    _ => "stroke:black;stroke-width:2;fill:none",
-                };
-
-                svg.add_line(cx1, *y_pos, cx2, *y_pos, style);
-
-                // Arrow head for solid/dashed/cross types (not open)
-                if !matches!(arrow_type, ArrowType::SolidOpen | ArrowType::DashedOpen) {
-                    let arrow_size = 8.0;
+                if from == to {
+                    // Self-message loop!
+                    let loop_w = 34.0;
+                    let loop_h = 22.0;
+                    let path = format!(
+                        "M {} {} L {} {} L {} {} L {} {}",
+                        cx1,
+                        *y_pos,
+                        cx1 + loop_w,
+                        *y_pos,
+                        cx1 + loop_w,
+                        *y_pos + loop_h,
+                        cx1,
+                        *y_pos + loop_h
+                    );
+                    svg.add_path(&path, "stroke:#334155;stroke-width:1.5;fill:none");
+                    // Arrow head pointing left towards cx1
                     svg.add_polygon(
                         &[
-                            (cx2, *y_pos),
-                            (cx2 - arrow_size, *y_pos - 4.0),
-                            (cx2 - arrow_size, *y_pos + 4.0),
+                            (cx1, *y_pos + loop_h),
+                            (cx1 + 6.0, *y_pos + loop_h - 3.5),
+                            (cx1 + 6.0, *y_pos + loop_h + 3.5),
                         ],
-                        "fill:black",
+                        "fill:#334155",
                     );
-                }
+                    // Label placed to the right of the loop, completely clear of the lifeline
+                    svg.add_text(
+                        cx1 + loop_w + 6.0,
+                        *y_pos + loop_h / 2.0 + 3.0,
+                        label,
+                        "text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif",
+                    );
+                    *y_pos += line_height.max(loop_h + 10.0);
+                } else {
+                    let style = match arrow_type {
+                        ArrowType::Dashed | ArrowType::DashedCross | ArrowType::DashedOpen => {
+                            "stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"
+                        }
+                        _ => "stroke:#334155;stroke-width:1.5;fill:none",
+                    };
 
-                // Message label
-                let mid_x = (cx1 + cx2) / 2.0;
-                let lw = 70.0;
-                let lh = 18.0;
-                svg.add_rect(
-                    mid_x - lw / 2.0,
-                    *y_pos - lh / 2.0,
-                    lw,
-                    lh,
-                    "fill:white;stroke:none;",
-                );
-                svg.add_text(
-                    mid_x,
-                    *y_pos + 4.0,
-                    label,
-                    "text-anchor:middle;font-size:11px;font-family:Arial",
-                );
-                *y_pos += line_height;
+                    svg.add_line(cx1, *y_pos, cx2, *y_pos, style);
+
+                    // Arrow head for solid/dashed/cross types (not open)
+                    if !matches!(arrow_type, ArrowType::SolidOpen | ArrowType::DashedOpen) {
+                        let arrow_size = 7.0;
+                        let dir = if cx2 >= cx1 { 1.0 } else { -1.0 };
+                        svg.add_polygon(
+                            &[
+                                (cx2, *y_pos),
+                                (cx2 - dir * arrow_size, *y_pos - 4.0),
+                                (cx2 - dir * arrow_size, *y_pos + 4.0),
+                            ],
+                            "fill:#334155",
+                        );
+                    }
+
+                    // Message label with dynamic text background
+                    let mid_x = (cx1 + cx2) / 2.0;
+                    let text_chars = label.chars().count() as f32;
+                    let lw = (text_chars * 12.0 + 16.0).max(40.0);
+                    let lh = 18.0;
+                    svg.add_rect(
+                        mid_x - lw / 2.0,
+                        *y_pos - lh / 2.0,
+                        lw,
+                        lh,
+                        "fill:#ffffff;stroke:none;",
+                    );
+                    svg.add_text(
+                        mid_x,
+                        *y_pos + 3.0,
+                        label,
+                        "text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif",
+                    );
+                    *y_pos += line_height;
+                }
             }
             Statement::Note {
                 target,
@@ -2913,13 +3273,17 @@ fn process_seq_stmts(
                 let block_start = *y_pos - 10.0;
 
                 // 计算条件框的左右边界（横跨所有参与者）
-                let blk_left = if let Some(min_x) = center_map.values().min_by(|a, b| a.partial_cmp(b).unwrap()) {
+                let blk_left = if let Some(min_x) =
+                    center_map.values().min_by(|a, b| a.partial_cmp(b).unwrap())
+                {
                     min_x - box_width / 2.0 - 20.0
                 } else {
                     start_x - 20.0
                 };
 
-                let blk_right = if let Some(max_x) = center_map.values().max_by(|a, b| a.partial_cmp(b).unwrap()) {
+                let blk_right = if let Some(max_x) =
+                    center_map.values().max_by(|a, b| a.partial_cmp(b).unwrap())
+                {
                     max_x + box_width / 2.0 + 20.0
                 } else {
                     start_x + box_width + 20.0
@@ -2937,61 +3301,48 @@ fn process_seq_stmts(
                 );
                 let block_end = *y_pos;
 
-                // 画完整的条件框：上、左、右、下四条边
-                // 上边
-                svg.add_line(
-                    blk_left,
-                    block_start,
-                    blk_right,
-                    block_start,
-                    "stroke:#666;stroke-width:1.5",
-                );
-                // 左边
-                svg.add_line(
-                    blk_left,
-                    block_start,
-                    blk_left,
-                    block_end,
-                    "stroke:#666;stroke-width:1.5",
-                );
-                // 右边
-                svg.add_line(
-                    blk_right,
-                    block_start,
-                    blk_right,
-                    block_end,
-                    "stroke:#666;stroke-width:1.5",
-                );
-                // 下边
-                svg.add_line(
-                    blk_left,
-                    block_end,
-                    blk_right,
-                    block_end,
-                    "stroke:#666;stroke-width:1.5",
-                );
+                // Draw modern condition box
+                if keyword == "else" {
+                    // Divider line for else block
+                    svg.add_line(
+                        blk_left,
+                        block_start,
+                        blk_right,
+                        block_start,
+                        "stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5",
+                    );
+                } else {
+                    // Enclosing container box
+                    svg.add_rect(
+                        blk_left,
+                        block_start,
+                        blk_right - blk_left,
+                        block_end - block_start,
+                        "fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4",
+                    );
+                }
 
                 let block_label = if let Some(cond) = condition {
                     format!("{} [{}]", keyword, cond)
                 } else {
                     keyword.clone()
                 };
-                // 为标签添加白色背景，防止被条件框内容遮挡
-                let label_width = block_label.len() as f32 * 6.0;
+                let label_chars = block_label.chars().count() as f32;
+                let label_width = (label_chars * 7.5 + 10.0).max(30.0);
                 svg.add_rect(
-                    blk_left - 2.0,
-                    block_start - 8.0,
-                    label_width + 8.0,
-                    14.0,
-                    "fill:white;stroke:none",
+                    blk_left,
+                    block_start,
+                    label_width,
+                    16.0,
+                    "fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3",
                 );
                 svg.add_text(
-                    blk_left + 2.0,
-                    block_start + 2.0,
+                    blk_left + 4.0,
+                    block_start + 11.0,
                     &block_label,
-                    "text-anchor:start;font-size:10px;font-family:Arial;font-weight:bold",
+                    "text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif",
                 );
-                // 条件框后增加更多间距，防止后续消息被框的下边界遮挡
+                // Extra breathing room after block
                 *y_pos += line_height;
             }
             Statement::Activate { participant } => {
@@ -3001,13 +3352,13 @@ fn process_seq_stmts(
             Statement::Deactivate { participant } => {
                 if let Some(&start_y) = activations.get(participant) {
                     if let Some(&cx) = center_map.get(participant.as_str()) {
-                        // 绘制激活框（activation box）— 显示参与者的活跃周期
+                        // Activation box showing active lifecycle
                         svg.add_rect(
-                            cx - 4.5,
+                            cx - 5.0,
                             start_y,
-                            9.0,
+                            10.0,
                             *y_pos - start_y,
-                            "fill:#f5f5f5;stroke:#999;stroke-width:1.5",
+                            "fill:#e2e8f0;stroke:#94a3b8;stroke-width:1;rx:2",
                         );
                     }
                 }
