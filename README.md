@@ -1,6 +1,8 @@
-# 🎨 Mermaid CLI - Rust 高性能实现
+# 🎨 Mermaid CLI - High-Performance Rust Implementation
 
-> **高性能、零依赖的 Mermaid 图表渲染引擎，专为 AI 系统和生产环境设计。**
+> **English** | [简体中文](./README_ZH.md)
+
+> **A high-performance, zero-dependency Mermaid diagram rendering engine built in Rust, engineered for AI systems, automated pipelines, and production environments.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 ![Version](https://img.shields.io/badge/version-v0.2.1--alpha-green)
@@ -8,184 +10,198 @@
 [![Online Studio](https://img.shields.io/badge/Playground-Online%20Studio-blueviolet)](./site/playground.html)
 ![Status](https://img.shields.io/badge/status-production--ready-brightgreen)
 
-## ⚡ 核心优势
+---
 
-| 优势 | mmdc（官方） | Rust 版本 |
-|------|------------|---------|
-| **单图渲染** | 2.9 秒 | 791ms | **3.7x 快** |
-| **冷启动** | 400ms | 5ms | **80x 快** |
-| **内存占用** | 300-500MB | <30MB | **10-15x 少** |
-| **部署复杂度** | 需要 Chromium | 零依赖 | **无限倍简单** |
-| **容器镜像** | 1.2GB | 70MB | **17x 小** |
+## ⚡ Core Advantages
 
-详见 [📊 性能对比](./docs/COMPARISON_ACTUAL_TEST.md)
+| Advantage | mmdc (Official Node.js) | Rust Version | Comparison |
+|-----------|-------------------------|--------------|------------|
+| **Single Diagram Render** | 2.9 s | 791 ms | **3.7x Faster** |
+| **Cold Start** | 400 ms | 5 ms | **80x Faster** |
+| **Memory Footprint** | 300–500 MB | <30 MB | **10–15x Lower** |
+| **Deployment Complexity** | Requires Chromium & Node.js | Single standalone binary | **Zero Dependencies** |
+| **Container Image Size** | 1.2 GB | ~70 MB | **17x Smaller** |
+
+See detailed benchmarks in [📊 Actual Performance Test](./docs/COMPARISON_ACTUAL_TEST.md).
 
 ---
 
-## 🎯 功能特性
+## 🎯 Features
 
-### ✅ 支持 23 种图表类型
+### ✅ Supports 23 Diagram Types
 
-**基础** — Flowchart, State Diagram, Class Diagram  
-**交互** — Sequence Diagram (时序图), Journey, ZenUML  
-**数据** — Pie Chart, XY Chart, Sankey, Radar, Treemap  
-**规划** — Gantt Chart, Timeline, Kanban  
-**架构** — Architecture, C4, Block, Mind Map  
-**关系** — ER Diagram, Requirement Diagram, Ishikawa  
-**其他** — Git Graph, Venn, Packet, Quadrant Chart
+- **Fundamentals** — Flowchart, State Diagram, Class Diagram  
+- **Interaction** — Sequence Diagram, Journey, ZenUML  
+- **Data & Metrics** — Pie Chart, XY Chart, Sankey, Radar, Treemap  
+- **Planning & Management** — Gantt Chart, Timeline, Kanban  
+- **Architecture** — Architecture, C4 Diagram, Block Diagram, Mind Map  
+- **Relationships** — ER Diagram, Requirement Diagram, Ishikawa (Fishbone)  
+- **Specialized** — Git Graph, Venn Diagram, Packet Diagram, Quadrant Chart  
 
-### 🚀 AI 友好特性
+### 🚀 Built for AI & Agentic Workflows
 
-- ✅ **流式调用** — 毫秒级响应，支持实时反馈
-- ✅ **自动纠错** — 语法检查和自动修复
-- ✅ **AST 输出** — JSON 格式，易于集成
-- ✅ **完整渲染** — SVG + PNG 双格式
-- ✅ **中文完全支持** — 标签、注释、文本全部正常
+- ✅ **Sub-Second Streaming** — Millisecond-level rendering suitable for interactive AI agents and real-time streaming feedback.
+- ✅ **Auto Error Recovery** — Built-in syntax analysis and automatic healing for common LLM typo patterns.
+- ✅ **AST Inspection** — Direct Abstract Syntax Tree export in JSON format for downstream programmatic processing.
+- ✅ **Dual-Format Rendering** — Native vector SVG and high-resolution raster PNG output without headless browsers.
+- ✅ **Full Multilingual & CJK Support** — Seamless rendering of Chinese, Japanese, Korean, and non-ASCII characters across labels, notes, and styles.
 
-### 🏗️ 生产就绪
+### 🏗️ Production-Ready Reliability
 
-- ✅ **编译一致** — 编译一次，到处运行
-- ✅ **零运行时依赖** — 无需 Node.js、Chromium
-- ✅ **容器友好** — 镜像 < 100MB，启动 < 100ms
-- ✅ **离线可用** — 无网络依赖
-- ✅ **代码质量** — 0 编译警告，完整测试覆盖
+- ✅ **Compile Once, Run Anywhere** — Self-contained binary without dynamic runtime dependencies.
+- ✅ **Zero Headless Browsers** — No Chromium, Puppeteer, or Node.js runtime overhead.
+- ✅ **Container-Friendly** — Minimal base container image (<100MB) with sub-100ms startup latency.
+- ✅ **100% Offline Capable** — Runs completely isolated without external network calls or font CDN dependencies.
+- ✅ **Strict Quality Assurance** — 0 compiler warnings, strict clippy standards, and 330+ unit, integration, and snapshot tests.
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 安装
+### 1. Installation
+
+#### Build from Source
 
 ```bash
-# 编译源代码
-git clone https://github.com/hao430/mermaid-cli
+# Clone the repository
+git clone https://github.com/hao430/mermaid-cli.git
 cd mermaid-cli
-cargo build --release
 
-# 输出：target/release/mermaid-cli
+# Compile with PNG support
+cargo build --release --features png
+
+# Standalone binary available at:
+# ./target/release/mermaid-cli
 ```
 
-### 2. 基本用法
+### 2. Basic Usage
 
 ```bash
-# 渲染为 PNG（推荐）
-./target/release/mermaid-cli diagram.mmd -o output.png -e png
+# Render directly to SVG (default)
+./target/release/mermaid-cli input.mmd -o output.svg
 
-# 渲染为 SVG
-./target/release/mermaid-cli diagram.mmd -o output.svg -e svg
+# Render to PNG
+./target/release/mermaid-cli input.mmd -o output.png
 
-# 从 stdin 读取（AI 调用）
-echo "graph TD; A[Start]-->B[End]" | \
-  ./target/release/mermaid-cli --stdin -o output.png -e png
+# Stream from standard input (ideal for AI pipelines)
+echo "graph TD; A[Input]-->B[Processing]-->C[Output]" | \
+  ./target/release/mermaid-cli --stdin -o output.png
 ```
 
-### 3. 高级用法
+### 3. Advanced Commands & Flags
 
 ```bash
-# 语法检查
-./target/release/mermaid-cli diagram.mmd check
+# Syntax verification
+./target/release/mermaid-cli check diagram.mmd
 
-# 自动修复
-./target/release/mermaid-cli diagram.mmd fix -o fixed.mmd
+# Automatic syntax healing and repair
+./target/release/mermaid-cli fix broken.mmd -o fixed.mmd
 
-# 自定义尺寸
-./target/release/mermaid-cli diagram.mmd -o output.png -w 1920 -h 1080 -s 2
+# Apply built-in themes (default, forest, dark, neutral)
+./target/release/mermaid-cli diagram.mmd -t dark -o output.svg
 
-# 输出 AST（JSON）
-./target/release/mermaid-cli diagram.mmd -e json
+# Custom dimensions and scale factor
+./target/release/mermaid-cli diagram.mmd -w 1920 -H 1080 -s 2 -o high_res.png
+
+# Export diagram AST as structured JSON (requires --features json)
+./target/release/mermaid-cli diagram.mmd --json
 ```
 
 ---
 
-## 📊 实测数据
+## 📊 Benchmark Data
 
-### 性能对比（2026-07-11 实测）
+### Real-World Sequence Diagram Benchmark
+
+*Benchmark specification: Complex Sequence Diagram with 5 participants and 16 sequential messages.*
 
 ```
-测试图表：复杂时序图（5参与者、16条消息）
+Rust mermaid-cli:
+  SVG Generation : 25 ms
+  PNG Rasterize  : 766 ms
+  Total Runtime  : 791 ms  ✅
+  Peak Memory    : <30 MB
+
+mmdc (Official Node.js CLI):
+  Node.js Startup   : ~100 ms
+  Chromium Launch   : ~2000 ms
+  Page Layout       : ~500 ms
+  Screenshot Capture: ~200 ms
+  Total Runtime     : ~2900 ms ⚠️
+  Peak Memory       : 300–500 MB
+```
+
+### High-Concurrency & Batch Rendering
+
+```
+Batch Processing: 1,000 Diagrams
+
+mmdc:
+  Sequential Time: 2,900 s (~48 minutes) ❌
+  50 Workers     : ~60 s, Memory: 50 × 500 MB = 25 GB ❌ (High risk of OOM)
 
 Rust mermaid-cli:
-  SVG 生成：25ms
-  PNG 转换：766ms
-  总计：791ms ✅
-  内存：<30MB
-
-mmdc (官方):
-  Node 启动：~100ms
-  Chromium 启动：~2000ms
-  页面渲染：~500ms
-  截图：~200ms
-  总计：~2900ms ⚠️
-  内存：300-500MB
+  Sequential Time: ~800 s (~13 minutes) ✅
+  50 Workers     : ~16 s, Memory: 50 × 30 MB = 1.5 GB ✅ (Lightweight & stable)
 ```
 
-**关键结论**：Rust 版本在所有指标上全面领先
-
-### 批量渲染性能
-
-```
-处理 1000 个图表：
-
-mmdc: 2900秒 = 48分钟 ❌ (即使 50 并发也需 1 分钟)
-Rust: 800秒 = 13分钟 ✅ (50 并发仅需 16 秒)
-
-内存占用：
-mmdc: 50 进程 × 500MB = 25GB ❌ OOM
-Rust: 50 进程 × 30MB = 1.5GB ✅ 轻松
-```
-
-详见 [完整对比分析](./docs/COMPARISON_ACTUAL_TEST.md)
+Read the full report in [📊 Full Comparison & Benchmarks](./docs/COMPARISON_ACTUAL_TEST.md).
 
 ---
 
-## 📚 文档导航
+## 📚 Documentation
 
-| 文档 | 内容 | 用时 |
-|------|------|------|
-| **[QUICK_START.md](./docs/QUICK_START.md)** | 5 分钟快速入门 | ⏱️ 5分钟 |
-| **[SEQUENCE_DIAGRAM_GUIDE.md](./docs/SEQUENCE_DIAGRAM_GUIDE.md)** | 时序图完整指南 | ⏱️ 15分钟 |
-| **[FLOWCHART_GUIDE.md](./docs/FLOWCHART_GUIDE.md)** | 流程图完整指南 | ⏱️ 15分钟 |
-| **[API.md](./docs/API.md)** | 完整 API 参考 | ⏱️ 20分钟 |
-| **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** | 系统架构设计 | ⏱️ 30分钟 |
-| **[COMPARISON_ACTUAL_TEST.md](./docs/COMPARISON_ACTUAL_TEST.md)** | mmdc 对比分析 | ⏱️ 15分钟 |
-| **[RELEASE_NOTES.md](./RELEASE_NOTES.md)** | v0.2.1 发布说明 | ⏱️ 10分钟 |
+| Document | Description | Est. Reading Time |
+|----------|-------------|-------------------|
+| **[QUICK_START.md](./docs/QUICK_START.md)** | Quick start tutorial and installation guide | ⏱️ 5 min |
+| **[FLOWCHART_GUIDE.md](./docs/FLOWCHART_GUIDE.md)** | Flowcharts, subgraphs, and styling guide | ⏱️ 15 min |
+| **[SEQUENCE_DIAGRAM_GUIDE.md](./docs/SEQUENCE_DIAGRAM_GUIDE.md)** | Comprehensive Sequence diagram manual | ⏱️ 15 min |
+| **[API.md](./docs/API.md)** | Rust crate and CLI parameter API reference | ⏱️ 20 min |
+| **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** | Internal architecture, lexer, AST, and renderer | ⏱️ 30 min |
+| **[COMPARISON_ACTUAL_TEST.md](./docs/COMPARISON_ACTUAL_TEST.md)** | In-depth comparison against official `mmdc` | ⏱️ 15 min |
+| **[RELEASE_NOTES.md](./RELEASE_NOTES.md)** | Release notes and version changelogs | ⏱️ 10 min |
 
 ---
 
-## 💡 使用案例
+## 💡 Practical Examples
 
-### AI 系统实时绘图
+### AI Agent Real-Time Diagram Generation (Python)
 
 ```python
-# Python 调用示例
 import subprocess
 
 diagram_code = """
 graph TD
-    A[用户输入] --> B[AI 处理]
-    B --> C[生成图表]
-    C --> D[返回结果]
+    User([User Prompt]) --> Agent[AI Agent]
+    Agent --> Plan{Task Planning}
+    Plan -->|Code| Gen[Code Generator]
+    Plan -->|Diagram| Mermaid[Rust mermaid-cli]
+    Mermaid --> Result[Rendered PNG / SVG]
 """
 
-# 毫秒级响应
-result = subprocess.run(
-    ['mermaid-cli', '--stdin', '-o', 'output.png', '-e', 'png'],
-    input=diagram_code.encode(),
+# Instant sub-second render
+process = subprocess.run(
+    ["mermaid-cli", "--stdin", "-o", "workflow.png"],
+    input=diagram_code.encode("utf-8"),
     capture_output=True,
-    timeout=1  # 1 秒超时（足够了）
+    check=True,
+    timeout=3,
 )
 ```
 
-### 自动文档生成
+### Automated Documentation Generation (Bash)
 
 ```bash
-# 批量渲染所有 .mmd 文件
-find . -name "*.mmd" | while read file; do
-  mermaid-cli "$file" -o "${file%.mmd}.png" -e png
+#!/usr/bin/env bash
+# Recursively render all .mmd diagrams in docs
+find docs -type f -name "*.mmd" | while read -r file; do
+  out="${file%.mmd}.png"
+  echo "Rendering: $file -> $out"
+  mermaid-cli "$file" -o "$out" -q
 done
 ```
 
-### Docker 容器部署
+### Lightweight Scratch Docker Container
 
 ```dockerfile
 FROM scratch
@@ -195,177 +211,125 @@ COPY /usr/share/fonts /fonts
 ENTRYPOINT ["/mermaid-cli"]
 CMD ["--help"]
 
-# 镜像大小：70MB（比 mmdc 小 17 倍）
+# Image size: ~70 MB (over 17x smaller than official Docker images)
 ```
 
 ---
 
-## 🎯 项目状态
+## 🎯 Project Status & Roadmap
 
-### ✅ 已完成（v0.2.1-alpha）
+### ✅ Completed Milestones
 
-- ✅ 基础 Flowchart 支持
-- ✅ 完整 Sequence Diagram（时序图）
-- ✅ PNG 输出（文字、尺寸、布局全部修复）
-- ✅ SVG 输出
-- ✅ 22+ 图表类型支持
-- ✅ 中文完全支持
-- ✅ 自动错误修复
-- ✅ 完整文档和示例
-- ✅ CI/CD 工作流
-- ✅ 生产级代码质量
+- ✅ Basic & complex Flowcharts with `subgraph` and `classDef` styling
+- ✅ Full Sequence Diagrams with activation, notes, loops, and options
+- ✅ Zero-Chromium native PNG & SVG generation
+- ✅ 23+ diagram formats supported
+- ✅ Multilingual and CJK font rendering
+- ✅ Built-in syntax error auto-fixer
+- ✅ Online Playground and interactive WebAssembly build
+- ✅ Zero compiler warnings, 330+ test suite pass
 
-### 📅 开发里程碑
+### 📅 Roadmap
 
-| 版本 | 日期 | 里程碑 |
-|------|------|--------|
-| v0.1-alpha | 2026-06-14 | 初始版本，基础功能 |
-| v0.2.0-alpha | 2026-06-28 | SVG 优化，性能基准 |
-| **v0.2.1-alpha** | **2026-07-11** | **PNG 完全修复，生产就绪** |
-| v0.3（计划） | 2026-08 | 高级图表增强 |
+| Version | Date | Key Highlights |
+|---------|------|----------------|
+| **v0.1.0-alpha** | 2026-06 | Initial prototype and core AST parser |
+| **v0.2.0-alpha** | 2026-06 | SVG layout optimization and baseline benchmarks |
+| **v0.2.1-alpha** | **2026-07** | **Native PNG rasterization, production ready** |
+| **v0.3.0 (Planned)** | 2026-08 | Native PDF generation, extended styling enhancements |
 
 ---
 
-## 🏗️ 项目结构
+## 🏗️ Project Architecture
 
 ```
 mermaid-cli/
 ├── src/
-│   ├── main.rs              # CLI 入口
-│   ├── lib.rs               # 库入口
-│   ├── parser/              # 解析模块（23 种图表）
-│   ├── renderer/            # 渲染引擎
-│   ├── svg/                 # SVG 生成
-│   ├── fixer/               # 语法修复
-│   └── utils/               # 工具函数
-├── docs/                    # 📚 完整文档
-│   ├── SEQUENCE_DIAGRAM_GUIDE.md
-│   ├── FLOWCHART_GUIDE.md
-│   ├── COMPARISON_ACTUAL_TEST.md
-│   └── ... 更多指南
-├── examples/                # 📝 实际例子
-│   ├── shopping_sequence.mmd/.png
-│   ├── checkout_flow.mmd/.png
-│   ├── oa_reimbursement_flow.mmd/.png
-│   └── ... 更多示例
-├── tests/                   # 🧪 测试
-├── .github/workflows/       # CI/CD 配置
-├── Cargo.toml              # 项目配置
-└── README.md               # 本文件
+│   ├── main.rs              # CLI entry point and argument parsing
+│   ├── lib.rs               # Library API interface
+│   ├── parser/              # Lexer, AST, and diagram parsers (23 formats)
+│   ├── renderer/            # Layout engines and vector positioning
+│   ├── svg/                 # High-performance SVG builder
+│   ├── fixer/               # Syntax diagnostics and auto-healing
+│   └── utils/               # Geometry, typography, and utility helpers
+├── docs/                    # 📚 Documentation and design specifications
+├── examples/                # 📝 Sample diagrams and rendering outputs
+├── site/                    # 🌐 WebAssembly playground and interactive studio
+├── tests/                   # 🧪 Integration, benchmark, and snapshot tests
+├── Cargo.toml              # Rust package configuration
+├── README.md               # English Documentation (Default)
+└── README_ZH.md            # Chinese Documentation
 ```
 
 ---
 
-## 🧪 测试和质量
+## 🧪 Testing & Code Quality
 
-### 代码质量
+Run the test suite, linting, and formatting checks:
 
 ```bash
-# 运行所有检查
-cargo test          # 单元测试
-cargo clippy        # 代码检查
-cargo fmt --check   # 格式检查
+# Run unit and integration tests
+cargo test --all-features
+
+# Run Clippy static analysis
+cargo clippy --all-targets --all-features
+
+# Verify formatting
+cargo fmt --check
 ```
 
-### 测试覆盖
+---
 
-- ✅ 解析器单元测试（各图表类型）
-- ✅ 渲染器集成测试（SVG + PNG）
-- ✅ 端到端测试（真实图表）
-- ✅ 性能基准测试（对标 mmdc）
+## 📈 When to Use Rust `mermaid-cli`
+
+### ✅ Recommended Use Cases
+
+- **AI & LLM Workflows** — Real-time diagram rendering requiring sub-second response times.
+- **High-Throughput Batch Processing** — Thousands of diagrams rendered within tight compute constraints.
+- **Containerized Workloads** — Kubernetes, Cloud Functions, and Docker deployments requiring ultra-small images (<100MB).
+- **CI/CD Pipelines** — Fast, dependable automated documentation builds without installing headless browsers.
+- **Resource-Constrained Environments** — Edge servers or embedded systems with limited RAM (<50MB).
+- **Air-Gapped / Offline Tooling** — Complete isolation from remote CDNs and external network resources.
+
+### ⚠️ Scenarios to Keep `mmdc`
+
+- Complete browser-engine DOM CSS cascading stylesheet dependencies.
+- Legacy pipelines requiring tight coupling with JavaScript browser runtime APIs.
 
 ---
 
-## 📈 何时使用 Rust mermaid-cli
+## 🤝 Contributing
 
-### ✅ 推荐场景
+Contributions are welcome!
 
-- **AI 系统** — 实时渲染，需要毫秒级响应
-- **批量处理** — 1000+ 图表，时间和资源受限
-- **容器部署** — Kubernetes、Docker，需要轻量级镜像
-- **CI/CD 集成** — 文档自动生成流水线
-- **边界计算** — 资源受限环境（<50MB 内存）
-- **离线工具** — 无网络依赖，快速启动
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/awesome-feature`)
+3. Commit your changes (`git commit -m 'feat: add awesome feature'`)
+4. Push to the branch (`git push origin feature/awesome-feature`)
+5. Open a Pull Request
 
-### ⚠️ 保留 mmdc 场景
-
-- 需要 PDF 输出
-- 需要完整 CSS 自定义
-- 已有成熟 Node 环境
-
-详见 [完整对比分析](./docs/COMPARISON_ACTUAL_TEST.md)
+Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
 
 ---
 
-## 🤝 贡献指南
+## 📄 License
 
-欢迎贡献！请：
-
-1. Fork 仓库
-2. 创建特性分支（`git checkout -b feature/amazing-feature`）
-3. 提交更改（`git commit -m 'Add amazing feature'`）
-4. 推送到分支（`git push origin feature/amazing-feature`）
-5. 开启 Pull Request
-
-详见 [DEVELOPMENT.md](./docs/DEVELOPMENT.md)
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
 
 ---
 
-## 📞 支持和反馈
+## 🙏 Acknowledgments
 
-- 🐛 **Bug 报告** — [GitHub Issues](https://github.com/hao430/mermaid-cli/issues)
-- 💬 **讨论建议** — [GitHub Discussions](https://github.com/hao430/mermaid-cli/discussions)
-- 📖 **文档** — 查看 `docs/` 目录
-
----
-
-## 📄 许可证
-
-MIT License — 详见 [LICENSE](./LICENSE)
-
-本项目在 MIT 许可证下发布，允许自由使用、修改和分发。
-
----
-
-## 🙏 致谢
-
-感谢以下项目和社区的支持：
-
-- **[Mermaid.js](https://mermaid.js.org/)** — 优秀的图表语言设计
-- **[Rust 生态](https://www.rust-lang.org/)** — 强大的工具链和库
-- **所有贡献者和用户** — 测试、反馈和改进
-
----
-
-## 📊 快速数据
-
-| 指标 | 数值 |
-|------|------|
-| **性能** | 3-4 倍快于 mmdc |
-| **依赖** | 零个外部依赖 |
-| **二进制** | 50MB 单文件 |
-| **图表类型** | 23+ 种 |
-| **代码质量** | 0 警告 |
-| **文档** | 20+ 份完整指南 |
-| **容器镜像** | <100MB |
-| **启动时间** | <5ms |
-
----
-
-## 🎯 下一步
-
-👉 **立即开始**：[📖 QUICK_START.md](./docs/QUICK_START.md)
-
-👉 **查看示例**：[examples/](./examples/) 目录
-
-👉 **深入了解**：[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- **[Mermaid.js](https://mermaid.js.org/)** — For the diagramming specification and ecosystem design.
+- **[Rust Community](https://www.rust-lang.org/)** — For the ecosystem, compiler, and tools.
+- All contributors, issue reporters, and users.
 
 ---
 
 <div align="center">
 
-**⭐ 如果觉得有用，请给个星标支持！**
+**⭐ If you find this project helpful, please give it a star on GitHub!**
 
-[GitHub](https://github.com/hao430/mermaid-cli) | [文档](./docs/) | [问题反馈](https://github.com/hao430/mermaid-cli/issues)
+[GitHub Repository](https://github.com/hao430/mermaid-cli) | [Documentation](./docs/) | [Issues & Feedback](https://github.com/hao430/mermaid-cli/issues)
 
 </div>

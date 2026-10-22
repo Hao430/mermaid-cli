@@ -242,6 +242,33 @@ body {
   border-color: var(--text-muted);
 }
 
+.lang-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.lang-toggle-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-highlight);
+  background: var(--bg-card-hover);
+}
+
+.lang-toggle-btn svg {
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    Hero Section
    ========================================================================== */

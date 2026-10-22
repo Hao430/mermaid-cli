@@ -122,6 +122,10 @@ let isPanning = false;
 let startX = 0;
 let startY = 0;
 
+function getLang() {
+  return localStorage.getItem('mermaid_cli_lang') || 'zh';
+}
+
 // Initialize WASM
 async function setupWasm() {
   const statusEl = document.getElementById('engine-status');
@@ -129,13 +133,17 @@ async function setupWasm() {
     await init(new URL('../../wasm/mermaid_cli_bg.wasm', import.meta.url));
     wasmReady = true;
     if (statusEl) {
-      statusEl.innerHTML = '<span class="status-badge ok">● Rust WASM 核心已就绪</span>';
+      statusEl.innerHTML = getLang() === 'en'
+        ? '<span class="status-badge ok">● Rust WASM Core Ready</span>'
+        : '<span class="status-badge ok">● Rust WASM 核心已就绪</span>';
     }
     renderCurrentCode();
   } catch (err) {
     console.warn('WASM load error (fallbacking to dynamic preview):', err);
     if (statusEl) {
-      statusEl.innerHTML = '<span class="status-badge ok">● 纯前端渲染管线 (标准兼容)</span>';
+      statusEl.innerHTML = getLang() === 'en'
+        ? '<span class="status-badge ok">● Client Fallback Engine (Compatible)</span>'
+        : '<span class="status-badge ok">● 纯前端渲染管线 (标准兼容)</span>';
     }
     wasmReady = false;
     renderCurrentCode();
@@ -154,7 +162,9 @@ export function renderCurrentCode() {
 
   const code = editor.value.trim();
   if (!code) {
-    preview.innerHTML = '<div style="color: #64748b; font-size: 0.9rem;">请输入 Mermaid 图表语法...</div>';
+    preview.innerHTML = getLang() === 'en'
+      ? '<div style="color: #64748b; font-size: 0.9rem;">Please enter Mermaid diagram syntax...</div>'
+      : '<div style="color: #64748b; font-size: 0.9rem;">请输入 Mermaid 图表语法...</div>';
     return;
   }
 
@@ -178,10 +188,12 @@ export function renderCurrentCode() {
   if (errorMsg) {
     if (errorBanner) {
       errorBanner.style.display = 'block';
-      errorBanner.textContent = `解析提示: ${errorMsg}`;
+      const hint = getLang() === 'en' ? 'Parse Hint:' : '解析提示:';
+      errorBanner.textContent = `${hint} ${errorMsg}`;
     }
     if (diagInfo) {
-      diagInfo.innerHTML = '<span style="color:#ef4444;">● 语法存在错误</span>';
+      const errText = getLang() === 'en' ? '● Syntax Error' : '● 语法存在错误';
+      diagInfo.innerHTML = `<span style="color:#ef4444;">${errText}</span>`;
     }
   } else {
     if (errorBanner) {
@@ -189,26 +201,29 @@ export function renderCurrentCode() {
     }
     preview.innerHTML = svg;
     if (renderTimeEl) {
-      renderTimeEl.textContent = `渲染耗时: ${duration} ms`;
+      const timeLabel = getLang() === 'en' ? 'Render Time' : '渲染耗时';
+      renderTimeEl.textContent = `${timeLabel}: ${duration} ms`;
     }
     if (diagInfo) {
       const firstLine = code.split('\n')[0].trim().toLowerCase();
-      diagInfo.innerHTML = `<span style="color:#10b981;">● 正常 (${detectDiagramType(firstLine)})</span>`;
+      const readyLabel = getLang() === 'en' ? 'Ready' : '正常';
+      diagInfo.innerHTML = `<span style="color:#10b981;">● ${readyLabel} (${detectDiagramType(firstLine)})</span>`;
     }
     updateAstViewer(code);
   }
 }
 
 function detectDiagramType(line) {
-  if (line.startsWith('graph') || line.startsWith('flowchart')) return '流程图 Flowchart';
-  if (line.startsWith('sequence')) return '时序图 Sequence';
-  if (line.startsWith('class')) return '类图 Class';
-  if (line.startsWith('mindmap')) return '思维导图 Mindmap';
-  if (line.startsWith('gitgraph')) return 'Git版本图 GitGraph';
-  if (line.startsWith('state')) return '状态机 State';
-  if (line.startsWith('pie')) return '饼图 Pie';
-  if (line.startsWith('erdiagram') || line.startsWith('er')) return '实体关系图 ER';
-  return 'Mermaid 图表';
+  const isEn = getLang() === 'en';
+  if (line.startsWith('graph') || line.startsWith('flowchart')) return isEn ? 'Flowchart' : '流程图 Flowchart';
+  if (line.startsWith('sequence')) return isEn ? 'Sequence' : '时序图 Sequence';
+  if (line.startsWith('class')) return isEn ? 'Class' : '类图 Class';
+  if (line.startsWith('mindmap')) return isEn ? 'Mindmap' : '思维导图 Mindmap';
+  if (line.startsWith('gitgraph')) return isEn ? 'GitGraph' : 'Git版本图 GitGraph';
+  if (line.startsWith('state')) return isEn ? 'State' : '状态机 State';
+  if (line.startsWith('pie')) return isEn ? 'Pie' : '饼图 Pie';
+  if (line.startsWith('erdiagram') || line.startsWith('er')) return isEn ? 'ER Diagram' : '实体关系图 ER';
+  return isEn ? 'Mermaid Diagram' : 'Mermaid 图表';
 }
 
 function updateAstViewer(code) {
@@ -258,7 +273,11 @@ export function handleAutoFix() {
       if (res && res.fixed) {
         editor.value = res.fixed;
         renderCurrentCode();
-        showToast(res.fixes && res.fixes.length > 0 ? `已修复: ${res.fixes.join(', ')}` : '代码语法良好，无需额外修复');
+        const isEn = getLang() === 'en';
+        const msg = res.fixes && res.fixes.length > 0
+          ? (isEn ? `Repaired: ${res.fixes.join(', ')}` : `已修复: ${res.fixes.join(', ')}`)
+          : (isEn ? 'Code is valid, no fixes needed' : '代码语法良好，无需额外修复');
+        showToast(msg);
         return;
       }
     } catch (e) {
@@ -274,7 +293,7 @@ export function handleAutoFix() {
     .replace(/\bpartcipant\b/g, 'participant');
   editor.value = fixed;
   renderCurrentCode();
-  showToast('已应用自动格式化与错别字修复');
+  showToast(getLang() === 'en' ? 'Auto-repair & formatting applied' : '已应用自动格式化与错别字修复');
 }
 
 function showToast(msg) {
@@ -374,7 +393,7 @@ export function downloadSvg() {
   const canvas = document.getElementById('diagram-canvas');
   const svg = canvas ? canvas.querySelector('svg') : null;
   if (!svg) {
-    showToast('当前没有可导出的图表');
+    showToast(getLang() === 'en' ? 'No diagram available to export' : '当前没有可导出的图表');
     return;
   }
   const svgData = new XMLSerializer().serializeToString(svg);
@@ -387,14 +406,14 @@ export function downloadSvg() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('✓ 已导出为 SVG 矢量图');
+  showToast(getLang() === 'en' ? '✓ Exported as SVG vector' : '✓ 已导出为 SVG 矢量图');
 }
 
 export function downloadPng() {
   const canvas = document.getElementById('diagram-canvas');
   const svg = canvas ? canvas.querySelector('svg') : null;
   if (!svg) {
-    showToast('当前没有可导出的图表');
+    showToast(getLang() === 'en' ? 'No diagram available to export' : '当前没有可导出的图表');
     return;
   }
   const svgData = new XMLSerializer().serializeToString(svg);
@@ -426,7 +445,7 @@ export function downloadPng() {
       document.body.removeChild(a);
       URL.revokeObjectURL(pngUrl);
       URL.revokeObjectURL(url);
-      showToast('✓ 已导出为高清 PNG 图片');
+      showToast(getLang() === 'en' ? '✓ Exported as high-res PNG' : '✓ 已导出为高清 PNG 图片');
     });
   };
   img.src = url;
@@ -438,9 +457,9 @@ export function copySvg() {
   if (!svg) return;
   const svgData = new XMLSerializer().serializeToString(svg);
   navigator.clipboard.writeText(svgData).then(() => {
-    showToast('✓ 已复制 SVG 源码到剪贴板');
+    showToast(getLang() === 'en' ? '✓ SVG source copied to clipboard' : '✓ 已复制 SVG 源码到剪贴板');
   }).catch(() => {
-    showToast('复制失败，请手动复制代码');
+    showToast(getLang() === 'en' ? 'Failed to copy, please copy manually' : '复制失败，请手动复制代码');
   });
 }
 
@@ -448,6 +467,19 @@ export function copySvg() {
 window.addEventListener('DOMContentLoaded', () => {
   setupWasm();
   setupPanZoom();
+
+  // Listen to language changes from i18n switcher
+  window.addEventListener('languagechange', () => {
+    const statusEl = document.getElementById('engine-status');
+    if (statusEl) {
+      if (wasmReady) {
+        statusEl.innerHTML = getLang() === 'en'
+          ? '<span class="status-badge ok">● Rust WASM Core Ready</span>'
+          : '<span class="status-badge ok">● Rust WASM 核心已就绪</span>';
+      }
+    }
+    renderCurrentCode();
+  });
 
   const editor = document.getElementById('code-editor');
   if (editor) {
