@@ -14,11 +14,33 @@ pub struct RoutedEdge {
     pub label_pos: (f32, f32),
 }
 
+/// Options for routing edges through shared horizontal distribution or collection buses.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct EdgeBusOptions {
+    /// Shared horizontal distribution bus Y coordinate for fork branches
+    pub fork_bus_y: Option<f32>,
+    /// Shared horizontal collection bus Y coordinate for join branches
+    pub join_bus_y: Option<f32>,
+    /// Lane column center X coordinate for vertical transit bypass
+    pub bypass_lane_x: Option<f32>,
+}
+
 /// Compute waypoints and rounded orthogonal path between source and target node bounding boxes
 pub fn route_orthogonal_edge(
     from_box: (f32, f32, f32, f32), // (x, y, width, height)
     to_box: (f32, f32, f32, f32),
     fillet_radius: f32,
+) -> RoutedEdge {
+    route_orthogonal_edge_with_bus(from_box, to_box, fillet_radius, None)
+}
+
+/// Extended orthogonal router with support for T-shaped fork distribution
+/// and join collection buses.
+pub fn route_orthogonal_edge_with_bus(
+    from_box: (f32, f32, f32, f32),
+    to_box: (f32, f32, f32, f32),
+    fillet_radius: f32,
+    bus_options: Option<&EdgeBusOptions>,
 ) -> RoutedEdge {
     let (x1, y1, w1, h1) = from_box;
     let (x2, y2, w2, h2) = to_box;
@@ -29,14 +51,52 @@ pub fn route_orthogonal_edge(
     let top2 = y2;
 
     let waypoints: Vec<(f32, f32)> = if top2 >= bottom1 - 4.0 {
+        let fork_bus = bus_options.and_then(|b| b.fork_bus_y);
+        let join_bus = bus_options.and_then(|b| b.join_bus_y);
+        let bypass_x = bus_options.and_then(|b| b.bypass_lane_x);
+        let has_bypass_lane = bypass_x
+            .map(|lx| (cx1 - lx).abs() >= 2.0 || (cx2 - lx).abs() >= 2.0)
+            .unwrap_or(false);
+
         // Forward edge (target is below source)
-        if (cx1 - cx2).abs() < 2.0 {
+        if (cx1 - cx2).abs() < 2.0 && !has_bypass_lane {
             // Straight vertical line in same column
             vec![(cx1, bottom1), (cx2, top2)]
         } else {
-            // Two-step orthogonal bend
-            let y_mid = bottom1 + (top2 - bottom1) / 2.0;
-            vec![(cx1, bottom1), (cx1, y_mid), (cx2, y_mid), (cx2, top2)]
+            match (fork_bus, join_bus) {
+                (Some(y_dist), Some(y_join))
+                    if y_dist < y_join && y_dist > bottom1 && y_join < top2 =>
+                {
+                    let lx = bypass_x.unwrap_or(cx2);
+                    if (cx1 - lx).abs() < 2.0 && (lx - cx2).abs() < 2.0 {
+                        vec![(cx1, bottom1), (cx2, top2)]
+                    } else if (cx1 - lx).abs() < 2.0 {
+                        vec![(cx1, bottom1), (cx1, y_join), (cx2, y_join), (cx2, top2)]
+                    } else if (lx - cx2).abs() < 2.0 {
+                        vec![(cx1, bottom1), (cx1, y_dist), (cx2, y_dist), (cx2, top2)]
+                    } else {
+                        vec![
+                            (cx1, bottom1),
+                            (cx1, y_dist),
+                            (lx, y_dist),
+                            (lx, y_join),
+                            (cx2, y_join),
+                            (cx2, top2),
+                        ]
+                    }
+                }
+                (Some(y_dist), _) if y_dist > bottom1 && y_dist < top2 => {
+                    vec![(cx1, bottom1), (cx1, y_dist), (cx2, y_dist), (cx2, top2)]
+                }
+                (_, Some(y_join)) if y_join > bottom1 && y_join < top2 => {
+                    vec![(cx1, bottom1), (cx1, y_join), (cx2, y_join), (cx2, top2)]
+                }
+                _ => {
+                    // Standard two-step orthogonal bend at midpoint
+                    let y_mid = bottom1 + (top2 - bottom1) / 2.0;
+                    vec![(cx1, bottom1), (cx1, y_mid), (cx2, y_mid), (cx2, top2)]
+                }
+            }
         }
     } else {
         // Backward / Feedback / Cross-layer loop edge
@@ -170,5 +230,56 @@ mod tests {
             route_orthogonal_edge((100.0, 200.0, 100.0, 50.0), (100.0, 50.0, 100.0, 50.0), 8.0);
         assert!(edge.path_data.contains('Q'));
         assert_eq!(edge.arrow.2, -1.0); // Points left into target node
+    }
+
+    #[test]
+    fn test_fork_distribution_bus() {
+        let bus = EdgeBusOptions {
+            fork_bus_y: Some(130.0),
+            join_bus_y: None,
+            bypass_lane_x: None,
+        };
+        let edge = route_orthogonal_edge_with_bus(
+            (100.0, 50.0, 100.0, 50.0),
+            (250.0, 200.0, 100.0, 50.0),
+            8.0,
+            Some(&bus),
+        );
+        assert!(edge.path_data.contains("130.0"));
+        assert!(edge.path_data.contains('Q'));
+    }
+
+    #[test]
+    fn test_join_collection_bus() {
+        let bus = EdgeBusOptions {
+            fork_bus_y: None,
+            join_bus_y: Some(170.0),
+            bypass_lane_x: None,
+        };
+        let edge = route_orthogonal_edge_with_bus(
+            (50.0, 50.0, 100.0, 50.0),
+            (200.0, 200.0, 100.0, 50.0),
+            8.0,
+            Some(&bus),
+        );
+        assert!(edge.path_data.contains("170.0"));
+        assert!(edge.path_data.contains('Q'));
+    }
+
+    #[test]
+    fn test_direct_bypass_bus() {
+        let bus = EdgeBusOptions {
+            fork_bus_y: Some(120.0),
+            join_bus_y: Some(280.0),
+            bypass_lane_x: Some(500.0),
+        };
+        let edge = route_orthogonal_edge_with_bus(
+            (100.0, 50.0, 100.0, 50.0),
+            (100.0, 350.0, 100.0, 50.0),
+            8.0,
+            Some(&bus),
+        );
+        assert!(edge.path_data.contains("500.0"));
+        assert!(edge.path_data.contains('Q'));
     }
 }

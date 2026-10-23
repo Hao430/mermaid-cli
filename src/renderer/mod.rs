@@ -3,6 +3,7 @@ use crate::parser::{Diagram, NodeShape, Statement, Subgraph};
 use crate::svg::SvgBuilder;
 use std::collections::{HashMap, HashSet};
 
+pub mod layout;
 pub mod routing;
 pub mod theme;
 
@@ -150,120 +151,33 @@ impl Renderer {
         let edges = diagram.get_edges();
         let edges_with_labels = diagram.get_edges_with_labels();
 
-        // ponytail: use tree-aware layout for org charts; fallback to topological sort for DAGs
+        // Forward DAG analysis and multi-column grid positioning without center collapse
         let node_ids: Vec<String> = node_info.keys().cloned().collect();
         let layers = compute_tree_layers(&node_ids, &edges, &diagram.subgraphs);
 
-        // 布局参数（紧凑树形布局以最小化连线交叉）
-        let node_width = 130.0;
-        let node_height = 65.0;
-        let h_spacing = 40.0;
-        let v_spacing = 80.0; // 减小垂直间距让线更短
-        let padding = 40.0;
+        let branch_analyzer =
+            layout::BranchAnalyzer::analyze(&node_ids, &edges, &layers, &diagram.subgraphs);
 
-        // ponytail: calculate required canvas size based on content, not viewport
-        let max_nodes_in_layer = layers.iter().map(|l| l.len()).max().unwrap_or(1) as f32;
-        let num_layers = layers.len() as f32;
+        let layout_grid = layout::LayoutGrid::compute(
+            &layers,
+            &diagram.subgraphs,
+            &branch_analyzer,
+            self.width,
+            self.height,
+        );
 
-        let required_width = max_nodes_in_layer * node_width
-            + (max_nodes_in_layer - 1.0) * h_spacing
-            + 2.0 * padding;
-        let required_height =
-            num_layers * node_height + (num_layers - 1.0) * v_spacing + 2.0 * padding;
-
-        let effective_width = required_width.max(self.width as f32) as u32;
-        let effective_height = required_height.max(self.height as f32) as u32;
-
-        // ponytail: Barycenter method - sort nodes by parent positions to minimize crossing
-        let mut parent_map: HashMap<String, String> = HashMap::new();
-        let mut children_map: HashMap<String, Vec<String>> = HashMap::new();
-
-        for (from, to) in &edges {
-            parent_map.insert(to.clone(), from.clone());
-            children_map
-                .entry(from.clone())
-                .or_default()
-                .push(to.clone());
-        }
-
-        let mut node_positions: HashMap<String, (f32, f32)> = HashMap::new();
-
-        for (layer_idx, layer_nodes) in layers.iter().enumerate() {
-            let y = padding + layer_idx as f32 * (node_height + v_spacing);
-
-            // Sort nodes in this layer by parent positions (barycenter method)
-            let mut sorted_nodes = layer_nodes.clone();
-            sorted_nodes.sort_by(|a, b| {
-                let a_parent_x = parent_map
-                    .get(a)
-                    .and_then(|p| node_positions.get(p).map(|&(x, _)| x))
-                    .unwrap_or(f32::INFINITY);
-
-                let b_parent_x = parent_map
-                    .get(b)
-                    .and_then(|p| node_positions.get(p).map(|&(x, _)| x))
-                    .unwrap_or(f32::INFINITY);
-
-                a_parent_x
-                    .partial_cmp(&b_parent_x)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            });
-
-            let count = sorted_nodes.len() as f32;
-            let total_width = count * node_width + (count - 1.0) * h_spacing;
-            let start_x = (effective_width as f32 - total_width) / 2.0;
-
-            for (idx, node_id) in sorted_nodes.iter().enumerate() {
-                let x = start_x + idx as f32 * (node_width + h_spacing);
-                node_positions.insert(node_id.clone(), (x, y));
-            }
-        }
+        let node_width = layout::LayoutGrid::NODE_WIDTH;
+        let node_height = layout::LayoutGrid::NODE_HEIGHT;
+        let effective_width = layout_grid.effective_width as u32;
+        let effective_height = layout_grid.effective_height as u32;
+        let node_positions = layout_grid.node_positions;
 
         // 更新 SVG 构建器的尺寸
         svg.set_dimensions(effective_width, effective_height);
 
-        // 绘制 subgraph 背景（在边和节点之前绘制）
+        // 绘制 subgraph 背景（使用预计算的自适应动态边界框）
         for sg in &diagram.subgraphs {
-            let mut sg_node_ids = HashSet::new();
-            for stmt in &sg.statements {
-                match stmt {
-                    Statement::NodeDef { id, .. } => {
-                        sg_node_ids.insert(id.clone());
-                    }
-                    Statement::EdgeDef { from, to, .. } => {
-                        sg_node_ids.insert(from.clone());
-                        sg_node_ids.insert(to.clone());
-                    }
-                    _ => {}
-                }
-            }
-
-            let mut min_x = f32::INFINITY;
-            let mut min_y = f32::INFINITY;
-            let mut max_x = f32::NEG_INFINITY;
-            let mut max_y = f32::NEG_INFINITY;
-            let mut has_node = false;
-
-            for id in &sg_node_ids {
-                if let Some(&(nx, ny)) = node_positions.get(id) {
-                    min_x = min_x.min(nx);
-                    min_y = min_y.min(ny);
-                    max_x = max_x.max(nx + node_width);
-                    max_y = max_y.max(ny + node_height);
-                    has_node = true;
-                }
-            }
-
-            if has_node {
-                let padding_x = 20.0;
-                let padding_bottom = 20.0;
-                let padding_top = if sg.title.is_some() { 36.0 } else { 20.0 };
-
-                let sg_x = min_x - padding_x;
-                let sg_y = min_y - padding_top;
-                let sg_w = max_x - min_x + 2.0 * padding_x;
-                let sg_h = max_y - min_y + padding_top + padding_bottom;
-
+            if let Some(&(sg_x, sg_y, sg_w, sg_h)) = layout_grid.subgraph_bounds.get(&sg.id) {
                 svg.add_rect(sg_x, sg_y, sg_w, sg_h, &theme::default_subgraph_style());
 
                 if let Some(title) = &sg.title {
@@ -271,21 +185,147 @@ impl Renderer {
                         sg_x + 15.0,
                         sg_y + 18.0,
                         title,
-                        &theme::default_subgraph_title_style(),
+                        "text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif",
                     );
                 }
             }
         }
 
-        // 绘制边 (使用 Ondine 式圆角正交连线路由算法)
+        // 映射节点到其所属子图 ID
+        let mut node_to_sg_id: HashMap<String, String> = HashMap::new();
+        for sg in &diagram.subgraphs {
+            let mut ids = HashSet::new();
+            layout::grid::collect_subgraph_nodes(&sg.statements, &mut ids);
+            for id in ids {
+                node_to_sg_id.insert(id, sg.id.clone());
+            }
+        }
+
+        // 构建前向 DAG 邻接与父节点索引（排除反向回边）
+        let mut forward_children: HashMap<String, Vec<String>> = HashMap::new();
+        let mut forward_parents: HashMap<String, Vec<String>> = HashMap::new();
+        for (from, to, _) in &edges_with_labels {
+            if !branch_analyzer
+                .back_edges
+                .contains(&(from.clone(), to.clone()))
+            {
+                forward_children
+                    .entry(from.clone())
+                    .or_default()
+                    .push(to.clone());
+                forward_parents
+                    .entry(to.clone())
+                    .or_default()
+                    .push(from.clone());
+            }
+        }
+
+        // 预计算分叉源节点的统一横向分发总线高度 (T-bus distribution)
+        let mut fork_bus_map: HashMap<String, f32> = HashMap::new();
+        for fork_id in &branch_analyzer.fork_nodes {
+            if let Some(&(_fx, fy)) = node_positions.get(fork_id) {
+                let bottom_f = fy + node_height;
+                if let Some(children) = forward_children.get(fork_id) {
+                    let mut min_child_top = f32::INFINITY;
+                    for c in children {
+                        if let Some(&(_, cy)) = node_positions.get(c) {
+                            if cy < min_child_top {
+                                min_child_top = cy;
+                            }
+                        }
+                    }
+                    if min_child_top > bottom_f + 10.0 {
+                        let bus_y = bottom_f + (min_child_top - bottom_f) / 2.0;
+                        fork_bus_map.insert(fork_id.clone(), bus_y);
+                    }
+                }
+            }
+        }
+
+        // 预计算汇聚节点的统一横向收集总线高度 (T-bus collection)
+        let mut join_bus_map: HashMap<String, f32> = HashMap::new();
+        for join_id in &branch_analyzer.join_nodes {
+            if let Some(&(_jx, jy)) = node_positions.get(join_id) {
+                let top_j = jy;
+                if let Some(parents) = forward_parents.get(join_id) {
+                    let join_sg = node_to_sg_id.get(join_id);
+                    let parent_sgs: HashSet<_> = parents
+                        .iter()
+                        .filter_map(|p| node_to_sg_id.get(p))
+                        .collect();
+
+                    let inter_subgraph_bus = if parent_sgs.len() == 1 {
+                        let p_sg_id = parent_sgs.into_iter().next().unwrap();
+                        if Some(p_sg_id) != join_sg {
+                            if let Some(&(_, p_sgy, _, p_sgh)) =
+                                layout_grid.subgraph_bounds.get(p_sg_id)
+                            {
+                                let p_sg_bottom = p_sgy + p_sgh;
+                                let j_entry_top = join_sg
+                                    .and_then(|jsg_id| layout_grid.subgraph_bounds.get(jsg_id))
+                                    .map(|&(_, jsgy, _, _)| jsgy)
+                                    .unwrap_or(top_j);
+                                if j_entry_top > p_sg_bottom + 4.0 {
+                                    Some((p_sg_bottom + j_entry_top) / 2.0)
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+
+                    if let Some(bus_y) = inter_subgraph_bus {
+                        join_bus_map.insert(join_id.clone(), bus_y);
+                    } else {
+                        let mut max_parent_bottom = f32::NEG_INFINITY;
+                        for p in parents {
+                            if let Some(&(_, py)) = node_positions.get(p) {
+                                let pb = py + node_height;
+                                if pb > max_parent_bottom {
+                                    max_parent_bottom = pb;
+                                }
+                            }
+                        }
+                        if top_j > max_parent_bottom + 10.0 {
+                            let bus_y = max_parent_bottom + (top_j - max_parent_bottom) / 2.0;
+                            join_bus_map.insert(join_id.clone(), bus_y);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 绘制边 (使用 Ondine 式圆角正交连线与 T-bus 总线路由算法)
         for (from, to, label) in &edges_with_labels {
             if let (Some(&(x1, y1)), Some(&(x2, y2))) =
                 (node_positions.get(from), node_positions.get(to))
             {
-                let routed = routing::route_orthogonal_edge(
+                let is_back = branch_analyzer
+                    .back_edges
+                    .contains(&(from.clone(), to.clone()));
+                let bus_options = if !is_back {
+                    let fork_bus_y = fork_bus_map.get(from).copied();
+                    let join_bus_y = join_bus_map.get(to).copied();
+                    Some(routing::EdgeBusOptions {
+                        fork_bus_y,
+                        join_bus_y,
+                        bypass_lane_x: None,
+                    })
+                } else {
+                    None
+                };
+
+                let routed = routing::route_orthogonal_edge_with_bus(
                     (x1, y1, node_width, node_height),
                     (x2, y2, node_width, node_height),
                     8.0,
+                    bus_options.as_ref(),
                 );
 
                 svg.add_path(&routed.path_data, &theme::default_edge_style());
@@ -318,8 +358,19 @@ impl Renderer {
             }
         }
 
-        // 绘制节点
-        for (node_id, (display_label, shape)) in &node_info {
+        // 绘制节点（按标签长度升序排序以确保精确子串匹配）
+        let mut sorted_nodes: Vec<_> = node_info.iter().collect();
+        sorted_nodes.sort_by(|(id_a, (label_a, _)), (id_b, (label_b, _))| {
+            let text_a = label_a.as_str();
+            let text_b = label_b.as_str();
+            text_a
+                .len()
+                .cmp(&text_b.len())
+                .then_with(|| text_a.cmp(text_b))
+                .then_with(|| id_a.cmp(id_b))
+        });
+
+        for (node_id, (display_label, shape)) in sorted_nodes {
             if let Some(&(x, y)) = node_positions.get(node_id) {
                 let cx = x + node_width / 2.0;
                 let cy = y + node_height / 2.0;
