@@ -1,0 +1,128 @@
+sequenceDiagram
+    autonumber
+
+    box rgb(232,240,254) 用户侧
+        actor U as 用户
+        participant FE as 前端App
+    end
+    box rgb(255,247,230) 接入层
+        participant GW as API网关
+    end
+    box rgb(232,248,238) 业务服务
+        participant OS as 订单服务
+        participant RS as 风控服务
+        participant IS as 库存服务
+        participant PS as 支付服务
+    end
+    box rgb(245,235,255) 外部与异步链路
+        participant TP as 第三方支付
+        participant MQ as 消息队列
+        participant WS as 仓储服务
+        participant LS as 物流服务
+    end
+
+    rect rgb(235,245,255)
+    Note over U,GW: 阶段一 · 下单请求与风控
+    U->>FE: 点击提交订单
+    FE->>FE: 前端校验(地址/优惠券/发票)
+    FE->>GW: POST /api/order/create
+    GW->>GW: JWT 鉴权 + 限流
+    alt 鉴权失败
+        GW-->>FE: 401 Unauthorized
+        FE-->>U: 提示登录已失效
+    else 鉴权通过
+        GW->>OS: 转发创建订单请求
+        OS->>OS: 幂等校验(requestId)
+        OS->>RS: 风控评分(用户/设备/IP)
+        RS-->>OS: 评分与风险等级
+        alt 风险等级 ≥ 高危阈值
+            OS-->>GW: 订单转人工审核
+            GW-->>FE: 返回待审核状态
+            FE-->>U: 提示等待审核
+        else 风险等级正常
+            OS->>IS: 预占库存(SKU/数量)
+            IS-->>OS: 预占结果
+            alt 库存不足
+                OS->>OS: 生成缺货子订单
+            end
+            OS->>MQ: 发布 OrderCreated 事件
+            OS-->>GW: 订单号与待付金额
+            GW-->>FE: 200 OK
+            FE-->>U: 跳转收银台
+        end
+    end
+    end
+
+    rect rgb(255,248,235)
+    Note over U,TP: 阶段二 · 支付发起与轮询
+    U->>FE: 选择支付方式并确认
+    FE->>GW: POST /api/pay/submit
+    GW->>PS: 创建支付单
+    PS->>TP: 调用三方支付下单
+    TP-->>PS: 支付链接与二维码
+    PS-->>GW: 支付单号
+    GW-->>FE: 返回支付凭证
+    FE-->>U: 展示二维码
+    loop 每 3 秒轮询，最多 10 次
+        FE->>GW: GET /api/pay/status
+        GW->>PS: 查询支付状态
+        PS->>TP: 查询三方状态
+        TP-->>PS: 返回状态
+        PS-->>GW: 返回状态
+        GW-->>FE: 返回状态
+        opt 状态为 SUCCESS
+            Note over FE: 停止轮询
+        end
+    end
+    end
+
+    rect rgb(235,255,240)
+    Note over TP,MQ: 阶段三 · 异步回调与履约
+    TP->>PS: 异步回调 notify
+    PS->>PS: 验签 + 金额校验
+    critical 幂等与事务一致性
+        PS->>PS: 更新支付单状态
+        PS->>MQ: 发布 PaymentSucceeded
+    option 校验失败
+        PS->>PS: 记录告警日志
+    end
+    PS-->>TP: 返回 success
+    PS->>OS: 通知订单已支付
+    OS->>OS: 订单状态更新为已支付
+    OS->>MQ: 发布 OrderPaid 事件
+    par 并行下游处理
+        MQ->>WS: 消费 OrderPaid
+        WS->>WS: 生成拣货单
+        WS-->>MQ: ACK
+    and
+        MQ->>LS: 消费 OrderPaid
+        LS->>LS: 预约运单
+        LS-->>MQ: ACK
+    end
+    end
+
+    rect rgb(255,235,235)
+    Note over OS,IS: 阶段四 · 超时与补偿
+    break 支付超时(30 分钟未支付)
+        OS->>IS: 释放预占库存
+        IS-->>OS: 释放成功
+        OS->>OS: 关闭订单
+        OS->>MQ: 发布 OrderClosed
+        MQ->>U: 推送关单通知
+    end
+    opt 库存服务调用异常
+        OS->>OS: 写入本地消息表待补偿
+        Note over OS: 定时任务按指数退避重试
+    end
+    end
+
+    rect rgb(245,245,255)
+    Note over LS,U: 阶段五 · 配送签收与结算
+    LS-->>U: 推送物流轨迹
+    U->>FE: 确认收货
+    FE->>GW: POST /api/order/confirm
+    GW->>OS: 确认收货
+    OS->>OS: 订单状态更新为已完成
+    OS->>MQ: 发布 OrderCompleted
+    MQ-->>LS: 下发结算指令
+    end

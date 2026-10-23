@@ -48,3 +48,4 @@ test_user_visual/
 # Local AI agent & assistant caches
 .claude/
 .codebuddy/
+.agents/
