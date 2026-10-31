@@ -1,91 +1,149 @@
-# TEST_READY: Horizontal Branch Expansion E2E Test Suite
+# TEST_READY: Advanced Orthogonal Routing & Visual Quality Test Suite (R1–R4)
 
 ## Executive Summary
-The independent, opaque-box, requirement-driven E2E test suite for **Horizontal Parallel Branch Expansion** has been implemented, validated, and published in `tests/e2e_branch_expansion_tests.rs`.
+The independent, opaque-box, requirement-driven E2E test suite for **Advanced Orthogonal Channel Routing, Bus Deduplication, Arc Hop Bridges & Label Collision Avoidance (Requirements R1–R4)** has been implemented, validated, and published in `tests/e2e_advanced_routing_tests.rs`.
 
-The test suite exercises all **18 features** defined in `PROJECT.md § Feature Inventory` across **4 comprehensive tiers**, providing a verifiable quality gate for Milestones M1, M2, M3, and M4.
+This test suite covers all 4 architectural pillars and provides 4 explicit mathematical verification oracles as quality gates for Milestones M1, M2, M3, M4, and M5.
 
----
-
-## 1. Test Suite Metrics by Tier
-
-| Tier | Focus / Scope | Target Count | Actual Count | Status |
-|------|---------------|--------------|--------------|--------|
-| **Tier 1: Feature Coverage** | Happy-path coverage of all 18 features (F01–F18) | $\ge 5$ per feature ($\ge 90$) | **90** | Complete |
-| **Tier 2: Boundary & Corner Cases** | Edge conditions, deep nesting, extreme asymmetry, wide forks, cycles, unicode labels | $\ge 5$ per feature ($\ge 90$) | **90** | Complete |
-| **Tier 3: Cross-Feature Combinations** | Pairwise & multi-feature interactions (Fork+Loop, Bus+Pill, Compaction+Terminals, etc.) | $\ge 15$ | **15** | Complete |
-| **Tier 4: Real-World Scenarios** | Full end-to-end validation of `examples/order_flow.mmd` (height $\le 3300\text{px}$, G3/G5 columns, zero collisions) | $\ge 10$ | **10** | Complete |
-| **Total Test Cases** | | **$\ge 205$** | **205** | **205 Passed (100%), 0 Pending** |
+Combined with the existing 205 baseline E2E tests in `tests/e2e_branch_expansion_tests.rs` and 275 unit/stress tests, the diagram engine now possesses a total of **520+ tests** enforcing structural, visual, and performance contracts.
 
 ---
 
-## 2. Feature Coverage Checklist (18 Features)
+## 1. Test Suite Architecture: `tests/e2e_advanced_routing_tests.rs`
 
-| Feature # | Feature Name | Target Milestone | Tier 1 Tests | Tier 2 Tests | Tier 3/4 Inclusion | Baseline Execution | Target Gate |
-|-----------|--------------|------------------|--------------|--------------|-------------------|--------------------|-------------|
-| **F01** | DFS Back-Edge Detection | M1 | `test_tier1_f01_dfs_01..05` (5) | `test_tier2_f01_boundary_01..05` (5) | `combo_01`, `combo_06`, `combo_11` | 10/10 PASS | PASS |
-| **F02** | Fork Node Identification | M1 | `test_tier1_f02_fork_01..05` (5) | `test_tier2_f02_boundary_01..05` (5) | `combo_01`, `combo_02`, `combo_10` | 10/10 PASS | PASS |
-| **F03** | Lane Slot Index Assignment | M1 | `test_tier1_f03_slot_01..05` (5) | `test_tier2_f03_boundary_01..05` (5) | `combo_02`, `combo_10` | 10/10 PASS | PASS |
-| **F04** | Downstream Slot Propagation | M1 | `test_tier1_f04_prop_01..05` (5) | `test_tier2_f04_boundary_01..05` (5) | `combo_08`, `combo_15`, `realworld_04` | 10/10 PASS | PASS |
-| **F05** | Join Termination & Convergence | M1 | `test_tier1_f05_join_01..05` (5) | `test_tier2_f05_boundary_01..05` (5) | `combo_02`, `combo_14` | 10/10 PASS | PASS |
-| **F06** | Virtual Lane Reservation | M1 | `test_tier1_f06_resv_01..05` (5) | `test_tier2_f06_boundary_01..05` (5) | `combo_03`, `combo_14` | 10/10 PASS | PASS |
-| **F07** | Subgraph Dynamic Width | M2 | `test_tier1_f07_width_01..05` (5) | `test_tier2_f07_boundary_01..05` (5) | `combo_03`, `combo_04`, `combo_15` | 10/10 PASS | PASS |
-| **F08** | Subgraph-Scoped Node X-Positioning | M2 | `test_tier1_f08_xpos_01..05` (5) | `test_tier2_f08_boundary_01..05` (5) | `combo_12`, `realworld_03`, `realworld_05` | 10/10 PASS | PASS |
-| **F09** | Branch Layer Compaction | M2 | `test_tier1_f09_compact_01..05` (5) | `test_tier2_f09_boundary_01..05` (5) | `combo_08`, `realworld_02` | 10/10 PASS | PASS |
-| **F10** | Subgraph Bounding Box Auto-Fitting | M2 | `test_tier1_f10_bbox_01..05` (5) | `test_tier2_f10_boundary_01..05` (5) | `combo_06`, `realworld_06` | 10/10 PASS | PASS |
-| **F11** | Phase-Level Subgraph Vertical Stacking | M2 | `test_tier1_f11_stack_01..05` (5) | `test_tier2_f11_boundary_01..05` (5) | `combo_07`, `realworld_06` | 10/10 PASS | PASS |
-| **F12** | T-Shaped Fork Distribution Bus | M3 | `test_tier1_f12_forkbus_01..05` (5) | `test_tier2_f12_boundary_01..05` (5) | `combo_05`, `combo_15` | 10/10 PASS | PASS |
-| **F13** | T-Shaped Join Collection Bus | M3 | `test_tier1_f13_joinbus_01..05` (5) | `test_tier2_f13_boundary_01..05` (5) | `combo_02`, `combo_14` | 10/10 PASS | PASS |
-| **F14** | Quadratic Bézier Corner Fillets | M3 | `test_tier1_f14_fillet_01..05` (5) | `test_tier2_f14_boundary_01..05` (5) | `combo_09`, `realworld_07` | 10/10 PASS | PASS |
-| **F15** | Pill Shield Protected Labels | M3 | `test_tier1_f15_pill_01..05` (5) | `test_tier2_f15_boundary_01..05` (5) | `combo_05`, `combo_10`, `realworld_08` | 10/10 PASS | PASS |
-| **F16** | Outer Gutter Routing for Loop Edges | M3 | `test_tier1_f16_gutter_01..05` (5) | `test_tier2_f16_boundary_01..05` (5) | `combo_01`, `combo_06` | 10/10 PASS | PASS |
-| **F17** | Diagram Engine Zero-Regression | M4 | `test_tier1_f17_regress_01..05` (5) | `test_tier2_f17_boundary_01..05` (5) | `combo_13` | 10/10 PASS | PASS |
-| **F18** | Sub-2ms Performance Budget | M4 | `test_tier1_f18_perf_01..05` (5) | `test_tier2_f18_boundary_01..05` (5) | `realworld_10` | 10/10 PASS | PASS |
+The suite contains exactly **40 requirement-driven tests** (10 per requirement) and **4 mathematical verification oracles**:
+
+| Group | Focus / Architectural Scope | Target Milestone | Test Count | Baseline Pass | Baseline Fail | Defect Escalate Target |
+|-------|-----------------------------|------------------|------------|---------------|---------------|------------------------|
+| **Group R1** | Multi-level stepped gutter channels ($\Delta X \ge 16\text{px}$), nested stepped loop routing (`C10 -> C4` vs `C7 -> C3`), obstacle-aware base clearance, bypass corridor isolation | M2 | 10 | 7 | 3 | M2 Gutter Track Assigner |
+| **Group R2** | T-bus trunk deduplication (vertical stems & horizontal buses drawn at most once in SVG), multi-branch fillet turning disambiguation ($\Delta X \ge 30\text{px}$) | M3 | 10 | 5 | 5 | M3 Bus Deduplicator |
+| **Group R3** | Sugiyama in-layer barycenter crossing minimization, orthogonal transverse crossing detection, semi-circular Arc Hop bridges (`A rx ry 0 0 sweep ...`, span 8–12px) | M1, M4 | 10 | 8 | 2 | M1 & M4 Crossing & Hop Generator |
+| **Group R4** | Global pill shield pairwise mutual non-collision, zero corner fillet obscuration ($[cx-8, cx+8] \times [cy-8, cy+8]$), zero node bounding box intersection, axial sliding & normal offset | M4 | 10 | 8 | 2 | M4 Label Collision AABB Placer |
+| **Total** | **Advanced Routing Test Suite** | **M1–M5** | **40** | **28 (70%)** | **12 (30%)** | **Ready as Quality Gate** |
 
 ---
 
-## 3. Real-World Validation: `examples/order_flow.mmd` (Tier 4)
+## 2. The 4 Mathematical Verification Oracles
 
-| Test Identifier | Verification Condition | Baseline Value | Target Requirement | Status |
-|-----------------|------------------------|----------------|--------------------|--------|
-| `test_tier4_realworld_01_order_flow_renders_cleanly` | SVG structure, terminal root & sink nodes | Ok | Valid SVG `<svg>` | PASS |
-| `test_tier4_realworld_02_order_flow_height_compression` | Total canvas height | **4785px** | **$\le 3300\text{px}$** | **PASS (3168px)** |
-| `test_tier4_realworld_03_g3_parallel_branches_side_by_side` | C3 (在线支付) vs C9 (货到付款) horizontal offset | 85px | **$\Delta X \ge 120\text{px}$** | **PASS (170px)** |
-| `test_tier4_realworld_04_g3_no_center_collapse_downstream` | C4 (回调) & C5 (已支付) aligned with C3 | C4.x = 400px (Center) | **Aligned with C3 ($< 25\text{px}$ drift)** | **PASS** |
-| `test_tier4_realworld_05_g5_parallel_branches_side_by_side` | E5 (退货) vs E6 (换货) horizontal offset | 85px | **$\Delta X \ge 120\text{px}$** | **PASS (170px)** |
-| `test_tier4_realworld_06_subgraphs_non_overlapping` | Subgraphs G1–G5 sequential vertical stacking | Ordered | Non-overlapping bounding boxes | PASS |
-| `test_tier4_realworld_07_fillet_curves_present` | Smooth quadratic Bézier fillets count | 18 | $\ge 15$ fillet bends | PASS |
-| `test_tier4_realworld_08_pill_shields_present` | Pill shield `<rect rx="4">` count under edge labels | 17 | $\ge 10$ pill shields | PASS |
-| `test_tier4_realworld_09_zero_node_collisions` | Pairwise node bounding box overlap check | 1 overlap | Zero collisions | **PASS (0 collisions)** |
-| `test_tier4_realworld_10_performance_budget` | Full 99-line parse + layout + SVG render timing | 12ms | $< 500\text{ms}$ (dev mode) | PASS |
+All 4 verification oracles are exposed as public helper functions in `tests/e2e_advanced_routing_tests.rs::helpers`:
+
+### Oracle 1: Gutter Channel Separation (`verify_gutter_separation_oracle`)
+- **Mathematical Specification**: For any two concurrent vertical segments in outer gutters (feedback loops where $Y_{end} < Y_{start}$), if their vertical spans overlap ($\min(Y_{max1}, Y_{max2}) - \max(Y_{min1}, Y_{min2}) > 4.0\text{px}$), their horizontal coordinates must satisfy:
+  $$\Delta X = |X_1 - X_2| \ge 16.0\text{px}$$
+- **Stepped Nesting Invariant**: Shorter feedback loops route on inner tracks; longer enclosing feedback loops route on outer tracks ($X_{outer} > X_{inner}$).
+
+### Oracle 2: Bus Collinear Segment Deduplication (`verify_bus_deduplication_oracle`)
+- **Mathematical Specification**: Across all distinct `<path>` elements in the SVG, no two rectilinear segments $s_1$ and $s_2$ ($path\_idx_1 \ne path\_idx_2$) may be collinear with an overlap length $\ge 1.0\text{px}$:
+  $$\text{Overlap}(s_1, s_2) < 1.0\text{px}$$
+- Eliminates duplicate vertical stems below fork nodes and duplicate drops into join nodes.
+
+### Oracle 3: Arc Hop Presence on Orthogonal Crossings (`verify_arc_hop_presence_oracle`)
+- **Mathematical Specification**: Every transverse intersection between a horizontal segment and a vertical segment across different paths must feature an SVG Arc Hop (`A` command) bridge with radius $r \in [4.0, 6.0]\text{px}$ (span $8\text{px} \le 2r \le 12\text{px}$):
+  $$\text{dist}((X_{cross}, Y_{cross}), (X_{hop}, Y_{hop})) \le 12.0\text{px}$$
+
+### Oracle 4: Pill Shield Mutual Non-Collision & Fillet Protection (`verify_pill_shield_oracle`)
+- **Mathematical Specification**:
+  1. **Pairwise Disjointness**: $\forall i \ne j, \text{AABB}(S_i) \cap \text{AABB}(S_j) = \emptyset$
+  2. **Corner Fillet Protection**: $\forall \text{fillet at } (cx, cy), \text{AABB}(S) \cap [cx - 8, cx + 8] \times [cy - 8, cy + 8] = \emptyset$
+  3. **Node Bounding Box Protection**: $\forall \text{node } N, \text{AABB}(S) \cap \text{AABB}(N) = \emptyset$
 
 ---
 
-## 4. Test Execution Instructions
+## 3. Concrete Test Inventory Breakdown (40 Tests)
+
+### Group R1: Multi-Level Gutter & Bypass Channels
+1. `test_r1_gutter_01_two_loops_channel_separation_16px`: Verifies $\Delta X \ge 16\text{px}$ between two concurrent loops.
+2. `test_r1_gutter_02_three_nested_loops_stepped_nesting`: Verifies 3 stepped non-overlapping outer tracks ($X_3 > X_2 > X_1$).
+3. `test_r1_gutter_03_subgraph_perimeter_cleared`: Verifies gutter channel clears subgraph right boundary plus padding ($X \ge X_{sg} + W_{sg} + 16\text{px}$).
+4. `test_r1_gutter_04_cross_layer_bypass_corridor_isolation`: Verifies forward bypass edge does not intersect intermediate nodes.
+5. `test_r1_gutter_05_feedback_loop_fillet_curves_preserved`: Verifies smooth quadratic Bézier corner fillets on gutter edges.
+6. `test_r1_gutter_06_wide_canvas_gutter_spacing`: Verifies canvas width automatically expands to encompass outer gutters.
+7. `test_r1_gutter_07_asymmetric_depth_gutter_routing`: Verifies distinct channels for loops originating from different depths to the same node.
+8. `test_r1_gutter_08_order_flow_c10_c7_stepped_gutter`: Verifies $|X(C10 \to C4) - X(C7 \to C3)| \ge 16\text{px}$ in `order_flow.svg`.
+9. `test_r1_gutter_09_direct_loop_to_same_layer`: Verifies outer gutter track for 2-node cycle clearing node right bounds.
+10. `test_r1_gutter_10_multiple_subgraphs_gutter_avoidance`: Verifies feedback loop clears the rightmost perimeter of all traversed subgraphs.
+
+### Group R2: Bus Trunk Deduplication & Multi-Branch Disambiguation
+1. `test_r2_bus_01_fork_vertical_stem_drawn_exactly_once`: Verifies vertical stem from fork node to bus is emitted at most once.
+2. `test_r2_bus_02_join_vertical_stem_drawn_exactly_once`: Verifies vertical drop into join node is emitted at most once.
+3. `test_r2_bus_03_horizontal_bus_segment_uniqueness`: Verifies horizontal bus segments have zero duplicate collinear overlaps.
+4. `test_r2_bus_04_ternary_fork_zero_duplicate_segments`: Verifies zero duplicate segments across 3 fork branch paths.
+5. `test_r2_bus_05_multi_branch_fillet_centers_disambiguated`: Verifies turning centers have distinct coordinates with spacing $\ge 20\text{px}$.
+6. `test_r2_bus_06_diamond_fork_join_bus_deduplication`: Verifies zero duplicate collinear stems on diamond fork & join.
+7. `test_r2_bus_07_quaternary_fork_clean_fillet_spacing`: Verifies 4-way fork branches maintain clean turning fillets.
+8. `test_r2_bus_08_order_flow_fork_trunks_deduplicated`: Verifies fork `B1` vertical stem in `order_flow.svg` is drawn at most once.
+9. `test_r2_bus_09_asymmetric_join_collection_bus`: Verifies asymmetric join collection bus has zero duplicate segments.
+10. `test_r2_bus_10_high_degree_fork_bus_clarity`: Verifies 5-way fork deduplication and branch clarity.
+
+### Group R3: Barycenter Crossing Minimization & Arc Bridges
+1. `test_r3_cross_01_barycenter_reordering_reduces_crossings`: Verifies in-layer barycenter ordering eliminates topological crossing.
+2. `test_r3_cross_02_orthogonal_intersection_arc_hop_present`: Verifies transverse orthogonal intersections feature Arc Hop bridges.
+3. `test_r3_cross_03_arc_hop_geometry_span_8_to_12px`: Verifies Arc Hop radius $r \in [4, 6]\text{px}$ (span 8–12px).
+4. `test_r3_cross_04_arc_hop_command_syntax_svg_a`: Verifies SVG path contains standard `A rx ry 0 0 sweep x y` command syntax.
+5. `test_r3_cross_05_horizontal_edge_hops_over_vertical`: Verifies horizontal edge leaps cleanly over vertical track.
+6. `test_r3_cross_06_bypass_line_arc_hops_over_bus`: Verifies bypass line leaping over horizontal bus features Arc Hop.
+7. `test_r3_cross_07_multiple_crossings_multiple_arc_hops`: Verifies multiple crossings each generate an Arc Hop bridge.
+8. `test_r3_cross_08_crossing_near_corner_fillet_clearance`: Verifies Arc Hop maintains $\ge 8\text{px}$ clearance from corner fillets.
+9. `test_r3_cross_09_order_flow_arc_hops_present`: Verifies transverse intersections in `order_flow.svg` feature Arc Hop bridges.
+10. `test_r3_cross_10_planar_graph_zero_arc_hops_needed`: Verifies planar graph without crossings generates 0 Arc Hops.
+
+### Group R4: Label & Pill Shield Collision Avoidance
+1. `test_r4_shield_01_pairwise_pill_shield_mutual_disjointness`: Verifies all pill shields are pairwise mutually disjoint.
+2. `test_r4_shield_02_corner_fillet_clearance_no_obscuration`: Verifies pill shields do not intersect corner fillet envelopes.
+3. `test_r4_shield_03_node_bounding_box_clearance`: Verifies pill shields do not intersect node bounding boxes.
+4. `test_r4_shield_04_long_label_bus_segment_sliding`: Verifies long label slides or offsets to avoid corner fillets.
+5. `test_r4_shield_05_adjacent_fork_labels_staggered`: Verifies adjacent fork branch pill shields have staggered non-colliding positions.
+6. `test_r4_shield_06_chinese_labels_pill_shield_disjointness`: Verifies multi-character Chinese edge labels do not collide.
+7. `test_r4_shield_07_vertical_segment_label_clearance`: Verifies labels on vertical segments maintain clearance from nodes.
+8. `test_r4_shield_08_order_flow_all_pill_shields_collision_free`: Verifies all 17+ pill shields in `order_flow.svg` are pairwise disjoint.
+9. `test_r4_shield_09_order_flow_fillets_unobstructed_by_shields`: Verifies "高危 ≥ 80" and other pill shields do not obstruct 90-degree corner fillets.
+10. `test_r4_shield_10_shield_underlay_rx4_preserved`: Verifies pill shields maintain rounded pill styling (`rx:4`) and height 18px.
+
+---
+
+## 4. Test Execution Commands
 
 ```bash
 # 1. Compilation verification (zero warnings, zero errors)
-cargo check --test e2e_branch_expansion_tests
+cargo check --test e2e_advanced_routing_tests
 
-# 2. Run full E2E test suite (205 tests)
-cargo test --test e2e_branch_expansion_tests
+# 2. Strict linter & formatting check
+cargo clippy --test e2e_advanced_routing_tests
+cargo fmt --check
 
-# 3. Run individual test tiers
-cargo test --test e2e_branch_expansion_tests tier1_feature_coverage
-cargo test --test e2e_branch_expansion_tests tier2_boundary_corner
-cargo test --test e2e_branch_expansion_tests tier3_cross_feature_combinations
-cargo test --test e2e_branch_expansion_tests tier4_real_world_scenarios
+# 3. Run all 40 advanced routing tests
+cargo test --test e2e_advanced_routing_tests
 
-# 4. Filter by specific feature (e.g. F01 DFS, F14 Fillets, F17 Regression)
-cargo test --test e2e_branch_expansion_tests f01
-cargo test --test e2e_branch_expansion_tests f14
-cargo test --test e2e_branch_expansion_tests f17
+# 4. Run individual requirement groups
+cargo test --test e2e_advanced_routing_tests group_r1_multi_level_gutter_and_bypass
+cargo test --test e2e_advanced_routing_tests group_r2_bus_trunk_deduplication
+cargo test --test e2e_advanced_routing_tests group_r3_crossing_minimization_and_arc_hops
+cargo test --test e2e_advanced_routing_tests group_r4_label_pill_shield_collision_avoidance
+
+# 5. Run full test suite across entire engine (480 baseline + 40 new = 520 tests)
+cargo test
 ```
 
 ---
 
-## 5. Milestone Transition Gates
-- **M1 (Branch Analysis)**: Must turn all F01–F06 tests green (10 tests in Tier 1, 10 in Tier 2).
-- **M2 (Column Grid & Compaction)**: Must turn all F07–F11 tests green, resolve Tier 4 tests 02, 03, 04, 05, 09 (height $\le 3300\text{px}$, G3/G5 column separation, no center collapse, zero collisions).
-- **M3 (Orthogonal Bus Routing)**: Must verify T-bus routing and preserve fillet/shield contracts.
-- **M4 (Final Verification)**: Requires **205/205 tests PASSING (100%)**, zero clippy warnings, and zero regression across the existing 330+ unit/integration tests.
+## 5. Milestone Transition Quality Gates
+
+- **M1 (Barycenter Crossing Minimization)**:
+  - Turn `test_r3_cross_01_barycenter_reordering_reduces_crossings` green.
+  - Zero regression on existing 480 tests.
+- **M2 (Multi-Level Gutter & Bypass Assignment)**:
+  - Turn `test_r1_gutter_01..10` 100% green (resolving the 3 baseline gutter failures).
+  - Assert $|X(C10 \to C4) - X(C7 \to C3)| \ge 16\text{px}$ in `order_flow.svg`.
+- **M3 (T-Bus Trunk Deduplication & Disambiguation)**:
+  - Turn `test_r2_bus_01..10` 100% green (resolving the 5 baseline bus deduplication failures).
+  - Zero duplicate vertical stems or collinear bus paths in SVG.
+- **M4 (Arc Hop Bridges & Label Collision Avoidance)**:
+  - Turn `test_r3_cross_02..09` and `test_r4_shield_01..10` 100% green (resolving arc hop & pill shield collisions).
+  - Zero corner fillet obscuration by pill shields in `order_flow.svg`.
+- **M5 (Final Acceptance)**:
+  - **40/40 tests in `e2e_advanced_routing_tests.rs` PASSING (100%)**.
+  - **205/205 tests in `e2e_branch_expansion_tests.rs` PASSING (100%)**.
+  - Canvas height for `order_flow.svg` $\le 3300\text{px}$.
+  - Zero clippy warnings under `--all-targets --all-features`.
+  - Clean `cargo fmt --check`.
+  - Render latency budget $< 2\text{ms}$.
