@@ -51,13 +51,10 @@ impl Fixer {
             ("er_diagram", "erDiagram"),
             // Gantt keywords
             ("gant", "gantt"),
-            ("gantt", "gantt"),
-            ("dateFormat", "dateFormat"),
             ("dataFormat", "dateFormat"),
             // Pie keywords
             ("pei", "pie"),
             // Mindmap
-            ("mindmap", "mindmap"),
             ("mindMap", "mindmap"),
             // GitGraph
             ("gitgraph", "gitGraph"),
@@ -69,13 +66,10 @@ impl Fixer {
             ("journy", "journey"),
             ("journe", "journey"),
             // Kanban
-            ("kanban", "kanban"),
             ("kanbam", "kanban"),
             // Arrow typos
             ("-->>", "-->"),
-            ("==>", "==>"),
             ("=>", "->"),
-            ("-->", "-->"),
             ("- ->", "->"),
             ("- ->>", "-->>"),
             // Direction typos
@@ -87,10 +81,7 @@ impl Fixer {
             ("LR-D", "LR"),
             // Note typos
             ("Note rigth", "Note right"),
-            ("Note left", "Note left"),
-            ("Note over", "Note over"),
             ("note rigth", "Note right"),
-            ("note left", "Note left"),
             // Activation typos
             ("acitvate", "activate"),
             ("deacitvate", "deactivate"),
@@ -109,7 +100,20 @@ impl Fixer {
             ("requirment", "requirement"),
         ];
 
+        let is_sequence = {
+            let trimmed = fixed.trim_start();
+            trimmed.starts_with("sequenceDiagram") || trimmed.starts_with("zenuml")
+        };
+
+        // Arrows are diagram-specific: `-->>` is a valid async return in
+        // sequence diagrams, and `=>` / `- ->` may legitimately appear inside
+        // message labels. Never rewrite them for sequence diagrams.
+        let sequence_arrow_typos = ["-->>", "- ->>", "=>", "- ->"];
+
         for (typo, correct) in &all_typos {
+            if is_sequence && sequence_arrow_typos.contains(typo) {
+                continue;
+            }
             if fixed.contains(typo) {
                 fixed = fixed.replace(typo, correct);
                 fixes.push(format!("Fixed typo: {} -> {}", typo, correct));
@@ -117,9 +121,7 @@ impl Fixer {
         }
 
         // Apply type-specific fixes
-        let trimmed = fixed.trim_start();
-        let is_sequence = trimmed.starts_with("sequenceDiagram") || trimmed.starts_with("zenuml");
-        let is_class = trimmed.starts_with("classDiagram");
+        let is_class = fixed.trim_start().starts_with("classDiagram");
 
         if is_sequence {
             self.fix_sequence(&mut fixed, &mut fixes);
@@ -146,8 +148,11 @@ impl Fixer {
     }
 
     fn fix_sequence(&self, fixed: &mut String, fixes: &mut Vec<String>) {
-        // Fix missing end for block keywords
-        let block_keywords = ["alt", "loop", "opt", "par", "else", "critical", "break"];
+        // Fix missing end for block keywords. `else`/`and`/`option` are branch
+        // separators and share the enclosing block's `end`.
+        let block_keywords = [
+            "alt", "loop", "opt", "par", "critical", "break", "rect", "box",
+        ];
         let mut open_count = 0;
         for line in fixed.lines() {
             let trimmed = line.trim();
@@ -201,6 +206,17 @@ mod tests {
         let (fixed, fixes) = fixer.fix("graph TD\nA-->B");
         assert!(fixed.trim().ends_with("end"));
         assert!(!fixes.is_empty());
+    }
+
+    #[test]
+    fn test_fixer_keeps_valid_sequence_arrows() {
+        let fixer = Fixer::new();
+        let (fixed, _) = fixer.fix("sequenceDiagram\n A-->>B: return\n B->>A: 2 => 3");
+        assert!(
+            fixed.contains("-->>"),
+            "async return arrow must be preserved"
+        );
+        assert!(fixed.contains("2 => 3"), "label text must be preserved");
     }
 
     #[test]
