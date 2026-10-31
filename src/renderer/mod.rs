@@ -7,6 +7,12 @@ pub mod layout;
 pub mod routing;
 pub mod theme;
 
+/// Width of an edge-label pill shield derived from its rendered text length.
+fn pill_label_width(label: &str) -> f32 {
+    let text_chars = label.chars().count() as f32;
+    (text_chars * 12.0 + 14.0).max(36.0)
+}
+
 pub struct Renderer {
     width: u32,
     height: u32,
@@ -1090,6 +1096,34 @@ impl Renderer {
             routed.path_data = hop_path_datas[i].clone();
         }
 
+        // R4: 统一为全部带标签边执行胶囊避让布局（硬性禁入节点/圆角 + 全局互斥松弛）
+        let node_boxes: Vec<(f32, f32, f32, f32)> = node_positions
+            .values()
+            .map(|&(x, y)| (x, y, node_width, node_height))
+            .collect();
+        let all_paths: Vec<Vec<(f32, f32)>> = routed_edges
+            .iter()
+            .map(|(r, _, _)| r.waypoints.clone())
+            .collect();
+        let mut label_edge_indices: Vec<usize> = Vec::new();
+        let mut label_requests: Vec<routing::PillLabelRequest> = Vec::new();
+        for (idx, (routed, _, label)) in routed_edges.iter().enumerate() {
+            if let Some(label) = label {
+                label_edge_indices.push(idx);
+                label_requests.push(routing::PillLabelRequest {
+                    waypoints: routed.waypoints.clone(),
+                    width: pill_label_width(label),
+                    height: 18.0,
+                });
+            }
+        }
+        let placements = routing::layout_pill_labels(&label_requests, &node_boxes, &all_paths, 8.0);
+        for (slot, &edge_idx) in label_edge_indices.iter().enumerate() {
+            if let Some(center) = placements.get(slot) {
+                routed_edges[edge_idx].0.label_pos = *center;
+            }
+        }
+
         for (routed, with_arrow, edge_label) in &routed_edges {
             svg.add_path(&routed.path_data, &theme::default_edge_style());
 
@@ -1105,8 +1139,7 @@ impl Renderer {
             }
 
             if let Some(edge_label) = edge_label {
-                let text_chars = edge_label.chars().count() as f32;
-                let lw = (text_chars * 12.0 + 14.0).max(36.0);
+                let lw = pill_label_width(edge_label);
                 let label_x = routed.label_pos.0 - lw / 2.0;
                 let label_y = routed.label_pos.1 - 9.0;
                 svg.add_rect(label_x, label_y, lw, 18.0, &theme::default_pill_style());

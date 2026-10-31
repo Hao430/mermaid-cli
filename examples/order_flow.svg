@@ -58,17 +58,17 @@
   <polygon points="422.5,932.0 418.0,924.0 427.0,924.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 507.5 1537.0 L 507.5 1540.2 Q 507.5 1543.5 504.2 1543.5 L 430.5 1543.5 Q 422.5 1543.5 422.5 1551.5 L 422.5 1562.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="422.5,1562.0 418.0,1554.0 427.0,1554.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 507.5 1357.0 L 507.5 1373.0 Q 507.5 1381.0 515.5 1381.0 L 832.5 1381.0 Q 840.5 1381.0 840.5 1389.0 L 840.5 1578.5 Q 840.5 1586.5 832.5 1586.5 L 430.5 1586.5 Q 422.5 1586.5 422.5 1594.5 L 422.5 1652.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 507.5 1357.0 L 507.5 1373.0 Q 507.5 1381.0 515.5 1381.0 L 799.5 1381.0 A 5.0 5.0 0 0 1 809.5 1381.0 L 817.5 1381.0 A 5.0 5.0 0 0 1 827.5 1381.0 L 832.5 1381.0 Q 840.5 1381.0 840.5 1389.0 L 840.5 1578.5 Q 840.5 1586.5 832.5 1586.5 L 430.5 1586.5 Q 422.5 1586.5 422.5 1594.5 L 422.5 1652.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="422.5,1652.0 418.0,1644.0 427.0,1644.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 337.5 1177.0 L 337.5 1183.0 Q 337.5 1189.0 331.5 1189.0 L 133.5 1189.0 Q 125.5 1189.0 125.5 1197.0 L 125.5 1578.5 Q 125.5 1586.5 133.5 1586.5 L 422.5 1586.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 337.5 1177.0 L 337.5 1183.0 Q 337.5 1189.0 331.5 1189.0 L 148.5 1189.0 A 5.0 5.0 0 0 0 138.5 1189.0 L 133.5 1189.0 Q 125.5 1189.0 125.5 1197.0 L 125.5 1578.5 Q 125.5 1586.5 133.5 1586.5 L 422.5 1586.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <path d="M 422.5 2437.0 L 422.5 2503.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="422.5,2503.0 418.0,2495.0 427.0,2495.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 422.5 3018.0 L 422.5 3024.2 Q 422.5 3030.5 416.2 3030.5 L 343.8 3030.5 Q 337.5 3030.5 337.5 3036.8 L 337.5 3043.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="337.5,3043.0 333.0,3035.0 342.0,3035.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 422.5 195.0 L 422.5 201.2 Q 422.5 207.5 416.2 207.5 L 343.8 207.5 Q 337.5 207.5 337.5 213.8 L 337.5 220.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="337.5,220.0 333.0,212.0 342.0,212.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="331" y="198.5" width="98" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="380" y="211.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">高危 ≥ 80</text>
+  <rect x="229" y="198.5" width="98" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="278" y="211.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">高危 ≥ 80</text>
   <path d="M 337.5 285.0 L 337.5 310.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="337.5,310.0 333.0,302.0 342.0,302.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 337.5 375.0 L 337.5 400.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
@@ -119,13 +119,13 @@
   <polygon points="337.5,1292.0 333.0,1284.0 342.0,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <rect x="385.5" y="1270.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
   <text x="422.5" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">超时无回调</text>
-  <path d="M 337.5 1357.0 L 337.5 1360.0 Q 337.5 1363.0 340.5 1363.0 L 778.5 1363.0 Q 786.5 1363.0 786.5 1355.0 L 786.5 1242.5 Q 786.5 1234.5 778.5 1234.5 L 572.5 1234.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 337.5 1357.0 L 337.5 1360.0 Q 337.5 1363.0 340.5 1363.0 L 502.5 1363.0 A 5.0 5.0 0 0 1 512.5 1363.0 L 778.5 1363.0 Q 786.5 1363.0 786.5 1355.0 L 786.5 1242.5 Q 786.5 1234.5 778.5 1234.5 L 572.5 1234.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="572.5,1234.5 580.5,1230.0 580.5,1239.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 507.5 1279.5 L 671.2 1279.5 Q 677.5 1279.5 677.5 1285.8 L 677.5 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="677.5,1292.0 673.0,1284.0 682.0,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <rect x="573.5" y="1270.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
   <text x="592.5" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">失败</text>
-  <path d="M 677.5 1357.0 L 677.5 1363.2 Q 677.5 1369.5 671.2 1369.5 L 343.8 1369.5 Q 337.5 1369.5 337.5 1375.8 L 337.5 1382.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 677.5 1357.0 L 677.5 1363.2 Q 677.5 1369.5 671.2 1369.5 L 512.5 1369.5 A 5.0 5.0 0 0 0 502.5 1369.5 L 343.8 1369.5 Q 337.5 1369.5 337.5 1375.8 L 337.5 1382.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="337.5,1382.0 333.0,1374.0 342.0,1374.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 402.5 1414.5 L 796.5 1414.5 Q 804.5 1414.5 804.5 1406.5 L 804.5 1152.5 Q 804.5 1144.5 796.5 1144.5 L 572.5 1144.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="572.5,1144.5 580.5,1140.0 580.5,1149.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
@@ -144,8 +144,8 @@
   <text x="143.5" y="1936" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓有货</text>
   <path d="M 422.5 1729.5 L 501.2 1729.5 Q 507.5 1729.5 507.5 1735.8 L 507.5 1742.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="507.5,1742.0 503.0,1734.0 512.0,1734.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="428" y="1720.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="1733.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓缺货</text>
+  <rect x="518" y="1720.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="555" y="1733.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓缺货</text>
   <path d="M 507.5 1807.0 L 507.5 1832.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="507.5,1832.0 503.0,1824.0 512.0,1824.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 507.5 1909.5 L 669.5 1909.5 Q 677.5 1909.5 677.5 1917.5 L 677.5 2120.5 Q 677.5 2128.5 669.5 2128.5 L 430.5 2128.5 Q 422.5 2128.5 422.5 2136.5 L 422.5 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
@@ -162,9 +162,9 @@
   <polygon points="337.5,2102.0 333.0,2094.0 342.0,2094.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <rect x="397.5" y="2080.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
   <text x="422.5" y="2093.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">不接受</text>
-  <path d="M 507.5 2089.5 L 687.5 2089.5 Q 695.5 2089.5 695.5 2097.5 L 695.5 2132.5 Q 695.5 2140.5 687.5 2140.5 L 422.5 2140.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <rect x="540" y="2131.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="559" y="2144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">接受</text>
+  <path d="M 507.5 2089.5 L 672.5 2089.5 A 5.0 5.0 0 0 1 682.5 2089.5 L 687.5 2089.5 Q 695.5 2089.5 695.5 2097.5 L 695.5 2132.5 Q 695.5 2140.5 687.5 2140.5 L 422.5 2140.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <rect x="576" y="2131.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="595" y="2144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">接受</text>
   <path d="M 422.5 2257.0 L 422.5 2282.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="422.5,2282.0 418.0,2274.0 427.0,2274.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 422.5 2347.0 L 422.5 2372.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
@@ -185,11 +185,11 @@
   <text x="507.5" y="2764.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">退货</text>
   <path d="M 507.5 2766.5 L 674.2 2766.5 Q 677.5 2766.5 677.5 2769.8 L 677.5 2773.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="677.5,2773.0 673.0,2765.0 682.0,2765.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="573.5" y="2757.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="592.5" y="2770.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">换货</text>
+  <rect x="579.5" y="2743.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="598.5" y="2756.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">换货</text>
   <path d="M 507.5 2754.5 L 839.5 2754.5 Q 847.5 2754.5 847.5 2762.5 L 847.5 3028.5 Q 847.5 3036.5 839.5 3036.5 L 507.5 3036.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <rect x="652.5" y="2745.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="677.5" y="2758.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">无售后</text>
+  <rect x="652.5" y="3027.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="677.5" y="3040.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">无售后</text>
   <path d="M 507.5 2838.0 L 507.5 2841.2 Q 507.5 2844.5 504.2 2844.5 L 430.5 2844.5 Q 422.5 2844.5 422.5 2852.5 L 422.5 2863.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="422.5,2863.0 418.0,2855.0 427.0,2855.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <path d="M 677.5 2838.0 L 677.5 2848.5 Q 677.5 2856.5 669.5 2856.5 L 422.5 2856.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>

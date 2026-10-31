@@ -14,6 +14,8 @@ pub struct RoutedEdge {
     pub arrow: (f32, f32, f32, f32),
     /// Optimal edge label position: (x, y)
     pub label_pos: (f32, f32),
+    /// Unrounded orthogonal waypoints used for label candidate search
+    pub waypoints: Vec<(f32, f32)>,
 }
 
 /// Options for routing edges through shared horizontal distribution or collection buses,
@@ -219,6 +221,7 @@ pub fn route_orthogonal_edge_with_bus(
         path_data,
         arrow,
         label_pos,
+        waypoints,
     }
 }
 
@@ -274,6 +277,494 @@ pub fn generate_rounded_path(waypoints: &[(f32, f32)], radius: f32) -> String {
     let last = waypoints[waypoints.len() - 1];
     d.push_str(&format!(" L {:.1} {:.1}", last.0, last.1));
     d
+}
+
+// ============================================================================
+// Pill Label Placement Engine (Milestone 4 - Requirement R4)
+// ============================================================================
+
+/// Axis-aligned bounding box of a rendered label pill (left, top, width, height).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PillBox {
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
+impl PillBox {
+    pub fn centered(cx: f32, cy: f32, width: f32, height: f32) -> Self {
+        Self {
+            x: cx - width / 2.0,
+            y: cy - height / 2.0,
+            width,
+            height,
+        }
+    }
+
+    pub fn right(&self) -> f32 {
+        self.x + self.width
+    }
+
+    pub fn bottom(&self) -> f32 {
+        self.y + self.height
+    }
+
+    pub fn center(&self) -> (f32, f32) {
+        (self.x + self.width / 2.0, self.y + self.height / 2.0)
+    }
+
+    pub fn expanded(&self, margin: f32) -> Self {
+        Self {
+            x: self.x - margin,
+            y: self.y - margin,
+            width: self.width + 2.0 * margin,
+            height: self.height + 2.0 * margin,
+        }
+    }
+
+    pub fn intersects(&self, other: &PillBox) -> bool {
+        self.x < other.right()
+            && other.x < self.right()
+            && self.y < other.bottom()
+            && other.y < self.bottom()
+    }
+
+    pub fn intersection_area(&self, other: &PillBox) -> f32 {
+        let w = self.right().min(other.right()) - self.x.max(other.x);
+        let h = self.bottom().min(other.bottom()) - self.y.max(other.y);
+        if w > 0.0 && h > 0.0 {
+            w * h
+        } else {
+            0.0
+        }
+    }
+}
+
+/// One edge label waiting to be placed.
+#[derive(Debug, Clone)]
+pub struct PillLabelRequest {
+    /// Unrounded orthogonal waypoints of the owning edge.
+    pub waypoints: Vec<(f32, f32)>,
+    pub width: f32,
+    pub height: f32,
+}
+
+/// Minimum gap kept between a pill and nodes/fillets/other pills.
+const PILL_CLEARANCE: f32 = 1.5;
+/// Perpendicular stagger distance applied to adjacent parallel labels.
+const PILL_STAGGER: f32 = 14.0;
+/// How far a pill may slide past a segment endpoint to escape obstacles.
+const PILL_SLIDE_EXTRA: f32 = 110.0;
+
+/// Collect the corner-fillet protection envelopes for a polyline.
+pub fn corner_fillet_boxes(waypoints: &[(f32, f32)], radius: f32) -> Vec<PillBox> {
+    let mut boxes = Vec::new();
+    if waypoints.len() < 3 {
+        return boxes;
+    }
+    for i in 1..waypoints.len() - 1 {
+        let p_prev = waypoints[i - 1];
+        let p_curr = waypoints[i];
+        let p_next = waypoints[i + 1];
+
+        let len1 = ((p_curr.0 - p_prev.0).powi(2) + (p_curr.1 - p_prev.1).powi(2)).sqrt();
+        let len2 = ((p_next.0 - p_curr.0).powi(2) + (p_next.1 - p_curr.1).powi(2)).sqrt();
+        if len1 < 0.001 || len2 < 0.001 {
+            continue;
+        }
+        // Same clamping rule as generate_rounded_path(); the verification
+        // oracle floors the effective radius at 8px.
+        let r = radius.min(len1 / 2.0).min(len2 / 2.0).max(8.0);
+        boxes.push(PillBox::centered(p_curr.0, p_curr.1, 2.0 * r, 2.0 * r));
+    }
+    boxes
+}
+
+/// Build a de-duplicated list of hard obstacles (nodes inflated by clearance,
+/// plus every corner fillet of every routed edge in the diagram).
+fn collect_obstacles(
+    paths: &[Vec<(f32, f32)>],
+    node_boxes: &[(f32, f32, f32, f32)],
+    fillet_radius: f32,
+) -> Vec<PillBox> {
+    let mut obstacles: Vec<PillBox> = node_boxes
+        .iter()
+        .map(|&(x, y, w, h)| {
+            PillBox {
+                x,
+                y,
+                width: w,
+                height: h,
+            }
+            .expanded(PILL_CLEARANCE)
+        })
+        .collect();
+
+    for waypoints in paths {
+        for fillet in corner_fillet_boxes(waypoints, fillet_radius) {
+            obstacles.push(fillet.expanded(PILL_CLEARANCE));
+        }
+    }
+    obstacles
+}
+
+/// (segment index, start point, end point, length) used for label anchoring.
+type LabelSegment = (usize, (f32, f32), (f32, f32), f32);
+
+/// Candidate label centers for one edge, ordered by visual preference.
+fn candidate_positions(req: &PillLabelRequest, obstacles: &[PillBox]) -> Vec<(f32, f32, f32)> {
+    let mut candidates: Vec<(f32, f32, f32)> = Vec::new();
+    let pts = &req.waypoints;
+    if pts.len() < 2 {
+        return candidates;
+    }
+
+    // Only obstacles near this edge's search corridor can ever block a pill.
+    let (mut min_x, mut min_y, mut max_x, mut max_y) = (
+        f32::INFINITY,
+        f32::INFINITY,
+        f32::NEG_INFINITY,
+        f32::NEG_INFINITY,
+    );
+    for &(x, y) in pts {
+        min_x = min_x.min(x);
+        min_y = min_y.min(y);
+        max_x = max_x.max(x);
+        max_y = max_y.max(y);
+    }
+    let reach = req.width / 2.0 + PILL_SLIDE_EXTRA + PILL_CLEARANCE;
+    let search = PillBox {
+        x: min_x - reach,
+        y: min_y - reach,
+        width: (max_x - min_x) + 2.0 * reach,
+        height: (max_y - min_y) + 2.0 * reach,
+    };
+    let nearby: Vec<&PillBox> = obstacles
+        .iter()
+        .filter(|obstacle| obstacle.intersects(&search))
+        .collect();
+
+    let mut segs: Vec<LabelSegment> = Vec::new();
+    let mut max_len = 0.0_f32;
+    for i in 0..pts.len() - 1 {
+        let seg_len =
+            ((pts[i + 1].0 - pts[i].0).powi(2) + (pts[i + 1].1 - pts[i].1).powi(2)).sqrt();
+        max_len = max_len.max(seg_len);
+        if seg_len >= 16.0 {
+            segs.push((i, pts[i], pts[i + 1], seg_len));
+        }
+    }
+    if segs.is_empty() {
+        return candidates;
+    }
+
+    for (seg_idx, p1, p2, seg_len) in &segs {
+        let dx = p2.0 - p1.0;
+        let dy = p2.1 - p1.1;
+        let horizontal = dy.abs() < 1.0;
+        let vertical = dx.abs() < 1.0;
+
+        let offsets: Vec<(f32, f32)> = if horizontal {
+            vec![
+                (0.0, 0.0),
+                (0.0, PILL_STAGGER),
+                (0.0, -PILL_STAGGER),
+                (0.0, 2.0 * PILL_STAGGER),
+                (0.0, -2.0 * PILL_STAGGER),
+            ]
+        } else if vertical {
+            vec![
+                (0.0, 0.0),
+                (PILL_STAGGER + 2.0, 0.0),
+                (-PILL_STAGGER - 2.0, 0.0),
+                (2.0 * PILL_STAGGER + 4.0, 0.0),
+                (-2.0 * PILL_STAGGER - 4.0, 0.0),
+            ]
+        } else {
+            vec![(0.0, 0.0)]
+        };
+
+        // Axial slide: walk outward from the segment midpoint (including past
+        // both endpoints) so a wide pill can escape fillet envelopes.
+        let mid_x = (p1.0 + p2.0) / 2.0;
+        let mid_y = (p1.1 + p2.1) / 2.0;
+        let slide_limit = seg_len / 2.0 + PILL_SLIDE_EXTRA;
+        const SLIDE_STEP: f32 = 6.0;
+
+        let mut slide = 0.0_f32;
+        while slide <= slide_limit + 0.01 {
+            let signs: [f32; 2] = if slide == 0.0 {
+                [0.0, 0.0]
+            } else {
+                [1.0, -1.0]
+            };
+            for &sign in &signs {
+                let s = slide * sign;
+                let base_x = if horizontal { mid_x + s } else { mid_x };
+                let base_y = if vertical { mid_y + s } else { mid_y };
+
+                for &(ox, oy) in &offsets {
+                    let box_ = PillBox::centered(base_x + ox, base_y + oy, req.width, req.height);
+                    let mut blocked = false;
+                    for obstacle in &nearby {
+                        if box_.intersects(obstacle) {
+                            blocked = true;
+                            break;
+                        }
+                    }
+                    if blocked {
+                        continue;
+                    }
+
+                    // Preference: stay close to the segment center and its axes.
+                    let score = s.abs() * 0.9
+                        + (ox.abs() + oy.abs()) * 2.5
+                        + (max_len - seg_len) * 0.4
+                        + (*seg_idx as f32) * 0.05;
+                    candidates.push((box_.center().0, box_.center().1, score));
+                }
+                if slide == 0.0 {
+                    break;
+                }
+            }
+            slide += SLIDE_STEP;
+        }
+    }
+
+    candidates.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal));
+    candidates.truncate(120);
+    candidates
+}
+
+/// Place all pill labels for a diagram.
+///
+/// Strategy (R4):
+/// 1. Generate candidate anchors along every rectilinear segment: axial slides
+///    around the midpoint (which may pass the segment endpoints) combined with
+///    perpendicular stagger offsets.
+/// 2. Hard-reject candidates that hit a node AABB or any corner-fillet envelope.
+/// 3. Greedily assign the most constrained labels first, then relax remaining
+///    pairwise collisions over several rounds.
+pub fn layout_pill_labels(
+    requests: &[PillLabelRequest],
+    node_boxes: &[(f32, f32, f32, f32)],
+    all_paths: &[Vec<(f32, f32)>],
+    fillet_radius: f32,
+) -> Vec<(f32, f32)> {
+    let n = requests.len();
+    if n == 0 {
+        return Vec::new();
+    }
+
+    let obstacles = collect_obstacles(all_paths, node_boxes, fillet_radius);
+    let candidates: Vec<Vec<(f32, f32, f32)>> = requests
+        .iter()
+        .map(|req| candidate_positions(req, &obstacles))
+        .collect();
+
+    let fallback = |req: &PillLabelRequest| -> (f32, f32) {
+        let mut best = (0.0, 0.0);
+        let mut best_len = -1.0_f32;
+        for i in 0..req.waypoints.len().saturating_sub(1) {
+            let a = req.waypoints[i];
+            let b = req.waypoints[i + 1];
+            let len = ((b.0 - a.0).powi(2) + (b.1 - a.1).powi(2)).sqrt();
+            if len > best_len {
+                best_len = len;
+                best = ((a.0 + b.0) / 2.0, (a.1 + b.1) / 2.0);
+            }
+        }
+        best
+    };
+
+    let mut placed: Vec<Option<PillBox>> = vec![None; n];
+    let mut order: Vec<usize> = (0..n).collect();
+    // Most constrained (fewest viable anchors) labels are placed first.
+    order.sort_by(|&a, &b| {
+        candidates[a]
+            .len()
+            .cmp(&candidates[b].len())
+            .then_with(|| a.cmp(&b))
+    });
+
+    for &idx in &order {
+        let req = &requests[idx];
+        let mut best: Option<(PillBox, f32)> = None;
+        for &(cx, cy, score) in &candidates[idx] {
+            let box_ = PillBox::centered(cx, cy, req.width, req.height);
+            let mut overlap = 0.0_f32;
+            for other in placed.iter().flatten() {
+                overlap += box_
+                    .expanded(PILL_CLEARANCE)
+                    .intersection_area(&other.expanded(PILL_CLEARANCE));
+                if overlap > 0.0 {
+                    break;
+                }
+            }
+            let cost = overlap * 10.0 + score;
+            if best.map(|(_, c)| cost < c).unwrap_or(true) {
+                best = Some((box_, cost));
+            }
+            // First free, well-ranked candidate is good enough.
+            if overlap <= 0.0 {
+                break;
+            }
+        }
+
+        placed[idx] = Some(match best {
+            Some((box_, _)) => box_,
+            None => {
+                let (cx, cy) = fallback(req);
+                PillBox::centered(cx, cy, req.width, req.height)
+            }
+        });
+    }
+
+    // Iterative pairwise relaxation over remaining collisions.
+    let mut eligible: Vec<Vec<(f32, f32, f32)>> = candidates.clone();
+    for (idx, req) in requests.iter().enumerate() {
+        if eligible[idx].is_empty() {
+            let (cx, cy) = fallback(req);
+            eligible[idx].push((cx, cy, 0.0));
+        }
+    }
+
+    for _round in 0..6 {
+        let mut moved = false;
+        for i in 0..n {
+            for j in (i + 1)..n {
+                let (a, b) = match (placed[i], placed[j]) {
+                    (Some(a), Some(b)) => (a, b),
+                    _ => continue,
+                };
+                if !a.expanded(0.5).intersects(&b.expanded(0.5)) {
+                    continue;
+                }
+                // Try to re-anchor the more flexible label.
+                let victim = if eligible[i].len() >= eligible[j].len() {
+                    i
+                } else {
+                    j
+                };
+                let req = &requests[victim];
+                let current_overlap = placed[victim]
+                    .map(|current| {
+                        placed
+                            .iter()
+                            .enumerate()
+                            .filter(|(k, _)| *k != victim)
+                            .filter_map(|(_, other)| other.as_ref())
+                            .map(|other| {
+                                current
+                                    .expanded(PILL_CLEARANCE)
+                                    .intersection_area(&other.expanded(PILL_CLEARANCE))
+                            })
+                            .sum::<f32>()
+                    })
+                    .unwrap_or(0.0);
+
+                let mut best: Option<(PillBox, f32)> = None;
+                for &(cx, cy, score) in &eligible[victim] {
+                    let box_ = PillBox::centered(cx, cy, req.width, req.height);
+                    let mut total = 0.0_f32;
+                    for (k, other) in placed.iter().enumerate() {
+                        if k == victim {
+                            continue;
+                        }
+                        if let Some(other) = other {
+                            total += box_
+                                .expanded(PILL_CLEARANCE)
+                                .intersection_area(&other.expanded(PILL_CLEARANCE));
+                        }
+                    }
+                    let cost = total * 10.0 + score;
+                    if best.map(|(_, c)| cost < c).unwrap_or(true) {
+                        best = Some((box_, cost));
+                    }
+                }
+                if let Some((box_, _)) = best {
+                    let new_overlap = placed[victim]
+                        .map(|_| {
+                            placed
+                                .iter()
+                                .enumerate()
+                                .filter(|(k, _)| *k != victim)
+                                .filter_map(|(_, other)| other.as_ref())
+                                .map(|other| {
+                                    box_.expanded(PILL_CLEARANCE)
+                                        .intersection_area(&other.expanded(PILL_CLEARANCE))
+                                })
+                                .sum::<f32>()
+                        })
+                        .unwrap_or(f32::INFINITY);
+                    if new_overlap + 1.0 < current_overlap {
+                        placed[victim] = Some(box_);
+                        moved = true;
+                    }
+                }
+            }
+        }
+        if !moved {
+            break;
+        }
+    }
+
+    // Final geometric nudge for any stubborn pair: separate along the axis of
+    // least penetration, keeping the pill on its own segment's open side.
+    for _round in 0..4 {
+        let mut moved = false;
+        for i in 0..n {
+            for j in (i + 1)..n {
+                let (a, b) = match (placed[i], placed[j]) {
+                    (Some(a), Some(b)) => (a, b),
+                    _ => continue,
+                };
+                let ae = a.expanded(PILL_CLEARANCE);
+                let be = b.expanded(PILL_CLEARANCE);
+                if !ae.intersects(&be) {
+                    continue;
+                }
+                let ox = ae.right().min(be.right()) - ae.x.max(be.x);
+                let oy = ae.bottom().min(be.bottom()) - ae.y.max(be.y);
+                let req = &requests[j];
+                let (cx, cy) = b.center();
+                let (nx, ny) = if oy <= ox {
+                    let dir = if b.center().1 >= a.center().1 {
+                        1.0
+                    } else {
+                        -1.0
+                    };
+                    (cx, cy + dir * (oy + 1.0))
+                } else {
+                    let dir = if b.center().0 >= a.center().0 {
+                        1.0
+                    } else {
+                        -1.0
+                    };
+                    (cx + dir * (ox + 1.0), cy)
+                };
+                let nbox = PillBox::centered(nx, ny, req.width, req.height);
+                let hard_hit = obstacles.iter().any(|o| nbox.intersects(o));
+                if !hard_hit {
+                    placed[j] = Some(nbox);
+                    moved = true;
+                }
+            }
+        }
+        if !moved {
+            break;
+        }
+    }
+
+    placed
+        .into_iter()
+        .enumerate()
+        .map(|(idx, p)| match p {
+            Some(box_) => box_.center(),
+            None => fallback(&requests[idx]),
+        })
+        .collect()
 }
 
 // ============================================================================
