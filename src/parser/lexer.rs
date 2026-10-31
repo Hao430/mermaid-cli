@@ -368,12 +368,14 @@ impl Lexer {
             if let Some(ch) = self.current_char() {
                 if ch.is_whitespace() {
                     if ch == '\n' {
+                        // Consume the newline without bumping the column twice:
+                        // `advance()` would add one to a freshly reset counter.
                         self.line += 1;
                         self.column = 0;
+                        self.position += 1;
                     } else {
-                        self.column += 1;
+                        self.advance();
                     }
-                    self.advance();
                 } else if ch == '%' && self.peek(1) == Some('%') {
                     // Comment: skip to end of line
                     while !self.is_at_end() && self.current_char() != Some('\n') {

@@ -891,102 +891,97 @@ impl Parser {
         let token = self.peek()?.clone();
 
         match &token.token_type {
-            // autonumber directive: skip rest of line
+            // autonumber directive: `autonumber [start] [step]`
             TokenType::Keyword(k) if k == "autonumber" => {
-                let line = token.line;
-                let _ = self.advance();
-                while !self.is_at_end() && self.peek()?.line == line {
-                    let _ = self.advance();
-                }
-                Ok(None)
+                let token = self.advance()?;
+                let raw = self.rest_after_seq_token(&token);
+                self.skip_seq_line(token.line);
+                let mut parts = raw.split_whitespace();
+                let start = parts
+                    .next()
+                    .and_then(|s| s.parse::<u32>().ok())
+                    .unwrap_or(1);
+                let step = parts
+                    .next()
+                    .and_then(|s| s.parse::<u32>().ok())
+                    .unwrap_or(1);
+                Ok(Some(Statement::Autonumber { start, step }))
             }
             // participant or actor declaration
             TokenType::Keyword(k) if k == "participant" || k == "actor" => {
                 let _ = self.advance();
                 let id = self.parse_node_id()?;
-                // optional: `as Label` (no colon)
-                let label = if let Ok(next) = self.peek() {
-                    if let TokenType::Keyword(ref kw) = next.token_type {
-                        if kw == "as" {
-                            let _ = self.advance(); // skip 'as'
-                                                    // read rest of line as label (no colon required)
-                            let line = self.peek()?.line;
-                            let mut text = String::new();
-                            while !self.is_at_end() {
-                                let t = self.peek()?;
-                                if t.line != line {
-                                    break;
-                                }
-                                match &t.token_type {
-                                    TokenType::Identifier(s) => {
-                                        if !text.is_empty() {
-                                            text.push(' ');
-                                        }
-                                        text.push_str(s);
-                                        let _ = self.advance();
-                                    }
-                                    TokenType::Keyword(kw) => {
-                                        if !text.is_empty() {
-                                            text.push(' ');
-                                        }
-                                        text.push_str(kw);
-                                        let _ = self.advance();
-                                    }
-                                    TokenType::String(s) => {
-                                        if !text.is_empty() {
-                                            text.push(' ');
-                                        }
-                                        text.push_str(s);
-                                        let _ = self.advance();
-                                    }
-                                    _ => break,
-                                }
-                            }
-                            if text.is_empty() {
-                                None
-                            } else {
-                                Some(text)
-                            }
-                        } else {
+                // optional: `as Label` — keep the raw text so punctuation survives
+                let label = match self.peek() {
+                    Ok(next) if matches!(&next.token_type, TokenType::Keyword(kw) if kw == "as") => {
+                        let as_token = self.advance()?;
+                        let text = self.rest_after_seq_token(&as_token).trim().to_string();
+                        self.skip_seq_line(as_token.line);
+                        if text.is_empty() {
                             None
+                        } else {
+                            Some(text)
                         }
-                    } else {
-                        None
                     }
-                } else {
-                    None
+                    _ => None,
                 };
                 Ok(Some(Statement::Participant { id, label }))
             }
-            // note: Note right of Alice / Note left of Alice / Note over Alice
+            // note: Note right of Alice / Note left of Alice / Note over Alice,Bob
             TokenType::Keyword(k) if k == "Note" || k == "note" => {
-                let _ = self.advance();
-                let position = match self.parse_node_id()?.as_str() {
-                    "right" | "Right" => {
-                        // expect "of"
-                        let _ = self.parse_node_id()?; // "of"
+                let _ = self.advance(); // consume Note
+                let position_token = self.advance()?;
+                let position = match position_token.raw.to_ascii_lowercase().as_str() {
+                    "right" => {
+                        self.consume_optional_of();
                         NotePosition::Right
                     }
-                    "left" | "Left" => {
-                        let _ = self.parse_node_id()?; // "of"
+                    "left" => {
+                        self.consume_optional_of();
                         NotePosition::Left
                     }
-                    "over" | "Over" => NotePosition::Over,
+                    "over" => NotePosition::Over,
                     _ => return Err(self.error("Expected 'right of', 'left of', or 'over'")),
                 };
-                let target = self.parse_node_id()?;
-                let text = self.parse_sequence_label()?;
+
+                // Work on the raw line: note text may contain any punctuation
+                // (commas, parens, middle dots, ...) and the header may list two
+                // targets (`Note over U,GW: ...`).
+                let anchor = self.tokens[self.current - 1].clone();
+                let rest = self.rest_after_seq_token(&anchor);
+                let Some((targets, text)) = rest.split_once(':') else {
+                    return Err(self.error("Expected ':'"));
+                };
+                let mut ids = targets.split(',').map(str::trim).filter(|s| !s.is_empty());
+                let target = match ids.next() {
+                    Some(id) => id.to_string(),
+                    None => return Err(self.error("Expected note target")),
+                };
+                let target_end = ids.next().map(|s| s.to_string());
+                let text = text.trim().to_string();
+                self.skip_seq_line(anchor.line);
+                if text.is_empty() {
+                    return Err(self.error("Expected note text after ':'"));
+                }
                 Ok(Some(Statement::Note {
                     target,
+                    target_end,
                     text,
                     position,
                 }))
             }
-            // block keywords: alt, loop, opt, par
-            TokenType::Keyword(k) if matches!(k.as_str(), "alt" | "loop" | "opt" | "par") => {
-                let keyword = k.clone();
-                let _ = self.advance();
-                let condition = self.try_parse_sequence_rest_of_line();
+            // block keywords (grouping frames). `box/rect/critical/break` are not
+            // lexer keywords (they would collide with flowchart identifiers), so
+            // match identifiers by their raw text as well.
+            TokenType::Keyword(k) | TokenType::Identifier(k)
+                if matches!(
+                    k.as_str(),
+                    "alt" | "loop" | "opt" | "par" | "critical" | "break" | "rect" | "box"
+                ) =>
+            {
+                let keyword_token = self.advance()?;
+                let keyword = keyword_token.raw.clone();
+                let condition = self.parse_seq_block_condition(&keyword_token);
                 let nested = self.parse_sequence_block_body()?;
                 Ok(Some(Statement::Block {
                     keyword,
@@ -1024,8 +1019,22 @@ impl Parser {
         }
     }
 
-    /// Parse the body of a block (alt/loop/opt/par), handling `else` branches.
+    /// Parse the body of a block, handling `else` (alt), `and` (par) and
+    /// `option` (critical) branches. Consumes the closing `end`.
     fn parse_sequence_block_body(&mut self) -> Result<Vec<Statement>, ParseError> {
+        self.parse_sequence_block_body_inner(true)
+    }
+
+    /// Parse a branch body (`else`/`and`/`option`) without consuming the
+    /// shared closing `end`, which belongs to the enclosing block.
+    fn parse_sequence_branch_body(&mut self) -> Result<Vec<Statement>, ParseError> {
+        self.parse_sequence_block_body_inner(false)
+    }
+
+    fn parse_sequence_block_body_inner(
+        &mut self,
+        consume_end: bool,
+    ) -> Result<Vec<Statement>, ParseError> {
         let mut nested = Vec::new();
 
         while !self.is_at_end() {
@@ -1035,22 +1044,19 @@ impl Parser {
                 TokenType::Keyword(k) if k == "end" => {
                     break;
                 }
-                // 'else' is part of an alt block — parse as a nested block
-                TokenType::Keyword(k) if k == "else" => {
-                    let _ = self.advance(); // consume 'else'
-                    let condition = self.try_parse_sequence_rest_of_line();
-                    let else_body = self.parse_sequence_block_body()?;
+                // branch separators start a nested branch block
+                TokenType::Keyword(k) | TokenType::Identifier(k)
+                    if matches!(k.as_str(), "else" | "and" | "option") =>
+                {
+                    let keyword_token = self.advance()?;
+                    let keyword = keyword_token.raw.clone();
+                    let condition = self.parse_seq_block_condition(&keyword_token);
+                    let branch = self.parse_sequence_branch_body()?;
                     nested.push(Statement::Block {
-                        keyword: "else".to_string(),
+                        keyword,
                         condition,
-                        statements: else_body,
+                        statements: branch,
                     });
-                }
-                // nested block keywords
-                TokenType::Keyword(k) if matches!(k.as_str(), "alt" | "loop" | "opt" | "par") => {
-                    if let Some(stmt) = self.parse_sequence_statement()? {
-                        nested.push(stmt);
-                    }
                 }
                 _ => {
                     if let Some(stmt) = self.parse_sequence_statement()? {
@@ -1060,11 +1066,13 @@ impl Parser {
             }
         }
 
-        // consume the 'end' keyword if present
-        if let Ok(next) = self.peek() {
-            if let TokenType::Keyword(k) = &next.token_type {
-                if k == "end" {
-                    let _ = self.advance();
+        // consume the 'end' keyword if present (branch bodies leave it alone)
+        if consume_end {
+            if let Ok(next) = self.peek() {
+                if let TokenType::Keyword(k) = &next.token_type {
+                    if k == "end" {
+                        let _ = self.advance();
+                    }
                 }
             }
         }
@@ -1111,43 +1119,18 @@ impl Parser {
 
     /// Parse label text after `:` in sequence diagram.
     fn parse_sequence_label(&mut self) -> Result<String, ParseError> {
-        // expect colon
-        let token = self.peek()?;
-        let colon_line = token.line;
-        match &token.token_type {
+        let colon = self.peek()?.clone();
+        match &colon.token_type {
             TokenType::Keyword(k) if k == ":" => {
                 let _ = self.advance();
             }
             _ => return Err(self.error("Expected ':'")),
         }
 
-        // read rest of line as label text (stop at newline only)
-        let mut text = String::new();
-        while !self.is_at_end() {
-            let token = self.peek()?;
-            // stop at newline (different line from colon)
-            if token.line != colon_line {
-                break;
-            }
-            match &token.token_type {
-                TokenType::Identifier(s) => {
-                    if !text.is_empty() {
-                        text.push(' ');
-                    }
-                    text.push_str(s);
-                    let _ = self.advance();
-                }
-                TokenType::Keyword(k) => {
-                    if !text.is_empty() {
-                        text.push(' ');
-                    }
-                    text.push_str(k);
-                    let _ = self.advance();
-                }
-                _ => break,
-            }
-        }
-
+        // Take the raw remainder of the line so punctuation and spacing are
+        // preserved (`POST /api/order/create(用户)` must not lose characters).
+        let text = self.rest_after_seq_token(&colon).trim().to_string();
+        self.skip_seq_line(colon.line);
         if text.is_empty() {
             return Err(self.error("Expected message text after ':'"));
         }
@@ -1155,60 +1138,52 @@ impl Parser {
         Ok(text)
     }
 
-    /// Try to parse rest of line as condition text (for alt/loop/opt).
-    /// Handles both `alt condition` and `loop: condition` syntax.
-    fn try_parse_sequence_rest_of_line(&mut self) -> Option<String> {
-        let start_line = if let Ok(token) = self.peek() {
-            token.line
-        } else {
-            return None;
+    /// Raw text following `token` up to end of line, dropping an inline
+    /// `%%` comment and a trailing `;` statement separator.
+    fn rest_after_seq_token(&self, token: &Token) -> String {
+        let Some(line) = self._source.lines().nth(token.line) else {
+            return String::new();
         };
+        let start = token.column + token.raw.chars().count();
+        let rest: String = line.chars().skip(start).collect();
+        let rest = rest.split("%%").next().unwrap_or("");
+        let rest = rest.split(';').next().unwrap_or("");
+        rest.trim_end().to_string()
+    }
 
-        // optionally consume colon
-        if let Ok(token) = self.peek() {
-            if let TokenType::Keyword(k) = &token.token_type {
-                if k == ":" {
-                    let _ = self.advance();
-                }
+    /// Consume the remaining tokens on `line`, including a `;` separator.
+    fn skip_seq_line(&mut self, line: usize) {
+        while let Ok(token) = self.peek() {
+            if token.line != line {
+                break;
+            }
+            let is_semicolon = matches!(token.token_type, TokenType::Semicolon);
+            let _ = self.advance();
+            if is_semicolon {
+                break;
             }
         }
+    }
 
-        let mut text = String::new();
-        while !self.is_at_end() {
-            if let Ok(token) = self.peek() {
-                if token.line != start_line {
-                    break;
-                }
-                match &token.token_type {
-                    TokenType::Identifier(s) => {
-                        if !text.is_empty() {
-                            text.push(' ');
-                        }
-                        text.push_str(s);
-                        let _ = self.advance();
-                    }
-                    TokenType::Keyword(k) => {
-                        if matches!(
-                            k.as_str(),
-                            "alt" | "loop" | "opt" | "par" | "else" | "end" | "participant"
-                        ) {
-                            break;
-                        }
-                        if !text.is_empty() {
-                            text.push(' ');
-                        }
-                        text.push_str(k);
-                        let _ = self.advance();
-                    }
-                    _ => break,
-                }
-            }
-        }
-
-        if text.is_empty() {
+    /// Condition text following a block keyword (`alt x`, `loop: x`),
+    /// kept verbatim.
+    fn parse_seq_block_condition(&mut self, token: &Token) -> Option<String> {
+        let raw = self.rest_after_seq_token(token);
+        self.skip_seq_line(token.line);
+        let trimmed = raw.trim().trim_start_matches(':').trim();
+        if trimmed.is_empty() {
             None
         } else {
-            Some(text)
+            Some(trimmed.to_string())
+        }
+    }
+
+    /// Consume the optional `of` in `Note right of X`.
+    fn consume_optional_of(&mut self) {
+        if let Ok(next) = self.peek() {
+            if next.raw.eq_ignore_ascii_case("of") {
+                let _ = self.advance();
+            }
         }
     }
 
@@ -3899,7 +3874,11 @@ mod tests {
         let mut parser = Parser::new(code);
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.diagram_type, DiagramType::Sequence);
-        match &diagram.statements[0] {
+        assert!(matches!(
+            &diagram.statements[0],
+            Statement::Autonumber { start: 1, step: 1 }
+        ));
+        match &diagram.statements[1] {
             Statement::Participant { id, label } => {
                 assert_eq!(id, "User");
                 assert_eq!(label.as_deref(), Some("终端用户"));
@@ -4036,6 +4015,7 @@ mod tests {
         match &diagram.statements[0] {
             Statement::Note {
                 target,
+                target_end: _,
                 text,
                 position,
             } => {
@@ -4062,7 +4042,7 @@ mod tests {
         let diagram = parser.parse().unwrap();
         assert_eq!(diagram.statements.len(), 2);
         match &diagram.statements[0] {
-            Statement::Message { label, .. } => assert_eq!(label, "How are you"),
+            Statement::Message { label, .. } => assert_eq!(label, "How are you?"),
             _ => panic!("Expected Message"),
         }
     }
@@ -4091,6 +4071,7 @@ mod tests {
         match &diagram.statements[0] {
             Statement::Note {
                 target,
+                target_end: _,
                 text,
                 position,
             } => {
@@ -4110,6 +4091,7 @@ mod tests {
         match &diagram.statements[0] {
             Statement::Note {
                 target,
+                target_end: _,
                 text,
                 position,
             } => {
@@ -4119,6 +4101,179 @@ mod tests {
             }
             _ => panic!("Expected Note"),
         }
+    }
+
+    #[test]
+    fn test_parse_sequence_label_keeps_punctuation() {
+        let code =
+            "sequenceDiagram\n    FE->>GW: POST /api/order/create(用户)\n    GW-->>FE: 401 Unauthorized";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Message { label, .. } => assert_eq!(label, "POST /api/order/create(用户)"),
+            _ => panic!("Expected Message"),
+        }
+        match &diagram.statements[1] {
+            Statement::Message { label, .. } => assert_eq!(label, "401 Unauthorized"),
+            _ => panic!("Expected Message"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_box_group() {
+        let code = "sequenceDiagram\n box rgb(232,240,254) 用户侧\n  actor U as 用户\n  participant FE as 前端App\n end\n U->>FE: hi";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Block {
+                keyword,
+                condition,
+                statements,
+            } => {
+                assert_eq!(keyword, "box");
+                assert_eq!(condition.as_deref(), Some("rgb(232,240,254) 用户侧"));
+                assert_eq!(statements.len(), 2);
+            }
+            _ => panic!("Expected box Block"),
+        }
+        assert!(matches!(&diagram.statements[1], Statement::Message { .. }));
+    }
+
+    #[test]
+    fn test_parse_sequence_rect_block() {
+        let code = "sequenceDiagram\n rect rgb(235,245,255)\n  A->>B: hi\n end";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Block {
+                keyword,
+                condition,
+                statements,
+            } => {
+                assert_eq!(keyword, "rect");
+                assert_eq!(condition.as_deref(), Some("rgb(235,245,255)"));
+                assert_eq!(statements.len(), 1);
+            }
+            _ => panic!("Expected rect Block"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_note_over_range() {
+        let code = "sequenceDiagram\n Note over U,GW: 阶段一 · 下单请求与风控";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Note {
+                target,
+                target_end,
+                text,
+                position,
+            } => {
+                assert_eq!(target, "U");
+                assert_eq!(target_end.as_deref(), Some("GW"));
+                assert_eq!(text, "阶段一 · 下单请求与风控");
+                assert_eq!(*position, NotePosition::Over);
+            }
+            _ => panic!("Expected Note"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_critical_option() {
+        let code =
+            "sequenceDiagram\n critical 幂等\n  A->>A: x\n option 校验失败\n  A->>A: y\n end";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Block {
+                keyword,
+                statements,
+                ..
+            } => {
+                assert_eq!(keyword, "critical");
+                assert!(matches!(
+                    &statements[1],
+                    Statement::Block { keyword, .. } if keyword == "option"
+                ));
+            }
+            _ => panic!("Expected critical Block"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_break_block() {
+        let code = "sequenceDiagram\n break 支付超时\n  A->>A: x\n end";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Block {
+                keyword,
+                condition,
+                statements,
+            } => {
+                assert_eq!(keyword, "break");
+                assert_eq!(condition.as_deref(), Some("支付超时"));
+                assert_eq!(statements.len(), 1);
+            }
+            _ => panic!("Expected break Block"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_par_and() {
+        let code = "sequenceDiagram\n par 并行\n  A->>B: x\n and\n  B->>A: y\n end";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        match &diagram.statements[0] {
+            Statement::Block {
+                keyword,
+                statements,
+                ..
+            } => {
+                assert_eq!(keyword, "par");
+                assert!(matches!(
+                    &statements[1],
+                    Statement::Block { keyword, .. } if keyword == "and"
+                ));
+            }
+            _ => panic!("Expected par Block"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_alt_does_not_swallow_following_statements() {
+        let code = "sequenceDiagram\n alt x\n  A->>B: a\n else y\n  A->>B: b\n end\n C->>D: after";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        assert_eq!(diagram.statements.len(), 2);
+        match &diagram.statements[1] {
+            Statement::Message { from, to, .. } => {
+                assert_eq!(from, "C");
+                assert_eq!(to, "D");
+            }
+            _ => panic!("Expected Message after alt block"),
+        }
+    }
+
+    #[test]
+    fn test_parse_sequence_par_does_not_swallow_following_statements() {
+        let code = "sequenceDiagram\n par x\n  A->>B: a\n and\n  A->>B: b\n end\n C->>D: after";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        assert_eq!(diagram.statements.len(), 2);
+        assert!(matches!(&diagram.statements[1], Statement::Message { .. }));
+    }
+
+    #[test]
+    fn test_parse_sequence_autonumber_start_step() {
+        let code = "sequenceDiagram\n autonumber 10 5\n A->>B: hi";
+        let mut parser = Parser::new(code);
+        let diagram = parser.parse().unwrap();
+        assert!(matches!(
+            &diagram.statements[0],
+            Statement::Autonumber { start: 10, step: 5 }
+        ));
     }
 
     // ---- Pie Chart 解析测试 ----

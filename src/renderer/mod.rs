@@ -536,51 +536,11 @@ impl Renderer {
         let top_margin = 40.0;
         let start_x = 60.0;
 
-        // Collect participants and display names
+        // Collect participants and display names, including declarations nested
+        // inside `box` groups and branch blocks.
         let mut participants: Vec<(String, String)> = Vec::new();
         let mut seen: HashSet<String> = HashSet::new();
-
-        for stmt in &diagram.statements {
-            match stmt {
-                Statement::Participant { id, label } => {
-                    if seen.insert(id.clone()) {
-                        let display = label.clone().unwrap_or_else(|| id.clone());
-                        participants.push((id.clone(), display));
-                    }
-                }
-                Statement::Message { from, to, .. } => {
-                    if seen.insert(from.clone()) {
-                        participants.push((from.clone(), from.clone()));
-                    }
-                    if seen.insert(to.clone()) {
-                        participants.push((to.clone(), to.clone()));
-                    }
-                }
-                Statement::Note { target, .. } => {
-                    if seen.insert(target.clone()) {
-                        participants.push((target.clone(), target.clone()));
-                    }
-                }
-                Statement::Activate { participant } | Statement::Deactivate { participant } => {
-                    if seen.insert(participant.clone()) {
-                        participants.push((participant.clone(), participant.clone()));
-                    }
-                }
-                Statement::Block { statements, .. } => {
-                    for s in flatten_seq_stmts(statements) {
-                        if let Statement::Message { from, to, .. } = &s {
-                            if seen.insert(from.clone()) {
-                                participants.push((from.clone(), from.clone()));
-                            }
-                            if seen.insert(to.clone()) {
-                                participants.push((to.clone(), to.clone()));
-                            }
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
+        collect_seq_participants(&diagram.statements, &mut participants, &mut seen);
 
         let centers: Vec<(String, f32)> = participants
             .iter()
@@ -600,6 +560,30 @@ impl Renderer {
         let mut y_pos = lifeline_top + 30.0;
         let line_height = 45.0;
         let mut activations: HashMap<String, f32> = HashMap::new();
+        let mut numbering = SeqNumbering::default();
+
+        // `box` groups draw a colored band behind the participant headers.
+        let mut box_bands: Vec<(Vec<String>, Option<String>, String)> = Vec::new();
+        for stmt in &diagram.statements {
+            if let Statement::Block {
+                keyword,
+                condition,
+                statements,
+            } = stmt
+            {
+                if keyword == "box" {
+                    let ids: Vec<String> = statements
+                        .iter()
+                        .filter_map(|s| match s {
+                            Statement::Participant { id, .. } => Some(id.clone()),
+                            _ => None,
+                        })
+                        .collect();
+                    let (color, title) = split_box_header(condition.as_deref().unwrap_or(""));
+                    box_bands.push((ids, color, title));
+                }
+            }
+        }
 
         // Process sequence statements with proper block handling
         process_seq_stmts(
@@ -611,7 +595,45 @@ impl Renderer {
             &mut activations,
             box_width,
             start_x,
+            &mut numbering,
         );
+
+        // Box group bands (behind participant headers)
+        for (ids, color, title) in &box_bands {
+            let xs: Vec<f32> = ids
+                .iter()
+                .filter_map(|id| center_map.get(id.as_str()).copied())
+                .collect();
+            let (Some(min_x), Some(max_x)) = (
+                xs.iter().copied().reduce(f32::min),
+                xs.iter().copied().reduce(f32::max),
+            ) else {
+                continue;
+            };
+            let left = min_x - box_width / 2.0 - 12.0;
+            let right = max_x + box_width / 2.0 + 12.0;
+            let top = 4.0;
+            let height = top_margin + box_height + 14.0 - top;
+            let color = color.clone().unwrap_or_else(|| "#e2e8f0".to_string());
+            svg.add_rect(
+                left,
+                top,
+                right - left,
+                height,
+                &format!(
+                    "fill:{};fill-opacity:0.5;stroke:{};stroke-width:1;rx:6;ry:6",
+                    color, color
+                ),
+            );
+            if !title.is_empty() {
+                svg.add_text(
+                    left + 8.0,
+                    top + 14.0,
+                    title,
+                    "text-anchor:start;font-size:11px;font-weight:600;fill:#475569;font-family:Arial, sans-serif",
+                );
+            }
+        }
 
         // Draw lifelines (dashed vertical lines)
         for (_, cx_val) in &centers {
@@ -625,7 +647,7 @@ impl Renderer {
         }
 
         // Draw participant boxes on top
-        for ((_, display_name), (id, cx)) in participants.iter().zip(centers.iter()) {
+        for ((_, display_name), (_, cx)) in participants.iter().zip(centers.iter()) {
             let bx = cx - box_width / 2.0;
             svg.add_rect(
                 bx,
@@ -640,14 +662,6 @@ impl Renderer {
                 display_name,
                 "text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif",
             );
-            if *display_name != *id {
-                svg.add_text(
-                    *cx,
-                    top_margin + box_height + 12.0,
-                    id,
-                    "text-anchor:middle;font-size:10px;fill:#64748b;font-family:Arial, sans-serif",
-                );
-            }
         }
 
         svg.build()
@@ -3470,20 +3484,6 @@ fn compute_layers(node_ids: &[String], edges: &[(String, String)]) -> Vec<Vec<St
     layers
 }
 
-/// Flatten nested statements from Block variants into a flat list.
-fn flatten_seq_stmts(stmts: &[Statement]) -> Vec<Statement> {
-    let mut result = Vec::new();
-    for stmt in stmts {
-        match stmt {
-            Statement::Block { statements, .. } => {
-                result.extend(flatten_seq_stmts(statements));
-            }
-            other => result.push(other.clone()),
-        }
-    }
-    result
-}
-
 /// Process sequence diagram statements recursively.
 #[allow(clippy::too_many_arguments)]
 fn process_seq_stmts(
@@ -3495,6 +3495,7 @@ fn process_seq_stmts(
     activations: &mut HashMap<String, f32>,
     box_width: f32,
     start_x: f32,
+    numbering: &mut SeqNumbering,
 ) {
     for stmt in stmts {
         match stmt {
@@ -3539,6 +3540,15 @@ fn process_seq_stmts(
                         label,
                         "text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif",
                     );
+                    if numbering.enabled {
+                        svg.add_text(
+                            cx1 - 4.0,
+                            *y_pos - 6.0,
+                            &numbering.next.to_string(),
+                            "text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif",
+                        );
+                        numbering.next += numbering.step;
+                    }
                     *y_pos += line_height.max(loop_h + 10.0);
                 } else {
                     let style = match arrow_type {
@@ -3582,22 +3592,40 @@ fn process_seq_stmts(
                         label,
                         "text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif",
                     );
+                    if numbering.enabled {
+                        svg.add_text(
+                            mid_x,
+                            *y_pos - 10.0,
+                            &numbering.next.to_string(),
+                            "text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif",
+                        );
+                        numbering.next += numbering.step;
+                    }
                     *y_pos += line_height;
                 }
             }
             Statement::Note {
                 target,
+                target_end,
                 text,
                 position,
             } => {
-                let cx = center_map.get(target.as_str()).copied().unwrap_or(0.0);
-                let (nx, note_w) = match position {
-                    NotePosition::Right => (cx + 20.0, 160.0),
-                    NotePosition::Left => (cx - box_width / 2.0 - 170.0, 160.0),
-                    NotePosition::Over => (cx - 80.0, 160.0),
+                let cx1 = center_map.get(target.as_str()).copied().unwrap_or(0.0);
+                let cx2 = target_end
+                    .as_ref()
+                    .and_then(|t| center_map.get(t.as_str()).copied())
+                    .unwrap_or(cx1);
+                let span = (cx2 - cx1).abs();
+                let text_w = text.chars().count() as f32 * 11.0 + 24.0;
+                let note_w = (span + box_width).max(160.0).max(text_w);
+                let nx = match position {
+                    NotePosition::Right => cx1 + 20.0,
+                    NotePosition::Left => cx1 - box_width / 2.0 - 20.0 - note_w,
+                    NotePosition::Over => (cx1 + cx2) / 2.0 - note_w / 2.0,
                 };
+                let line_count = text.matches("<br").count() + 1;
                 let ny = *y_pos - 15.0;
-                let note_h = 36.0;
+                let note_h = 18.0 * line_count as f32 + 18.0;
                 svg.add_rect(
                     nx,
                     ny,
@@ -3613,12 +3641,14 @@ fn process_seq_stmts(
                 );
                 *y_pos += line_height;
             }
+            // `box` groups are painted once behind the participant headers.
+            Statement::Block { keyword, .. } if keyword == "box" => {}
             Statement::Block {
                 keyword,
                 condition,
                 statements,
             } => {
-                let block_start = *y_pos - 10.0;
+                let block_start = *y_pos - 18.0;
 
                 // 计算条件框的左右边界（横跨所有参与者）
                 let blk_left = if let Some(min_x) =
@@ -3637,6 +3667,7 @@ fn process_seq_stmts(
                     start_x + box_width + 20.0
                 };
 
+                let insert_at = svg.element_count();
                 process_seq_stmts(
                     svg,
                     center_map,
@@ -3646,52 +3677,70 @@ fn process_seq_stmts(
                     activations,
                     box_width,
                     start_x,
+                    numbering,
                 );
                 let block_end = *y_pos;
 
-                // Draw modern condition box
-                if keyword == "else" {
-                    // Divider line for else block
-                    svg.add_line(
+                if keyword == "rect" {
+                    // Background band: insert *behind* the messages just emitted.
+                    let color = condition.clone().unwrap_or_else(|| "#f1f5f9".to_string());
+                    svg.insert_rect_at(
+                        insert_at,
                         blk_left,
-                        block_start,
-                        blk_right,
-                        block_start,
-                        "stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5",
+                        block_start - 4.0,
+                        blk_right - blk_left,
+                        (block_end - block_start + 4.0).max(24.0),
+                        &format!("fill:{};stroke:none;", color),
                     );
+                    *y_pos += 12.0;
                 } else {
-                    // Enclosing container box
+                    // `else` (alt), `and` (par) and `option` (critical) split a frame
+                    let is_branch = matches!(keyword.as_str(), "else" | "and" | "option");
+                    if is_branch {
+                        svg.add_line(
+                            blk_left,
+                            block_start,
+                            blk_right,
+                            block_start,
+                            "stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5",
+                        );
+                    } else {
+                        // Enclosing frame: inserted behind the children so the
+                        // translucent fill does not wash out message labels.
+                        svg.insert_rect_at(
+                            insert_at,
+                            blk_left,
+                            block_start,
+                            blk_right - blk_left,
+                            block_end - block_start,
+                            "fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4",
+                        );
+                    }
+
+                    let block_label = if let Some(cond) = condition {
+                        format!("{} [{}]", keyword, cond)
+                    } else {
+                        keyword.clone()
+                    };
+                    let label_chars = block_label.chars().count() as f32;
+                    let label_width = (label_chars * 7.5 + 10.0).max(30.0);
                     svg.add_rect(
                         blk_left,
                         block_start,
-                        blk_right - blk_left,
-                        block_end - block_start,
-                        "fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4",
+                        label_width,
+                        16.0,
+                        "fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3",
                     );
+                    svg.add_text(
+                        blk_left + 4.0,
+                        block_start + 11.0,
+                        &block_label,
+                        "text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif",
+                    );
+                    // Breathing room after block (kept small so nested
+                    // frames do not accumulate large empty bands).
+                    *y_pos += 16.0;
                 }
-
-                let block_label = if let Some(cond) = condition {
-                    format!("{} [{}]", keyword, cond)
-                } else {
-                    keyword.clone()
-                };
-                let label_chars = block_label.chars().count() as f32;
-                let label_width = (label_chars * 7.5 + 10.0).max(30.0);
-                svg.add_rect(
-                    blk_left,
-                    block_start,
-                    label_width,
-                    16.0,
-                    "fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3",
-                );
-                svg.add_text(
-                    blk_left + 4.0,
-                    block_start + 11.0,
-                    &block_label,
-                    "text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif",
-                );
-                // Extra breathing room after block
-                *y_pos += line_height;
             }
             Statement::Activate { participant } => {
                 activations.insert(participant.clone(), *y_pos);
@@ -3712,9 +3761,95 @@ fn process_seq_stmts(
                 }
                 *y_pos += 5.0;
             }
+            Statement::Autonumber { start, step } => {
+                numbering.enabled = true;
+                numbering.next = *start;
+                numbering.step = (*step).max(1);
+            }
             _ => {}
         }
     }
+}
+
+/// Message numbering state for `autonumber`.
+#[derive(Default)]
+struct SeqNumbering {
+    enabled: bool,
+    next: u32,
+    step: u32,
+}
+
+/// Walk sequence statements in order and collect participant declarations,
+/// including those nested in `box` groups and branch blocks.
+fn collect_seq_participants(
+    stmts: &[Statement],
+    participants: &mut Vec<(String, String)>,
+    seen: &mut HashSet<String>,
+) {
+    for stmt in stmts {
+        match stmt {
+            Statement::Participant { id, label } => {
+                if seen.insert(id.clone()) {
+                    let display = label.clone().unwrap_or_else(|| id.clone());
+                    participants.push((id.clone(), display));
+                } else if let Some(label) = label {
+                    // The participant was referenced before its declaration
+                    // (`Note over A,B` first): apply the alias retroactively.
+                    if let Some(entry) = participants.iter_mut().find(|(pid, _)| pid == id) {
+                        entry.1 = label.clone();
+                    }
+                }
+            }
+            Statement::Message { from, to, .. } => {
+                for id in [from, to] {
+                    if seen.insert(id.clone()) {
+                        participants.push((id.clone(), id.clone()));
+                    }
+                }
+            }
+            Statement::Note {
+                target, target_end, ..
+            } => {
+                for id in std::iter::once(target).chain(target_end.iter()) {
+                    if seen.insert(id.clone()) {
+                        participants.push((id.clone(), id.clone()));
+                    }
+                }
+            }
+            Statement::Activate { participant } | Statement::Deactivate { participant } => {
+                if seen.insert(participant.clone()) {
+                    participants.push((participant.clone(), participant.clone()));
+                }
+            }
+            Statement::Block { statements, .. } => {
+                collect_seq_participants(statements, participants, seen);
+            }
+            _ => {}
+        }
+    }
+}
+
+/// Split a `box` header into its optional color and title:
+/// `rgb(232,240,254) 用户侧` -> (`rgb(232,240,254)`, `用户侧`).
+fn split_box_header(raw: &str) -> (Option<String>, String) {
+    let raw = raw.trim();
+    for prefix in ["rgb(", "rgba("] {
+        if let Some(rest) = raw.strip_prefix(prefix) {
+            if let Some(end) = rest.find(')') {
+                let color = format!("{}{})", prefix, &rest[..end]);
+                return (Some(color), rest[end + 1..].trim().to_string());
+            }
+        }
+    }
+    if raw.starts_with('#') {
+        let mut parts = raw.splitn(2, char::is_whitespace);
+        let color = parts.next().unwrap_or("").to_string();
+        let title = parts.next().unwrap_or("").trim().to_string();
+        if !color.is_empty() {
+            return (Some(color), title);
+        }
+    }
+    (None, raw.to_string())
 }
 
 #[cfg(test)]

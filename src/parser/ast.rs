@@ -84,6 +84,8 @@ pub enum Statement {
     },
     Note {
         target: String,
+        /// Second participant for `Note over A,B` spans.
+        target_end: Option<String>,
         text: String,
         position: NotePosition,
     },
@@ -97,6 +99,11 @@ pub enum Statement {
     },
     Deactivate {
         participant: String,
+    },
+    /// `autonumber [start] [step]` — enable message sequence numbers.
+    Autonumber {
+        start: u32,
+        step: u32,
     },
     // Pie chart
     PieSlice {
@@ -474,6 +481,7 @@ impl Diagram {
                 Statement::Activate { participant } | Statement::Deactivate { participant } => {
                     nodes.insert(participant.clone());
                 }
+                Statement::Autonumber { .. } => {}
                 Statement::PieSlice { .. } => {} // Pie slices don't have graph nodes
                 Statement::ClassDef { name, .. } => {
                     nodes.insert(name.clone());
@@ -675,6 +683,7 @@ impl Diagram {
                         .entry(participant.clone())
                         .or_insert_with(|| participant.clone());
                 }
+                Statement::Autonumber { .. } => {}
                 Statement::PieSlice { .. } => {} // Pie slices don't have graph nodes
                 Statement::ClassDef { name, .. } => {
                     node_map.entry(name.clone()).or_insert_with(|| name.clone());

@@ -4435,6 +4435,60 @@ fn test_sequence_dashed_arrow() {
     assert!(svg.contains("dashed"));
 }
 
+#[test]
+fn test_sequence_box_group_renders_band() {
+    let svg = render(
+        "sequenceDiagram\n box rgb(232,240,254) 用户侧\n  participant A\n  participant B\n end\n A->>B: msg",
+    )
+    .unwrap();
+    assert!(svg.contains("用户侧"));
+    assert!(svg.contains("rgb(232,240,254)"));
+}
+
+#[test]
+fn test_sequence_rect_background_renders() {
+    let svg = render("sequenceDiagram\n rect rgb(235,245,255)\n  A->>B: msg\n end").unwrap();
+    assert!(svg.contains("rgb(235,245,255)"));
+}
+
+#[test]
+fn test_sequence_note_over_two_participants() {
+    let svg =
+        render("sequenceDiagram\n participant A\n participant B\n Note over A,B: span").unwrap();
+    assert!(svg.contains("span"));
+}
+
+#[test]
+fn test_sequence_alias_applies_when_referenced_first() {
+    let svg = render("sequenceDiagram\n Note over A,B: span\n participant B as 后端").unwrap();
+    assert!(svg.contains("后端"));
+}
+
+#[test]
+fn test_sequence_label_punctuation_preserved() {
+    let svg = render("sequenceDiagram\n A->>B: POST /api/x(1)").unwrap();
+    assert!(svg.contains("POST /api/x(1)"));
+}
+
+#[test]
+fn test_sequence_autonumber_renders_numbers() {
+    let svg = render("sequenceDiagram\n autonumber\n A->>B: hi\n A->>B: yo").unwrap();
+    assert!(svg.contains(">1<"));
+    assert!(svg.contains(">2<"));
+}
+
+#[test]
+fn test_sequence_critical_break_par_render() {
+    let svg = render(
+        "sequenceDiagram\n critical c\n  A->>B: a\n option o\n  A->>B: b\n end\n break x\n  A->>B: c\n end\n par p\n  A->>B: d\n and\n  A->>B: e\n end",
+    )
+    .unwrap();
+    assert!(svg.contains("critical [c]"));
+    assert!(svg.contains("option [o]"));
+    assert!(svg.contains("break [x]"));
+    assert!(svg.contains("par [p]"));
+}
+
 // --- Pie edge cases ---
 #[test]
 fn test_pie_many_slices() {

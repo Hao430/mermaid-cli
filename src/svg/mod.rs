@@ -60,6 +60,32 @@ impl SvgBuilder {
         self.elements.push(element);
     }
 
+    /// Number of elements emitted so far (used to insert backgrounds behind
+    /// content that is drawn later).
+    pub fn element_count(&self) -> usize {
+        self.elements.len()
+    }
+
+    /// Insert a rectangle at an earlier position so it sits behind already
+    /// emitted content (e.g. `rect` bands in sequence diagrams).
+    pub fn insert_rect_at(
+        &mut self,
+        index: usize,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+        style: &str,
+    ) {
+        self.track_bounds(x + width, y + height);
+        let element = format!(
+            r#"  <rect x="{}" y="{}" width="{}" height="{}" style="{}"/>"#,
+            x, y, width, height, style
+        );
+        let index = index.min(self.elements.len());
+        self.elements.insert(index, element);
+    }
+
     pub fn add_circle(&mut self, cx: f32, cy: f32, r: f32, style: &str) {
         self.track_bounds(cx + r, cy + r);
         let element = format!(
