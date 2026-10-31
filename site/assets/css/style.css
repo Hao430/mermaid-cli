@@ -789,8 +789,6 @@ body {
   flex: 1;
   overflow: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 2rem;
   position: relative;
   user-select: none;
@@ -801,8 +799,8 @@ body {
   border-radius: var(--radius-md);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
   padding: 2rem;
+  margin: auto;
   max-width: 95%;
-  max-height: 95%;
   transition: transform 0.1s ease-out;
   display: flex;
   align-items: center;

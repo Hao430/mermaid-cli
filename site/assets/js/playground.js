@@ -422,9 +422,23 @@ export function downloadPng() {
   const url = URL.createObjectURL(svgBlob);
 
   img.onload = () => {
-    const scale = 2; // Retina 2x resolution
-    const width = (svg.clientWidth || 800) * scale;
-    const height = (svg.clientHeight || 600) * scale;
+    // 以 SVG 的固有尺寸导出，而不是以预览区缩放后的 clientWidth 导出，
+    // 否则下载图的分辨率会随窗口大小变化（且低于源图）。
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    const intrinsicW =
+      (vb && vb.width) ||
+      parseFloat(svg.getAttribute('width')) ||
+      svg.clientWidth ||
+      800;
+    const intrinsicH =
+      (vb && vb.height) ||
+      parseFloat(svg.getAttribute('height')) ||
+      svg.clientHeight ||
+      600;
+    const maxDimension = 4096;
+    const scale = Math.min(2, maxDimension / Math.max(intrinsicW, intrinsicH));
+    const width = Math.max(1, Math.round(intrinsicW * scale));
+    const height = Math.max(1, Math.round(intrinsicH * scale));
 
     const htmlCanvas = document.createElement('canvas');
     htmlCanvas.width = width;
