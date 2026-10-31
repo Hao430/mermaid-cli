@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="930" height="3168" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="872" height="3168" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <style>
     :root {
       --mermaid-bg: transparent;
@@ -37,268 +37,257 @@
     text { font-family: Arial, sans-serif; font-size: 14px; }
   </style>
   <rect width="100%" height="100%" fill="white"/>
-  <rect x="295" y="94" width="340" height="391" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
-  <text x="310" y="112" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">① 风控校验与订单创建</text>
-  <rect x="210" y="495" width="510" height="391" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
-  <text x="225" y="513" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">② 库存预占</text>
-  <rect x="125" y="896" width="595" height="661" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
-  <text x="140" y="914" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">③ 支付处理</text>
-  <rect x="295" y="1616" width="340" height="841" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
-  <text x="310" y="1634" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">④ 仓储调度与履约</text>
-  <rect x="210" y="2467" width="595" height="661" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
-  <text x="225" y="2485" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">⑤ 签收与售后</text>
-  <path d="M 465.0 105.0 L 465.0 130.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,130.0 460.5,122.0 469.5,122.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 465.0 L 380.0 1541.5 Q 380.0 1549.5 388.0 1549.5 L 458.8 1549.5 Q 465.0 1549.5 465.0 1555.8 L 465.0 1562.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,1562.0 460.5,1554.0 469.5,1554.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 465.0 L 550.0 490.0 Q 550.0 498.0 542.0 498.0 L 473.0 498.0 Q 465.0 498.0 465.0 506.0 L 465.0 531.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,531.0 460.5,523.0 469.5,523.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 776.0 L 550.0 1541.5 Q 550.0 1549.5 542.0 1549.5 L 471.2 1549.5 Q 465.0 1549.5 465.0 1555.8 L 465.0 1562.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,1562.0 460.5,1554.0 469.5,1554.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 295.0 686.0 L 295.0 883.0 Q 295.0 891.0 303.0 891.0 L 457.0 891.0 Q 465.0 891.0 465.0 899.0 L 465.0 932.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,932.0 460.5,924.0 469.5,924.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 866.0 L 380.0 883.0 Q 380.0 891.0 388.0 891.0 L 457.0 891.0 Q 465.0 891.0 465.0 899.0 L 465.0 932.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,932.0 460.5,924.0 469.5,924.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 1537.0 L 380.0 1543.2 Q 380.0 1549.5 386.2 1549.5 L 458.8 1549.5 Q 465.0 1549.5 465.0 1555.8 L 465.0 1562.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,1562.0 460.5,1554.0 469.5,1554.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 1357.0 L 380.0 1578.5 Q 380.0 1586.5 388.0 1586.5 L 457.0 1586.5 Q 465.0 1586.5 465.0 1594.5 L 465.0 1652.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,1652.0 460.5,1644.0 469.5,1644.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 1177.0 L 550.0 1578.5 Q 550.0 1586.5 542.0 1586.5 L 473.0 1586.5 Q 465.0 1586.5 465.0 1594.5 L 465.0 1652.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,1652.0 460.5,1644.0 469.5,1644.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 2437.0 L 465.0 2503.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2503.0 460.5,2495.0 469.5,2495.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 3018.0 L 465.0 3024.2 Q 465.0 3030.5 471.2 3030.5 L 543.8 3030.5 Q 550.0 3030.5 550.0 3036.8 L 550.0 3043.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,3043.0 545.5,3035.0 554.5,3035.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 195.0 L 465.0 201.2 Q 465.0 207.5 458.8 207.5 L 386.2 207.5 Q 380.0 207.5 380.0 213.8 L 380.0 220.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,220.0 375.5,212.0 384.5,212.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="373.5" y="198.5" width="98" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="422.5" y="211.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">高危 ≥ 80</text>
-  <path d="M 380.0 285.0 L 380.0 310.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,310.0 375.5,302.0 384.5,302.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 375.0 L 380.0 400.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,400.0 375.5,392.0 384.5,392.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="361" y="378.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="380" y="391.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">拒绝</text>
-  <path d="M 380.0 375.0 L 380.0 381.2 Q 380.0 387.5 386.2 387.5 L 543.8 387.5 Q 550.0 387.5 550.0 393.8 L 550.0 400.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,400.0 545.5,392.0 554.5,392.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="446" y="378.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="391.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">通过</text>
-  <path d="M 465.0 195.0 L 465.0 201.2 Q 465.0 207.5 471.2 207.5 L 542.0 207.5 Q 550.0 207.5 550.0 215.5 L 550.0 400.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,400.0 545.5,392.0 554.5,392.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="501" y="294.75" width="98" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="550" y="307.75" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">正常 &lt; 80</text>
-  <path d="M 465.0 596.0 L 465.0 602.2 Q 465.0 608.5 458.8 608.5 L 301.2 608.5 Q 295.0 608.5 295.0 614.8 L 295.0 621.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="295.0,621.0 290.5,613.0 299.5,613.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="349" y="599.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="380" y="612.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">完全充足</text>
-  <path d="M 465.0 596.0 L 465.0 621.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,621.0 460.5,613.0 469.5,613.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="434" y="599.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="612.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">部分不足</text>
-  <path d="M 465.0 596.0 L 465.0 602.2 Q 465.0 608.5 471.2 608.5 L 542.0 608.5 Q 550.0 608.5 550.0 616.5 L 550.0 711.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,711.0 545.5,703.0 554.5,703.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="519" y="650.75" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="550" y="663.75" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">完全缺货</text>
-  <path d="M 465.0 686.0 L 465.0 692.2 Q 465.0 698.5 458.8 698.5 L 386.2 698.5 Q 380.0 698.5 380.0 704.8 L 380.0 711.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,711.0 375.5,703.0 384.5,703.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="404.5" y="689.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="422.5" y="702.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
-  <path d="M 465.0 686.0 L 465.0 692.2 Q 465.0 698.5 471.2 698.5 L 543.8 698.5 Q 550.0 698.5 550.0 704.8 L 550.0 711.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,711.0 545.5,703.0 554.5,703.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="489.5" y="689.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="507.5" y="702.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
-  <path d="M 380.0 776.0 L 380.0 801.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,801.0 375.5,793.0 384.5,793.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 997.0 L 465.0 1022.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,1022.0 460.5,1014.0 469.5,1014.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 1087.0 L 465.0 1093.2 Q 465.0 1099.5 458.8 1099.5 L 386.2 1099.5 Q 380.0 1099.5 380.0 1105.8 L 380.0 1112.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,1112.0 375.5,1104.0 384.5,1104.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="391.5" y="1090.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="422.5" y="1103.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">在线支付</text>
-  <path d="M 465.0 1087.0 L 465.0 1093.2 Q 465.0 1099.5 471.2 1099.5 L 543.8 1099.5 Q 550.0 1099.5 550.0 1105.8 L 550.0 1112.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,1112.0 545.5,1104.0 554.5,1104.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="476.5" y="1090.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="507.5" y="1103.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">货到付款</text>
-  <path d="M 380.0 1177.0 L 380.0 1202.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,1202.0 375.5,1194.0 384.5,1194.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 1267.0 L 380.0 1273.2 Q 380.0 1279.5 386.2 1279.5 L 543.8 1279.5 Q 550.0 1279.5 550.0 1285.8 L 550.0 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,1292.0 545.5,1284.0 554.5,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="428" y="1270.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">超时无回调</text>
-  <path d="M 615.0 1324.5 L 635.0 1324.5 Q 643.0 1324.5 643.0 1316.5 L 643.0 1242.5 Q 643.0 1234.5 635.0 1234.5 L 445.0 1234.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="445.0,1234.5 453.0,1230.0 453.0,1239.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 1267.0 L 380.0 1273.2 Q 380.0 1279.5 373.8 1279.5 L 216.2 1279.5 Q 210.0 1279.5 210.0 1285.8 L 210.0 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="210.0,1292.0 205.5,1284.0 214.5,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="276" y="1270.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="295" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">失败</text>
-  <path d="M 210.0 1357.0 L 210.0 1363.2 Q 210.0 1369.5 216.2 1369.5 L 543.8 1369.5 Q 550.0 1369.5 550.0 1375.8 L 550.0 1382.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,1382.0 545.5,1374.0 554.5,1374.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 615.0 1414.5 L 635.0 1414.5 Q 643.0 1414.5 643.0 1406.5 L 643.0 1152.5 Q 643.0 1144.5 635.0 1144.5 L 445.0 1144.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="445.0,1144.5 453.0,1140.0 453.0,1149.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="625" y="1270.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="643" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
-  <path d="M 550.0 1447.0 L 550.0 1453.2 Q 550.0 1459.5 543.8 1459.5 L 386.2 1459.5 Q 380.0 1459.5 380.0 1465.8 L 380.0 1472.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,1472.0 375.5,1464.0 384.5,1464.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="447" y="1450.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="1463.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
-  <path d="M 380.0 1267.0 L 380.0 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,1292.0 375.5,1284.0 384.5,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="361" y="1270.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="380" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">成功</text>
-  <path d="M 465.0 1717.0 L 465.0 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2192.0 460.5,2184.0 469.5,2184.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="428" y="1945.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="1958.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓有货</text>
-  <path d="M 465.0 1717.0 L 465.0 1723.2 Q 465.0 1729.5 471.2 1729.5 L 543.8 1729.5 Q 550.0 1729.5 550.0 1735.8 L 550.0 1742.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,1742.0 545.5,1734.0 554.5,1734.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="470.5" y="1720.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="507.5" y="1733.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓缺货</text>
-  <path d="M 550.0 1807.0 L 550.0 1832.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,1832.0 545.5,1824.0 554.5,1824.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 1897.0 L 550.0 1903.2 Q 550.0 1909.5 543.8 1909.5 L 473.0 1909.5 Q 465.0 1909.5 465.0 1917.5 L 465.0 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2192.0 460.5,2184.0 469.5,2184.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="447" y="2041.75" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="2054.75" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
-  <path d="M 550.0 1897.0 L 550.0 1922.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,1922.0 545.5,1914.0 554.5,1914.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="532" y="1900.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="550" y="1913.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
-  <path d="M 550.0 1987.0 L 550.0 2012.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,2012.0 545.5,2004.0 554.5,2004.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 2077.0 L 550.0 2083.2 Q 550.0 2089.5 543.8 2089.5 L 386.2 2089.5 Q 380.0 2089.5 380.0 2095.8 L 380.0 2102.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,2102.0 375.5,2094.0 384.5,2094.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="440" y="2080.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="2093.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">不接受</text>
-  <path d="M 550.0 2077.0 L 550.0 2083.2 Q 550.0 2089.5 543.8 2089.5 L 473.0 2089.5 Q 465.0 2089.5 465.0 2097.5 L 465.0 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2192.0 460.5,2184.0 469.5,2184.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="446" y="2131.75" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="2144.75" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">接受</text>
-  <path d="M 465.0 2257.0 L 465.0 2282.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2282.0 460.5,2274.0 469.5,2274.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 2347.0 L 465.0 2372.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2372.0 460.5,2364.0 469.5,2364.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 2568.0 L 465.0 2574.2 Q 465.0 2580.5 458.8 2580.5 L 386.2 2580.5 Q 380.0 2580.5 380.0 2586.8 L 380.0 2593.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,2593.0 375.5,2585.0 384.5,2585.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="403.5" y="2571.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="422.5" y="2584.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">拒收</text>
-  <path d="M 465.0 2568.0 L 465.0 2574.2 Q 465.0 2580.5 471.2 2580.5 L 543.8 2580.5 Q 550.0 2580.5 550.0 2586.8 L 550.0 2593.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,2593.0 545.5,2585.0 554.5,2585.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="482.5" y="2571.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="507.5" y="2584.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">已签收</text>
-  <path d="M 550.0 2658.0 L 550.0 2683.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,2683.0 545.5,2675.0 554.5,2675.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 2748.0 L 550.0 2754.2 Q 550.0 2760.5 556.2 2760.5 L 713.8 2760.5 Q 720.0 2760.5 720.0 2766.8 L 720.0 2773.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="720.0,2773.0 715.5,2765.0 724.5,2765.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="616" y="2751.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="635" y="2764.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">退货</text>
-  <path d="M 550.0 2748.0 L 550.0 2773.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="550.0,2773.0 545.5,2765.0 554.5,2765.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="531" y="2751.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="550" y="2764.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">换货</text>
-  <path d="M 550.0 2748.0 L 550.0 2754.2 Q 550.0 2760.5 543.8 2760.5 L 388.0 2760.5 Q 380.0 2760.5 380.0 2768.5 L 380.0 3043.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,3043.0 375.5,3035.0 384.5,3035.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="355" y="2892.75" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="380" y="2905.75" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">无售后</text>
-  <path d="M 720.0 2838.0 L 720.0 2844.2 Q 720.0 2850.5 713.8 2850.5 L 471.2 2850.5 Q 465.0 2850.5 465.0 2856.8 L 465.0 2863.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2863.0 460.5,2855.0 469.5,2855.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 550.0 2838.0 L 550.0 2844.2 Q 550.0 2850.5 543.8 2850.5 L 471.2 2850.5 Q 465.0 2850.5 465.0 2856.8 L 465.0 2863.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2863.0 460.5,2855.0 469.5,2855.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 2928.0 L 465.0 2953.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2953.0 460.5,2945.0 469.5,2945.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="446" y="2931.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="465" y="2944.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">通过</text>
-  <path d="M 465.0 2928.0 L 465.0 2934.2 Q 465.0 2940.5 471.2 2940.5 L 628.8 2940.5 Q 635.0 2940.5 635.0 2946.8 L 635.0 2953.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="635.0,2953.0 630.5,2945.0 639.5,2945.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="531" y="2931.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="550" y="2944.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">驳回</text>
-  <path d="M 635.0 3018.0 L 635.0 3024.2 Q 635.0 3030.5 628.8 3030.5 L 386.2 3030.5 Q 380.0 3030.5 380.0 3036.8 L 380.0 3043.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,3043.0 375.5,3035.0 384.5,3035.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380.0 2658.0 L 380.0 2932.5 Q 380.0 2940.5 388.0 2940.5 L 458.8 2940.5 Q 465.0 2940.5 465.0 2946.8 L 465.0 2953.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="465.0,2953.0 460.5,2945.0 469.5,2945.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 380 310 L 445 342.5 L 380 375 L 315 342.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="380" y="342.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">审核结论</text>
-  <rect x="485" y="711" width="130" height="65" style="fill:#f8d7da;stroke:#dc3545;stroke-width:2px;rx:6;ry:6"/>
-  <text x="550" y="743.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#721c24;font-family:Arial, sans-serif">缺货登记</text>
-  <rect x="400" y="1562" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
-  <text x="465" y="1594.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">订单关闭</text>
-  <rect x="485" y="2773" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="2805.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">创建换货单</text>
-  <rect x="655" y="2773" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="720" y="2805.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">创建退货单</text>
-  <rect x="315" y="400" width="130" height="65" style="fill:#f8d7da;stroke:#dc3545;stroke-width:2px;rx:6;ry:6"/>
-  <text x="380" y="432.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#721c24;font-family:Arial, sans-serif">加入黑名单</text>
-  <rect x="400" y="2192" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="465" y="2224.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">生成拣货单</text>
-  <path d="M 550 1382 L 615 1414.5 L 550 1447 L 485 1414.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="550" y="1414.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">重试次数 &lt; 3</text>
-  <rect x="485" y="1292" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="1324.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">主动轮询查单</text>
-  <rect x="400" y="2372" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="465" y="2404.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">交接物流配送</text>
-  <rect x="315" y="3043" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
-  <text x="380" y="3075.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">交易正式关闭</text>
-  <path d="M 465 1652 L 530 1684.5 L 465 1717 L 400 1684.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="1684.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">仓储调度决策</text>
-  <path d="M 465 2863 L 530 2895.5 L 465 2928 L 400 2895.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="2895.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">售后审核结论</text>
-  <rect x="485" y="3043" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
-  <text x="550" y="3075.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">售后流程结束</text>
-  <path d="M 465 130 L 530 162.5 L 465 195 L 400 162.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="162.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">基础风控评分</text>
-  <rect x="400" y="2282" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="465" y="2314.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">复核打包出库</text>
-  <path d="M 465 531 L 530 563.5 L 465 596 L 400 563.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="563.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">实时库存查询</text>
-  <rect x="570" y="2953" width="130" height="65" style="fill:var(--mermaid-node-bg, #ffffff);stroke:var(--mermaid-node-border, #334155);stroke-width:var(--mermaid-node-border-width, 1.5);rx:6;ry:6"/>
-  <text x="635" y="2985.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:var(--mermaid-text-primary, #0f172a);font-family:Arial, sans-serif">推送驳回原因</text>
-  <path d="M 380 1202 L 445 1234.5 L 380 1267 L 315 1234.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="380" y="1234.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">支付回调结果</text>
-  <path d="M 465 621 L 530 653.5 L 465 686 L 400 653.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="653.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">是否允许拆单</text>
-  <path d="M 550 2683 L 615 2715.5 L 550 2748 L 485 2715.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="550" y="2715.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">是否申请售后</text>
-  <rect x="485" y="1112" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="1144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">标记为待收款</text>
-  <path d="M 465 2503 L 530 2535.5 L 465 2568 L 400 2535.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="2535.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">物流签收结果</text>
-  <rect x="400" y="40" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
-  <text x="465" y="72.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">用户提交订单</text>
-  <path d="M 550 2012 L 615 2044.5 L 550 2077 L 485 2044.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="550" y="2044.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">用户是否接受</text>
-  <rect x="315" y="1112" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="380" y="1144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">调用支付网关</text>
-  <rect x="400" y="932" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="465" y="964.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">进入支付环节</text>
-  <rect x="315" y="2593" width="130" height="65" style="fill:var(--mermaid-node-bg, #ffffff);stroke:var(--mermaid-node-border, #334155);stroke-width:var(--mermaid-node-border-width, 1.5);rx:6;ry:6"/>
-  <text x="380" y="2625.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:var(--mermaid-text-primary, #0f172a);font-family:Arial, sans-serif">逆向物流回仓</text>
-  <path d="M 465 1022 L 530 1054.5 L 465 1087 L 400 1054.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="465" y="1054.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">选择支付方式</text>
-  <rect x="315" y="1472" width="130" height="65" style="fill:#f8d7da;stroke:#dc3545;stroke-width:2px;rx:6;ry:6"/>
-  <text x="380" y="1504.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#721c24;font-family:Arial, sans-serif">释放已锁库存</text>
-  <path d="M 550 1832 L 615 1864.5 L 550 1897 L 485 1864.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
-  <text x="550" y="1864.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">预计到货 &lt; 48h</text>
-  <rect x="315" y="801" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="380" y="833.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">按子单分别锁定</text>
-  <rect x="315" y="220" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="380" y="252.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">转人工审核队列</text>
-  <rect x="315" y="711" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="380" y="743.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">按仓库拆分子订单</text>
-  <rect x="315" y="1292" width="130" height="65" style="fill:#d4edda;stroke:#28a745;stroke-width:2px;rx:6;ry:6"/>
-  <text x="380" y="1324.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#155724;font-family:Arial, sans-serif">订单状态 = 已支付</text>
-  <rect x="145" y="1292" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="210" y="1324.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">通知用户支付失败</text>
-  <rect x="485" y="1922" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="1954.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">通知用户预计延期</text>
-  <rect x="485" y="1742" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="1774.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">触发采购 / 跨仓调拨</text>
-  <rect x="315" y="2102" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
-  <text x="380" y="2134.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">订单取消并全额退款</text>
-  <rect x="485" y="2593" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="2625.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif"><tspan x="550" dy="-8">确认收货</tspan><tspan x="550" dy="16">订单完成</tspan></text>
-  <rect x="230" y="621" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="295" y="653.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif"><tspan x="295" dy="-8">锁定库存</tspan><tspan x="295" dy="16">写入预占记录</tspan></text>
-  <rect x="485" y="400" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
-  <text x="550" y="432.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif"><tspan x="550" dy="-8">生成订单号</tspan><tspan x="550" dy="16">写入订单主表</tspan></text>
-  <rect x="400" y="2953" width="130" height="65" style="fill:#d4edda;stroke:#28a745;stroke-width:2px;rx:6;ry:6"/>
-  <text x="465" y="2985.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#155724;font-family:Arial, sans-serif"><tspan x="465" dy="-8">生成售后处理单</tspan><tspan x="465" dy="16">财务发起退款/补发</tspan></text>
+  <rect x="252.5" y="94" width="340" height="391" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
+  <text x="267.5" y="112" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">① 风控校验与订单创建</text>
+  <rect x="167.5" y="495" width="510" height="391" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
+  <text x="182.5" y="513" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">② 库存预占</text>
+  <rect x="167.5" y="896" width="595" height="661" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
+  <text x="182.5" y="914" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">③ 支付处理</text>
+  <rect x="252.5" y="1616" width="340" height="841" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
+  <text x="267.5" y="1634" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">④ 仓储调度与履约</text>
+  <rect x="167.5" y="2467" width="595" height="661" style="fill:var(--mermaid-subgraph-bg, #f8fafc);stroke:var(--mermaid-subgraph-border, #cbd5e1);stroke-width:1.5;stroke-dasharray:4;rx:8;ry:8"/>
+  <text x="182.5" y="2485" style="text-anchor:start;dominant-baseline:middle;font-size:12px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif">⑤ 签收与售后</text>
+  <path d="M 422.5 105.0 L 422.5 130.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,130.0 418.0,122.0 427.0,122.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 337.5 465.0 L 337.5 471.0 Q 337.5 477.0 331.5 477.0 L 151.5 477.0 Q 143.5 477.0 143.5 485.0 L 143.5 1541.5 Q 143.5 1549.5 151.5 1549.5 L 422.5 1549.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 507.5 465.0 L 507.5 490.0 Q 507.5 498.0 499.5 498.0 L 430.5 498.0 Q 422.5 498.0 422.5 506.0 L 422.5 531.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,531.0 418.0,523.0 427.0,523.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 776.0 L 507.5 782.0 Q 507.5 788.0 513.5 788.0 L 814.5 788.0 Q 822.5 788.0 822.5 796.0 L 822.5 1547.5 Q 822.5 1555.5 814.5 1555.5 L 422.5 1555.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 252.5 686.0 L 252.5 889.0 Q 252.5 897.0 260.5 897.0 L 422.5 897.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 337.5 866.0 L 337.5 877.0 Q 337.5 885.0 345.5 885.0 L 414.5 885.0 Q 422.5 885.0 422.5 893.0 L 422.5 932.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,932.0 418.0,924.0 427.0,924.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 1537.0 L 507.5 1540.2 Q 507.5 1543.5 504.2 1543.5 L 430.5 1543.5 Q 422.5 1543.5 422.5 1551.5 L 422.5 1562.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,1562.0 418.0,1554.0 427.0,1554.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 1357.0 L 507.5 1373.0 Q 507.5 1381.0 515.5 1381.0 L 832.5 1381.0 Q 840.5 1381.0 840.5 1389.0 L 840.5 1578.5 Q 840.5 1586.5 832.5 1586.5 L 430.5 1586.5 Q 422.5 1586.5 422.5 1594.5 L 422.5 1652.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,1652.0 418.0,1644.0 427.0,1644.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 337.5 1177.0 L 337.5 1183.0 Q 337.5 1189.0 331.5 1189.0 L 133.5 1189.0 Q 125.5 1189.0 125.5 1197.0 L 125.5 1578.5 Q 125.5 1586.5 133.5 1586.5 L 422.5 1586.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 422.5 2437.0 L 422.5 2503.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,2503.0 418.0,2495.0 427.0,2495.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 422.5 3018.0 L 422.5 3024.2 Q 422.5 3030.5 416.2 3030.5 L 343.8 3030.5 Q 337.5 3030.5 337.5 3036.8 L 337.5 3043.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,3043.0 333.0,3035.0 342.0,3035.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 422.5 195.0 L 422.5 201.2 Q 422.5 207.5 416.2 207.5 L 343.8 207.5 Q 337.5 207.5 337.5 213.8 L 337.5 220.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,220.0 333.0,212.0 342.0,212.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="331" y="198.5" width="98" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="380" y="211.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">高危 ≥ 80</text>
+  <path d="M 337.5 285.0 L 337.5 310.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,310.0 333.0,302.0 342.0,302.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 337.5 375.0 L 337.5 400.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,400.0 333.0,392.0 342.0,392.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="318.5" y="378.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="337.5" y="391.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">拒绝</text>
+  <path d="M 337.5 387.5 L 507.5 387.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <rect x="403.5" y="378.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="422.5" y="391.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">通过</text>
+  <path d="M 422.5 207.5 L 499.5 207.5 Q 507.5 207.5 507.5 215.5 L 507.5 400.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,400.0 503.0,392.0 512.0,392.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="458.5" y="294.75" width="98" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="507.5" y="307.75" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">正常 &lt; 80</text>
+  <path d="M 422.5 608.5 L 258.8 608.5 Q 252.5 608.5 252.5 614.8 L 252.5 621.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="252.5,621.0 248.0,613.0 257.0,613.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="306.5" y="599.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="337.5" y="612.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">完全充足</text>
+  <path d="M 422.5 596.0 L 422.5 621.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,621.0 418.0,613.0 427.0,613.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="391.5" y="599.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="422.5" y="612.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">部分不足</text>
+  <path d="M 422.5 608.5 L 584.5 608.5 Q 592.5 608.5 592.5 616.5 L 592.5 690.5 Q 592.5 698.5 584.5 698.5 L 513.8 698.5 Q 507.5 698.5 507.5 704.8 L 507.5 711.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,711.0 503.0,703.0 512.0,703.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="476.5" y="599.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="507.5" y="612.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">完全缺货</text>
+  <path d="M 422.5 686.0 L 422.5 692.2 Q 422.5 698.5 416.2 698.5 L 343.8 698.5 Q 337.5 698.5 337.5 704.8 L 337.5 711.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,711.0 333.0,703.0 342.0,703.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="362" y="689.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="380" y="702.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
+  <path d="M 422.5 698.5 L 507.5 698.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <rect x="447" y="689.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="465" y="702.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
+  <path d="M 337.5 776.0 L 337.5 801.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,801.0 333.0,793.0 342.0,793.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 422.5 997.0 L 422.5 1022.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,1022.0 418.0,1014.0 427.0,1014.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 422.5 1087.0 L 422.5 1093.2 Q 422.5 1099.5 428.8 1099.5 L 501.2 1099.5 Q 507.5 1099.5 507.5 1105.8 L 507.5 1112.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1112.0 503.0,1104.0 512.0,1104.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="434" y="1090.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="465" y="1103.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">在线支付</text>
+  <path d="M 422.5 1099.5 L 343.8 1099.5 Q 337.5 1099.5 337.5 1105.8 L 337.5 1112.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,1112.0 333.0,1104.0 342.0,1104.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="349" y="1090.5" width="62" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="380" y="1103.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">货到付款</text>
+  <path d="M 507.5 1177.0 L 507.5 1202.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1202.0 503.0,1194.0 512.0,1194.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 1279.5 L 343.8 1279.5 Q 337.5 1279.5 337.5 1285.8 L 337.5 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,1292.0 333.0,1284.0 342.0,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="385.5" y="1270.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="422.5" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">超时无回调</text>
+  <path d="M 337.5 1357.0 L 337.5 1360.0 Q 337.5 1363.0 340.5 1363.0 L 778.5 1363.0 Q 786.5 1363.0 786.5 1355.0 L 786.5 1242.5 Q 786.5 1234.5 778.5 1234.5 L 572.5 1234.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="572.5,1234.5 580.5,1230.0 580.5,1239.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 1279.5 L 671.2 1279.5 Q 677.5 1279.5 677.5 1285.8 L 677.5 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="677.5,1292.0 673.0,1284.0 682.0,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="573.5" y="1270.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="592.5" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">失败</text>
+  <path d="M 677.5 1357.0 L 677.5 1363.2 Q 677.5 1369.5 671.2 1369.5 L 343.8 1369.5 Q 337.5 1369.5 337.5 1375.8 L 337.5 1382.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,1382.0 333.0,1374.0 342.0,1374.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 402.5 1414.5 L 796.5 1414.5 Q 804.5 1414.5 804.5 1406.5 L 804.5 1152.5 Q 804.5 1144.5 796.5 1144.5 L 572.5 1144.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="572.5,1144.5 580.5,1140.0 580.5,1149.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="585.5" y="1405.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="603.5" y="1418.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
+  <path d="M 337.5 1447.0 L 337.5 1453.2 Q 337.5 1459.5 343.8 1459.5 L 501.2 1459.5 Q 507.5 1459.5 507.5 1465.8 L 507.5 1472.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1472.0 503.0,1464.0 512.0,1464.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="404.5" y="1450.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="422.5" y="1463.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
+  <path d="M 507.5 1267.0 L 507.5 1292.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1292.0 503.0,1284.0 512.0,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="488.5" y="1270.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="507.5" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">成功</text>
+  <path d="M 422.5 1717.0 L 422.5 1723.2 Q 422.5 1729.5 416.2 1729.5 L 151.5 1729.5 Q 143.5 1729.5 143.5 1737.5 L 143.5 2126.5 Q 143.5 2134.5 151.5 2134.5 L 422.5 2134.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <rect x="106.5" y="1923" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="143.5" y="1936" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓有货</text>
+  <path d="M 422.5 1729.5 L 501.2 1729.5 Q 507.5 1729.5 507.5 1735.8 L 507.5 1742.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1742.0 503.0,1734.0 512.0,1734.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="428" y="1720.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="465" y="1733.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓缺货</text>
+  <path d="M 507.5 1807.0 L 507.5 1832.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1832.0 503.0,1824.0 512.0,1824.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 1909.5 L 669.5 1909.5 Q 677.5 1909.5 677.5 1917.5 L 677.5 2120.5 Q 677.5 2128.5 669.5 2128.5 L 430.5 2128.5 Q 422.5 2128.5 422.5 2136.5 L 422.5 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,2192.0 418.0,2184.0 427.0,2184.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="532" y="2119.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="550" y="2132.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
+  <path d="M 507.5 1897.0 L 507.5 1922.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,1922.0 503.0,1914.0 512.0,1914.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="489.5" y="1900.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="507.5" y="1913.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
+  <path d="M 507.5 1987.0 L 507.5 2012.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,2012.0 503.0,2004.0 512.0,2004.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 2077.0 L 507.5 2083.2 Q 507.5 2089.5 501.2 2089.5 L 343.8 2089.5 Q 337.5 2089.5 337.5 2095.8 L 337.5 2102.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,2102.0 333.0,2094.0 342.0,2094.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="397.5" y="2080.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="422.5" y="2093.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">不接受</text>
+  <path d="M 507.5 2089.5 L 687.5 2089.5 Q 695.5 2089.5 695.5 2097.5 L 695.5 2132.5 Q 695.5 2140.5 687.5 2140.5 L 422.5 2140.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <rect x="540" y="2131.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="559" y="2144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">接受</text>
+  <path d="M 422.5 2257.0 L 422.5 2282.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,2282.0 418.0,2274.0 427.0,2274.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 422.5 2347.0 L 422.5 2372.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,2372.0 418.0,2364.0 427.0,2364.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 422.5 2568.0 L 422.5 2574.2 Q 422.5 2580.5 416.2 2580.5 L 343.8 2580.5 Q 337.5 2580.5 337.5 2586.8 L 337.5 2593.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="337.5,2593.0 333.0,2585.0 342.0,2585.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="361" y="2571.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="380" y="2584.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">拒收</text>
+  <path d="M 422.5 2580.5 L 501.2 2580.5 Q 507.5 2580.5 507.5 2586.8 L 507.5 2593.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,2593.0 503.0,2585.0 512.0,2585.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="440" y="2571.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="465" y="2584.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">已签收</text>
+  <path d="M 507.5 2658.0 L 507.5 2683.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,2683.0 503.0,2675.0 512.0,2675.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 507.5 2748.0 L 507.5 2773.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,2773.0 503.0,2765.0 512.0,2765.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="488.5" y="2751.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="507.5" y="2764.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">退货</text>
+  <path d="M 507.5 2766.5 L 674.2 2766.5 Q 677.5 2766.5 677.5 2769.8 L 677.5 2773.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="677.5,2773.0 673.0,2765.0 682.0,2765.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="573.5" y="2757.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="592.5" y="2770.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">换货</text>
+  <path d="M 507.5 2754.5 L 839.5 2754.5 Q 847.5 2754.5 847.5 2762.5 L 847.5 3028.5 Q 847.5 3036.5 839.5 3036.5 L 507.5 3036.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <rect x="652.5" y="2745.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="677.5" y="2758.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">无售后</text>
+  <path d="M 507.5 2838.0 L 507.5 2841.2 Q 507.5 2844.5 504.2 2844.5 L 430.5 2844.5 Q 422.5 2844.5 422.5 2852.5 L 422.5 2863.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,2863.0 418.0,2855.0 427.0,2855.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 677.5 2838.0 L 677.5 2848.5 Q 677.5 2856.5 669.5 2856.5 L 422.5 2856.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 422.5 2928.0 L 422.5 2953.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="422.5,2953.0 418.0,2945.0 427.0,2945.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="403.5" y="2931.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="422.5" y="2944.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">通过</text>
+  <path d="M 422.5 2940.5 L 586.2 2940.5 Q 592.5 2940.5 592.5 2946.8 L 592.5 2953.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="592.5,2953.0 588.0,2945.0 597.0,2945.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="488.5" y="2931.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="507.5" y="2944.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">驳回</text>
+  <path d="M 592.5 3018.0 L 592.5 3021.2 Q 592.5 3024.5 589.2 3024.5 L 515.5 3024.5 Q 507.5 3024.5 507.5 3032.5 L 507.5 3043.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="507.5,3043.0 503.0,3035.0 512.0,3035.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 337.5 2658.0 L 337.5 2932.5 Q 337.5 2940.5 345.5 2940.5 L 422.5 2940.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 337.5 310 L 402.5 342.5 L 337.5 375 L 272.5 342.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="337.5" y="342.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">审核结论</text>
+  <rect x="442.5" y="711" width="130" height="65" style="fill:#f8d7da;stroke:#dc3545;stroke-width:2px;rx:6;ry:6"/>
+  <text x="507.5" y="743.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#721c24;font-family:Arial, sans-serif">缺货登记</text>
+  <rect x="357.5" y="1562" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
+  <text x="422.5" y="1594.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">订单关闭</text>
+  <rect x="612.5" y="2773" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="677.5" y="2805.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">创建换货单</text>
+  <rect x="442.5" y="2773" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="507.5" y="2805.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">创建退货单</text>
+  <rect x="272.5" y="400" width="130" height="65" style="fill:#f8d7da;stroke:#dc3545;stroke-width:2px;rx:6;ry:6"/>
+  <text x="337.5" y="432.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#721c24;font-family:Arial, sans-serif">加入黑名单</text>
+  <rect x="357.5" y="2192" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="422.5" y="2224.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">生成拣货单</text>
+  <path d="M 337.5 1382 L 402.5 1414.5 L 337.5 1447 L 272.5 1414.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="337.5" y="1414.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">重试次数 &lt; 3</text>
+  <rect x="272.5" y="1292" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="337.5" y="1324.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">主动轮询查单</text>
+  <rect x="357.5" y="2372" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="422.5" y="2404.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">交接物流配送</text>
+  <rect x="442.5" y="3043" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
+  <text x="507.5" y="3075.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">交易正式关闭</text>
+  <path d="M 422.5 1652 L 487.5 1684.5 L 422.5 1717 L 357.5 1684.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="1684.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">仓储调度决策</text>
+  <path d="M 422.5 2863 L 487.5 2895.5 L 422.5 2928 L 357.5 2895.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="2895.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">售后审核结论</text>
+  <rect x="272.5" y="3043" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
+  <text x="337.5" y="3075.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">售后流程结束</text>
+  <path d="M 422.5 130 L 487.5 162.5 L 422.5 195 L 357.5 162.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="162.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">基础风控评分</text>
+  <rect x="357.5" y="2282" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="422.5" y="2314.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">复核打包出库</text>
+  <path d="M 422.5 531 L 487.5 563.5 L 422.5 596 L 357.5 563.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="563.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">实时库存查询</text>
+  <rect x="527.5" y="2953" width="130" height="65" style="fill:var(--mermaid-node-bg, #ffffff);stroke:var(--mermaid-node-border, #334155);stroke-width:var(--mermaid-node-border-width, 1.5);rx:6;ry:6"/>
+  <text x="592.5" y="2985.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:var(--mermaid-text-primary, #0f172a);font-family:Arial, sans-serif">推送驳回原因</text>
+  <path d="M 507.5 1202 L 572.5 1234.5 L 507.5 1267 L 442.5 1234.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="507.5" y="1234.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">支付回调结果</text>
+  <path d="M 422.5 621 L 487.5 653.5 L 422.5 686 L 357.5 653.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="653.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">是否允许拆单</text>
+  <path d="M 507.5 2683 L 572.5 2715.5 L 507.5 2748 L 442.5 2715.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="507.5" y="2715.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">是否申请售后</text>
+  <rect x="272.5" y="1112" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="337.5" y="1144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">标记为待收款</text>
+  <path d="M 422.5 2503 L 487.5 2535.5 L 422.5 2568 L 357.5 2535.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="2535.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">物流签收结果</text>
+  <rect x="357.5" y="40" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
+  <text x="422.5" y="72.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">用户提交订单</text>
+  <path d="M 507.5 2012 L 572.5 2044.5 L 507.5 2077 L 442.5 2044.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="507.5" y="2044.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">用户是否接受</text>
+  <rect x="442.5" y="1112" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="507.5" y="1144.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">调用支付网关</text>
+  <rect x="357.5" y="932" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="422.5" y="964.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">进入支付环节</text>
+  <rect x="272.5" y="2593" width="130" height="65" style="fill:var(--mermaid-node-bg, #ffffff);stroke:var(--mermaid-node-border, #334155);stroke-width:var(--mermaid-node-border-width, 1.5);rx:6;ry:6"/>
+  <text x="337.5" y="2625.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:var(--mermaid-text-primary, #0f172a);font-family:Arial, sans-serif">逆向物流回仓</text>
+  <path d="M 422.5 1022 L 487.5 1054.5 L 422.5 1087 L 357.5 1054.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="422.5" y="1054.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">选择支付方式</text>
+  <rect x="442.5" y="1472" width="130" height="65" style="fill:#f8d7da;stroke:#dc3545;stroke-width:2px;rx:6;ry:6"/>
+  <text x="507.5" y="1504.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#721c24;font-family:Arial, sans-serif">释放已锁库存</text>
+  <path d="M 507.5 1832 L 572.5 1864.5 L 507.5 1897 L 442.5 1864.5 Z" style="fill:#fff3cd;stroke:#ffc107;stroke-width:2px"/>
+  <text x="507.5" y="1864.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#664d03;font-family:Arial, sans-serif">预计到货 &lt; 48h</text>
+  <rect x="272.5" y="801" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="337.5" y="833.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">按子单分别锁定</text>
+  <rect x="272.5" y="220" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="337.5" y="252.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">转人工审核队列</text>
+  <rect x="272.5" y="711" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="337.5" y="743.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">按仓库拆分子订单</text>
+  <rect x="442.5" y="1292" width="130" height="65" style="fill:#d4edda;stroke:#28a745;stroke-width:2px;rx:6;ry:6"/>
+  <text x="507.5" y="1324.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#155724;font-family:Arial, sans-serif">订单状态 = 已支付</text>
+  <rect x="612.5" y="1292" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="677.5" y="1324.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">通知用户支付失败</text>
+  <rect x="442.5" y="1922" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="507.5" y="1954.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">通知用户预计延期</text>
+  <rect x="442.5" y="1742" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="507.5" y="1774.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif">触发采购 / 跨仓调拨</text>
+  <rect x="272.5" y="2102" width="130" height="65" style="fill:#1f77b4;stroke:#0d4d7a;stroke-width:2px;rx:32.5;ry:32.5"/>
+  <text x="337.5" y="2134.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#ffffff;font-family:Arial, sans-serif">订单取消并全额退款</text>
+  <rect x="442.5" y="2593" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="507.5" y="2625.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif"><tspan x="507.5" dy="-8">确认收货</tspan><tspan x="507.5" dy="16">订单完成</tspan></text>
+  <rect x="187.5" y="621" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="252.5" y="653.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif"><tspan x="252.5" dy="-8">锁定库存</tspan><tspan x="252.5" dy="16">写入预占记录</tspan></text>
+  <rect x="442.5" y="400" width="130" height="65" style="fill:#e7f1ff;stroke:#4a90d9;stroke-width:1.5px;rx:6;ry:6"/>
+  <text x="507.5" y="432.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#1a3a5c;font-family:Arial, sans-serif"><tspan x="507.5" dy="-8">生成订单号</tspan><tspan x="507.5" dy="16">写入订单主表</tspan></text>
+  <rect x="357.5" y="2953" width="130" height="65" style="fill:#d4edda;stroke:#28a745;stroke-width:2px;rx:6;ry:6"/>
+  <text x="422.5" y="2985.5" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:500;fill:#155724;font-family:Arial, sans-serif"><tspan x="422.5" dy="-8">生成售后处理单</tspan><tspan x="422.5" dy="16">财务发起退款/补发</tspan></text>
 </svg>
