@@ -152,8 +152,59 @@ impl Renderer {
         let edges_with_labels = diagram.get_edges_with_labels();
 
         // Forward DAG analysis and multi-column grid positioning without center collapse
-        let node_ids: Vec<String> = node_info.keys().cloned().collect();
-        let layers = compute_tree_layers(&node_ids, &edges, &diagram.subgraphs);
+        let mut node_ids: Vec<String> = Vec::new();
+        let mut seen_nodes = HashSet::new();
+        let mut add_node = |id: &str| {
+            if node_info.contains_key(id) && seen_nodes.insert(id.to_string()) {
+                node_ids.push(id.to_string());
+            }
+        };
+
+        for stmt in &diagram.statements {
+            match stmt {
+                Statement::NodeDef { id, .. } => add_node(id),
+                Statement::EdgeDef { from, to, .. } => {
+                    add_node(from);
+                    add_node(to);
+                }
+                _ => {}
+            }
+        }
+        for sg in &diagram.subgraphs {
+            for stmt in &sg.statements {
+                match stmt {
+                    Statement::NodeDef { id, .. } => add_node(id),
+                    Statement::EdgeDef { from, to, .. } => {
+                        add_node(from);
+                        add_node(to);
+                    }
+                    _ => {}
+                }
+            }
+        }
+        for (from, to) in &edges {
+            add_node(from);
+            add_node(to);
+        }
+        let mut remaining: Vec<String> = node_info
+            .keys()
+            .filter(|k| !seen_nodes.contains(k.as_str()))
+            .cloned()
+            .collect();
+        remaining.sort();
+        node_ids.extend(remaining);
+        let mut layers = compute_tree_layers(&node_ids, &edges, &diagram.subgraphs);
+
+        // Pre-compute forward DAG to identify cycle back-edges for crossing minimization
+        let fwd = layout::ForwardGraph::build(&node_ids, &edges);
+
+        // Milestone 1: Sugiyama Two-Sided In-Layer Barycenter Ordering
+        layout::BarycenterCrossingMinimizer::minimize_crossings(
+            &mut layers,
+            &edges,
+            &fwd.back_edges,
+            &diagram.subgraphs,
+        );
 
         let branch_analyzer =
             layout::BranchAnalyzer::analyze(&node_ids, &edges, &layers, &diagram.subgraphs);
@@ -168,7 +219,7 @@ impl Renderer {
 
         let node_width = layout::LayoutGrid::NODE_WIDTH;
         let node_height = layout::LayoutGrid::NODE_HEIGHT;
-        let effective_width = layout_grid.effective_width as u32;
+        let mut effective_width = layout_grid.effective_width as u32;
         let effective_height = layout_grid.effective_height as u32;
         let node_positions = layout_grid.node_positions;
 
@@ -220,12 +271,326 @@ impl Renderer {
             }
         }
 
-        // 预计算分叉源节点的统一横向分发总线高度 (T-bus distribution)
-        let mut fork_bus_map: HashMap<String, f32> = HashMap::new();
+        // Milestone 2 (R1): Assign obstacle-aware stepped outer gutter tracks for backward loops
+        let mut backward_edge_list = Vec::new();
+        for (from, to, _) in &edges_with_labels {
+            let is_back = branch_analyzer
+                .back_edges
+                .contains(&(from.clone(), to.clone()))
+                || node_positions
+                    .get(from)
+                    .and_then(|&(_, y1)| node_positions.get(to).map(|&(_, y2)| y2 <= y1))
+                    .unwrap_or(false);
+            if is_back {
+                backward_edge_list.push((from.clone(), to.clone()));
+            }
+        }
+
+        let gutter_assignments = routing::GutterChannelAssigner::assign_channels(
+            &backward_edge_list,
+            &node_positions,
+            (node_width, node_height),
+            &layout_grid.subgraph_bounds,
+        );
+
+        let mut max_gutter_x = 0.0f32;
+        for g in gutter_assignments.values() {
+            if g.gutter_x > max_gutter_x {
+                max_gutter_x = g.gutter_x;
+            }
+        }
+
+        let node_to_layer: HashMap<String, usize> = layers
+            .iter()
+            .enumerate()
+            .flat_map(|(l_idx, layer)| layer.iter().map(move |n| (n.clone(), l_idx)))
+            .collect();
+
+        #[derive(Clone)]
+        struct BypassSpanInfo {
+            edge: (String, String),
+            candidate_x: f32,
+            y_min: f32,
+            y_max: f32,
+            canvas_center_x: f32,
+        }
+
+        // 预计算跨层前向直连边的无碰撞走廊 (Forward bypass corridors with obstacle clearance)
+        let mut forward_bypass_x: HashMap<(String, String), f32> = HashMap::new();
+        let mut unobstructed_bypass_spans: Vec<BypassSpanInfo> = Vec::new();
+        let mut left_bypass_spans: Vec<((String, String), f32, f32)> = Vec::new();
+        let mut right_bypass_spans: Vec<((String, String), f32, f32)> = Vec::new();
+
+        for (from, to, _) in &edges_with_labels {
+            let is_back = branch_analyzer
+                .back_edges
+                .contains(&(from.clone(), to.clone()))
+                || node_positions
+                    .get(from)
+                    .and_then(|&(_, y1)| node_positions.get(to).map(|&(_, y2)| y2 <= y1))
+                    .unwrap_or(false);
+            if !is_back {
+                if let (Some(&l1), Some(&l2)) = (node_to_layer.get(from), node_to_layer.get(to)) {
+                    if l2 > l1 + 1 {
+                        if let (Some(&(x1, y1)), Some(&(_x2, y2))) =
+                            (node_positions.get(from), node_positions.get(to))
+                        {
+                            let slot_opt = branch_analyzer.bypass_slot_for_edge(from, to, l1, l2);
+                            let canvas_center_x = layout_grid.effective_width / 2.0;
+                            let sg_center_x = node_to_sg_id
+                                .get(from)
+                                .or_else(|| node_to_sg_id.get(to))
+                                .and_then(|sg_id| {
+                                    layout_grid.subgraph_grids.get(sg_id).map(|g| g.center_x)
+                                })
+                                .unwrap_or(canvas_center_x);
+                            let candidate_x = slot_opt
+                                .map(|slot| {
+                                    sg_center_x
+                                        + slot * (node_width + layout::LayoutGrid::H_SPACING)
+                                })
+                                .unwrap_or(x1 + node_width / 2.0);
+
+                            let y_min = y1 + node_height;
+                            let y_max = y2;
+
+                            // 检查候选列在中间层是否穿透任何节点
+                            let mut obstructed = false;
+                            for l in (l1 + 1)..l2 {
+                                if let Some(layer_nodes) = layers.get(l) {
+                                    for n in layer_nodes {
+                                        if n == from || n == to {
+                                            continue;
+                                        }
+                                        if let Some(&(nx, ny)) = node_positions.get(n) {
+                                            if ny + node_height > y_min + 2.0 && ny < y_max - 2.0 {
+                                                let n_cx = nx + node_width / 2.0;
+                                                if (n_cx - candidate_x).abs()
+                                                    < node_width / 2.0 + 8.0
+                                                {
+                                                    obstructed = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if obstructed {
+                                    break;
+                                }
+                            }
+
+                            if !obstructed {
+                                unobstructed_bypass_spans.push(BypassSpanInfo {
+                                    edge: (from.clone(), to.clone()),
+                                    candidate_x,
+                                    y_min,
+                                    y_max,
+                                    canvas_center_x,
+                                });
+                            } else {
+                                let cx_from = x1 + node_width / 2.0;
+                                if cx_from <= canvas_center_x {
+                                    left_bypass_spans.push((
+                                        (from.clone(), to.clone()),
+                                        y_min,
+                                        y_max,
+                                    ));
+                                } else {
+                                    right_bypass_spans.push((
+                                        (from.clone(), to.clone()),
+                                        y_min,
+                                        y_max,
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 对未受阻的旁路边，按候选列分组并进行区间着色分轨，避免多个并发旁路边在同列重叠
+        if !unobstructed_bypass_spans.is_empty() {
+            let mut groups: Vec<Vec<BypassSpanInfo>> = Vec::new();
+            for span in unobstructed_bypass_spans {
+                let mut added = false;
+                for group in &mut groups {
+                    if (group[0].candidate_x - span.candidate_x).abs() < 2.0 {
+                        group.push(span.clone());
+                        added = true;
+                        break;
+                    }
+                }
+                if !added {
+                    groups.push(vec![span]);
+                }
+            }
+
+            for mut group in groups {
+                group.sort_by(|a, b| {
+                    a.y_min
+                        .partial_cmp(&b.y_min)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                });
+                let mut track_ends: Vec<f32> = Vec::new();
+                for span in group {
+                    let mut assigned_track = None;
+                    for (t_idx, end_y) in track_ends.iter_mut().enumerate() {
+                        if span.y_min >= *end_y + 4.0 {
+                            *end_y = span.y_max;
+                            assigned_track = Some(t_idx);
+                            break;
+                        }
+                    }
+                    let t_idx = match assigned_track {
+                        Some(idx) => idx,
+                        None => {
+                            track_ends.push(span.y_max);
+                            track_ends.len() - 1
+                        }
+                    };
+                    let sign = if span.candidate_x >= span.canvas_center_x {
+                        1.0
+                    } else {
+                        -1.0
+                    };
+                    let track_x = span.candidate_x + sign * (t_idx as f32) * 18.0;
+                    forward_bypass_x.insert(span.edge, track_x);
+                }
+            }
+        }
+
+        // 为左侧受阻旁路边分配离散阶梯清空轨道
+        if !left_bypass_spans.is_empty() {
+            let mut min_obs_x = f32::INFINITY;
+            for ((from, to), y_min, y_max) in &left_bypass_spans {
+                if let (Some(&l1), Some(&l2)) = (node_to_layer.get(from), node_to_layer.get(to)) {
+                    for l in (l1 + 1)..l2 {
+                        if let Some(layer_nodes) = layers.get(l) {
+                            for n in layer_nodes {
+                                if let Some(&(nx, ny)) = node_positions.get(n) {
+                                    if ny + node_height > *y_min && ny < *y_max && nx < min_obs_x {
+                                        min_obs_x = nx;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    for &(sg_x, sg_y, _, sg_h) in layout_grid.subgraph_bounds.values() {
+                        if sg_y + sg_h > *y_min && sg_y < *y_max && sg_x < min_obs_x {
+                            min_obs_x = sg_x;
+                        }
+                    }
+                }
+            }
+            let base_left = (min_obs_x - 24.0).max(12.0);
+
+            left_bypass_spans
+                .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+            let mut track_ends: Vec<f32> = Vec::new();
+            for ((from, to), y_min, y_max) in left_bypass_spans {
+                let mut assigned_track = None;
+                for (t_idx, end_y) in track_ends.iter_mut().enumerate() {
+                    if y_min >= *end_y {
+                        *end_y = y_max;
+                        assigned_track = Some(t_idx);
+                        break;
+                    }
+                }
+                let t_idx = match assigned_track {
+                    Some(idx) => idx,
+                    None => {
+                        track_ends.push(y_max);
+                        track_ends.len() - 1
+                    }
+                };
+                let clear_x = (base_left - (t_idx as f32) * 18.0).max(12.0);
+                forward_bypass_x.insert((from, to), clear_x);
+            }
+        }
+
+        // 为右侧受阻旁路边分配离散阶梯清空轨道
+        if !right_bypass_spans.is_empty() {
+            let mut max_obs_x = f32::NEG_INFINITY;
+            for ((from, to), y_min, y_max) in &right_bypass_spans {
+                if let (Some(&l1), Some(&l2)) = (node_to_layer.get(from), node_to_layer.get(to)) {
+                    for l in (l1 + 1)..l2 {
+                        if let Some(layer_nodes) = layers.get(l) {
+                            for n in layer_nodes {
+                                if let Some(&(nx, ny)) = node_positions.get(n) {
+                                    if ny + node_height > *y_min && ny < *y_max {
+                                        let right = nx + node_width;
+                                        if right > max_obs_x {
+                                            max_obs_x = right;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    for &(sg_x, sg_y, sg_w, sg_h) in layout_grid.subgraph_bounds.values() {
+                        if sg_y + sg_h > *y_min && sg_y < *y_max {
+                            let right = sg_x + sg_w;
+                            if right > max_obs_x {
+                                max_obs_x = right;
+                            }
+                        }
+                    }
+                }
+            }
+            let base_right = (max_obs_x + 24.0).max(max_gutter_x + 18.0);
+
+            right_bypass_spans
+                .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+            let mut track_ends: Vec<f32> = Vec::new();
+            for ((from, to), y_min, y_max) in right_bypass_spans {
+                let mut assigned_track = None;
+                for (t_idx, end_y) in track_ends.iter_mut().enumerate() {
+                    if y_min >= *end_y {
+                        *end_y = y_max;
+                        assigned_track = Some(t_idx);
+                        break;
+                    }
+                }
+                let t_idx = match assigned_track {
+                    Some(idx) => idx,
+                    None => {
+                        track_ends.push(y_max);
+                        track_ends.len() - 1
+                    }
+                };
+                let clear_x = base_right + (t_idx as f32) * 18.0;
+                forward_bypass_x.insert((from, to), clear_x);
+            }
+        }
+
+        let mut max_all_x = max_gutter_x;
+        for &bx in forward_bypass_x.values() {
+            if bx > max_all_x {
+                max_all_x = bx;
+            }
+        }
+        if max_all_x > 0.0 && max_all_x + 24.0 > effective_width as f32 {
+            effective_width = (max_all_x + 24.0).ceil() as u32;
+            svg.set_dimensions(effective_width, effective_height);
+        }
+
+        // 预计算分叉源节点的分支横向分发总线高度与主干去重 (T-bus distribution & deduplication)
+        // 每个分支分别计算 fork_bus_y，同侧分支采用阶梯错开高度 (|ΔY| >= 12px)，
+        // 直通子节点 (|cx1 - cx2| <= 2.0) 保留主干 (omit_source_trunk = false)，
+        // 转向分支省略主干 (omit_source_trunk = true)；若无直通子节点，则由最深分支保留主干，其余省略。
+        let mut edge_fork_bus: HashMap<(String, String), f32> = HashMap::new();
+        let mut edge_omit_src_trunk: HashSet<(String, String)> = HashSet::new();
+
         for fork_id in &branch_analyzer.fork_nodes {
             if let Some(&(_fx, fy)) = node_positions.get(fork_id) {
+                let cx_fork = _fx + node_width / 2.0;
                 let bottom_f = fy + node_height;
                 if let Some(children) = forward_children.get(fork_id) {
+                    if children.len() < 2 {
+                        continue;
+                    }
                     let mut min_child_top = f32::INFINITY;
                     for c in children {
                         if let Some(&(_, cy)) = node_positions.get(c) {
@@ -234,20 +599,189 @@ impl Renderer {
                             }
                         }
                     }
-                    if min_child_top > bottom_f + 10.0 {
-                        let bus_y = bottom_f + (min_child_top - bottom_f) / 2.0;
-                        fork_bus_map.insert(fork_id.clone(), bus_y);
+                    let base_bus_y = if min_child_top > bottom_f + 10.0 {
+                        bottom_f + (min_child_top - bottom_f) / 2.0
+                    } else {
+                        bottom_f + 12.0
+                    };
+
+                    // 分类子节点：直通、左侧、右侧（结合前向旁路通道位置精确判定）
+                    let mut straight_children: Vec<String> = Vec::new();
+                    let mut left_children: Vec<String> = Vec::new();
+                    let mut right_children: Vec<String> = Vec::new();
+
+                    for c in children {
+                        let cx_child = forward_bypass_x
+                            .get(&(fork_id.clone(), c.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(c)
+                                    .map(|p| p.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        if (cx_child - cx_fork).abs() <= 2.0 {
+                            straight_children.push(c.clone());
+                        } else if cx_child < cx_fork - 2.0 {
+                            left_children.push(c.clone());
+                        } else {
+                            right_children.push(c.clone());
+                        }
+                    }
+
+                    // 左侧分支按与中心距离降序排列（由外向内）：
+                    // 最外侧分支位于最高位（最小 Y，远离下方节点），最内侧分支位于最低位（最大 Y）
+                    left_children.sort_by(|a, b| {
+                        let cxa = forward_bypass_x
+                            .get(&(fork_id.clone(), a.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(a)
+                                    .map(|p| p.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let cxb = forward_bypass_x
+                            .get(&(fork_id.clone(), b.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(b)
+                                    .map(|p| p.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let da = (cx_fork - cxa).abs();
+                        let db = (cx_fork - cxb).abs();
+                        db.partial_cmp(&da).unwrap_or(std::cmp::Ordering::Equal)
+                    });
+
+                    // 右侧分支按与中心距离降序排列（由外向内）
+                    right_children.sort_by(|a, b| {
+                        let cxa = forward_bypass_x
+                            .get(&(fork_id.clone(), a.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(a)
+                                    .map(|p| p.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let cxb = forward_bypass_x
+                            .get(&(fork_id.clone(), b.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(b)
+                                    .map(|p| p.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let da = (cx_fork - cxa).abs();
+                        let db = (cx_fork - cxb).abs();
+                        db.partial_cmp(&da).unwrap_or(std::cmp::Ordering::Equal)
+                    });
+
+                    let bus_min = (bottom_f + 6.0).min(min_child_top - 6.0);
+                    let bus_max = (bottom_f + 6.0).max(min_child_top - 6.0);
+                    let avail_span = if bus_min < bus_max {
+                        bus_max - bus_min
+                    } else {
+                        24.0
+                    };
+
+                    let n_left = left_children.len();
+                    let step_left = if n_left > 1 {
+                        (avail_span / (n_left as f32 - 1.0)).min(12.0)
+                    } else {
+                        0.0
+                    };
+                    for (i, c) in left_children.iter().enumerate() {
+                        let offset = if n_left > 1 {
+                            -(n_left as f32 - 1.0) / 2.0 * step_left + (i as f32) * step_left
+                        } else {
+                            0.0
+                        };
+                        let bus_y = if bus_min < bus_max {
+                            (base_bus_y + offset).clamp(bus_min, bus_max)
+                        } else {
+                            base_bus_y + offset
+                        };
+                        edge_fork_bus.insert((fork_id.clone(), c.clone()), bus_y);
+                    }
+
+                    let n_right = right_children.len();
+                    let step_right = if n_right > 1 {
+                        (avail_span / (n_right as f32 - 1.0)).min(12.0)
+                    } else {
+                        0.0
+                    };
+                    for (j, c) in right_children.iter().enumerate() {
+                        let offset = if n_right > 1 {
+                            -(n_right as f32 - 1.0) / 2.0 * step_right + (j as f32) * step_right
+                        } else {
+                            0.0
+                        };
+                        let bus_y = if bus_min < bus_max {
+                            (base_bus_y + offset).clamp(bus_min, bus_max)
+                        } else {
+                            base_bus_y + offset
+                        };
+                        edge_fork_bus.insert((fork_id.clone(), c.clone()), bus_y);
+                    }
+
+                    for c in &straight_children {
+                        edge_fork_bus.insert((fork_id.clone(), c.clone()), base_bus_y);
+                    }
+
+                    // 确定主干承担者 (omit_source_trunk = false)：
+                    // 1. 若存在直通子节点，由第一个直通子节点保留主干，所有转向分支及其余直通分支省略主干。
+                    // 2. 若无直通子节点，由具有最大 bus_y（最低位）的转向分支保留主干，其余分支省略主干。
+                    if !straight_children.is_empty() {
+                        let primary = &straight_children[0];
+                        for c in children {
+                            if c != primary {
+                                edge_omit_src_trunk.insert((fork_id.clone(), c.clone()));
+                            }
+                        }
+                    } else {
+                        let mut max_y = f32::NEG_INFINITY;
+                        let mut primary_child = None;
+                        for c in children {
+                            let y = edge_fork_bus
+                                .get(&(fork_id.clone(), c.clone()))
+                                .copied()
+                                .unwrap_or(base_bus_y);
+                            if y > max_y {
+                                max_y = y;
+                                primary_child = Some(c.clone());
+                            }
+                        }
+                        if let Some(primary) = primary_child {
+                            for c in children {
+                                if c != &primary {
+                                    edge_omit_src_trunk.insert((fork_id.clone(), c.clone()));
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // 预计算汇聚节点的统一横向收集总线高度 (T-bus collection)
-        let mut join_bus_map: HashMap<String, f32> = HashMap::new();
+        // 预计算汇聚节点的统一横向收集总线高度与落干去重 (T-bus collection & deduplication)
+        // 同侧汇聚分支采用阶梯错开高度 (|ΔY| >= 12px)，
+        // 直通父节点 (|cx1 - cx2| <= 2.0) 保留落干与箭头 (omit_target_drop = false)，
+        // 转向分支省略落干并抑制箭头 (omit_target_drop = true)；若无直通父节点，则由最小 bus_y（最高位）的父节点保留落干，其余省略。
+        let mut edge_join_bus: HashMap<(String, String), f32> = HashMap::new();
+        let mut edge_omit_dst_drop: HashSet<(String, String)> = HashSet::new();
+
         for join_id in &branch_analyzer.join_nodes {
             if let Some(&(_jx, jy)) = node_positions.get(join_id) {
+                let cx_join = _jx + node_width / 2.0;
                 let top_j = jy;
                 if let Some(parents) = forward_parents.get(join_id) {
+                    if parents.len() < 2 {
+                        continue;
+                    }
                     let join_sg = node_to_sg_id.get(join_id);
                     let parent_sgs: HashSet<_> = parents
                         .iter()
@@ -280,21 +814,180 @@ impl Renderer {
                         None
                     };
 
-                    if let Some(bus_y) = inter_subgraph_bus {
-                        join_bus_map.insert(join_id.clone(), bus_y);
-                    } else {
-                        let mut max_parent_bottom = f32::NEG_INFINITY;
-                        for p in parents {
-                            if let Some(&(_, py)) = node_positions.get(p) {
-                                let pb = py + node_height;
-                                if pb > max_parent_bottom {
-                                    max_parent_bottom = pb;
-                                }
+                    let mut max_parent_bottom = f32::NEG_INFINITY;
+                    for p in parents {
+                        if let Some(&(_, py)) = node_positions.get(p) {
+                            let pb = py + node_height;
+                            if pb > max_parent_bottom {
+                                max_parent_bottom = pb;
                             }
                         }
-                        if top_j > max_parent_bottom + 10.0 {
-                            let bus_y = max_parent_bottom + (top_j - max_parent_bottom) / 2.0;
-                            join_bus_map.insert(join_id.clone(), bus_y);
+                    }
+
+                    let base_bus_y = if let Some(bus_y) = inter_subgraph_bus {
+                        bus_y
+                    } else if top_j > max_parent_bottom + 10.0 {
+                        max_parent_bottom + (top_j - max_parent_bottom) / 2.0
+                    } else {
+                        top_j - 12.0
+                    };
+
+                    // 分类父节点：直通、左侧、右侧（结合前向旁路通道位置精确判定）
+                    let mut straight_parents: Vec<String> = Vec::new();
+                    let mut left_parents: Vec<String> = Vec::new();
+                    let mut right_parents: Vec<String> = Vec::new();
+
+                    for p in parents {
+                        let cx_p = forward_bypass_x
+                            .get(&(p.clone(), join_id.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(p)
+                                    .map(|pt| pt.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        if (cx_p - cx_join).abs() <= 2.0 {
+                            straight_parents.push(p.clone());
+                        } else if cx_p < cx_join - 2.0 {
+                            left_parents.push(p.clone());
+                        } else {
+                            right_parents.push(p.clone());
+                        }
+                    }
+
+                    // 左侧父节点按与中心距离降序排列（由外向内）：
+                    // 最外侧分支位于更靠近 join 节点的低位（较大 Y），最内侧分支位于高位（较小 Y）
+                    left_parents.sort_by(|a, b| {
+                        let cxa = forward_bypass_x
+                            .get(&(a.clone(), join_id.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(a)
+                                    .map(|pt| pt.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let cxb = forward_bypass_x
+                            .get(&(b.clone(), join_id.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(b)
+                                    .map(|pt| pt.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let da = (cx_join - cxa).abs();
+                        let db = (cx_join - cxb).abs();
+                        db.partial_cmp(&da).unwrap_or(std::cmp::Ordering::Equal)
+                    });
+
+                    // 右侧父节点按与中心距离降序排列（由外向内）
+                    right_parents.sort_by(|a, b| {
+                        let cxa = forward_bypass_x
+                            .get(&(a.clone(), join_id.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(a)
+                                    .map(|pt| pt.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let cxb = forward_bypass_x
+                            .get(&(b.clone(), join_id.clone()))
+                            .copied()
+                            .unwrap_or_else(|| {
+                                node_positions
+                                    .get(b)
+                                    .map(|pt| pt.0 + node_width / 2.0)
+                                    .unwrap_or(0.0)
+                            });
+                        let da = (cx_join - cxa).abs();
+                        let db = (cx_join - cxb).abs();
+                        db.partial_cmp(&da).unwrap_or(std::cmp::Ordering::Equal)
+                    });
+
+                    let bus_min = (max_parent_bottom + 6.0).min(top_j - 6.0);
+                    let bus_max = (max_parent_bottom + 6.0).max(top_j - 6.0);
+                    let avail_span = if bus_min < bus_max {
+                        bus_max - bus_min
+                    } else {
+                        24.0
+                    };
+
+                    let n_left = left_parents.len();
+                    let step_left = if n_left > 1 {
+                        (avail_span / (n_left as f32 - 1.0)).min(12.0)
+                    } else {
+                        0.0
+                    };
+                    for (i, p) in left_parents.iter().enumerate() {
+                        let offset = if n_left > 1 {
+                            (n_left as f32 - 1.0) / 2.0 * step_left - (i as f32) * step_left
+                        } else {
+                            0.0
+                        };
+                        let bus_y = if bus_min < bus_max {
+                            (base_bus_y + offset).clamp(bus_min, bus_max)
+                        } else {
+                            base_bus_y + offset
+                        };
+                        edge_join_bus.insert((p.clone(), join_id.clone()), bus_y);
+                    }
+
+                    let n_right = right_parents.len();
+                    let step_right = if n_right > 1 {
+                        (avail_span / (n_right as f32 - 1.0)).min(12.0)
+                    } else {
+                        0.0
+                    };
+                    for (j, p) in right_parents.iter().enumerate() {
+                        let offset = if n_right > 1 {
+                            (n_right as f32 - 1.0) / 2.0 * step_right - (j as f32) * step_right
+                        } else {
+                            0.0
+                        };
+                        let bus_y = if bus_min < bus_max {
+                            (base_bus_y + offset).clamp(bus_min, bus_max)
+                        } else {
+                            base_bus_y + offset
+                        };
+                        edge_join_bus.insert((p.clone(), join_id.clone()), bus_y);
+                    }
+
+                    for p in &straight_parents {
+                        edge_join_bus.insert((p.clone(), join_id.clone()), base_bus_y);
+                    }
+
+                    // 确定落干承担者 (omit_target_drop = false)：
+                    // 1. 若存在直通父节点，由直通父节点保留落干和箭头，其余省略。
+                    // 2. 若无直通父节点，由最小 bus_y（最高位）的父节点保留落干和箭头，其余省略。
+                    if !straight_parents.is_empty() {
+                        let primary = &straight_parents[0];
+                        for p in parents {
+                            if p != primary {
+                                edge_omit_dst_drop.insert((p.clone(), join_id.clone()));
+                            }
+                        }
+                    } else {
+                        let mut min_y = f32::INFINITY;
+                        let mut primary_parent = None;
+                        for p in parents {
+                            let y = edge_join_bus
+                                .get(&(p.clone(), join_id.clone()))
+                                .copied()
+                                .unwrap_or(base_bus_y);
+                            if y < min_y {
+                                min_y = y;
+                                primary_parent = Some(p.clone());
+                            }
+                        }
+                        if let Some(primary) = primary_parent {
+                            for p in parents {
+                                if p != &primary {
+                                    edge_omit_dst_drop.insert((p.clone(), join_id.clone()));
+                                }
+                            }
                         }
                     }
                 }
@@ -302,23 +995,78 @@ impl Renderer {
         }
 
         // 绘制边 (使用 Ondine 式圆角正交连线与 T-bus 总线路由算法)
+        // 先收集全部路由结果，以便生成 SVG 前统一插入跨线半圆拱桥 (Arc Hop)
+        let mut routed_edges: Vec<(routing::RoutedEdge, bool, Option<&String>)> = Vec::new();
         for (from, to, label) in &edges_with_labels {
             if let (Some(&(x1, y1)), Some(&(x2, y2))) =
                 (node_positions.get(from), node_positions.get(to))
             {
                 let is_back = branch_analyzer
                     .back_edges
-                    .contains(&(from.clone(), to.clone()));
+                    .contains(&(from.clone(), to.clone()))
+                    || y2 <= y1;
                 let bus_options = if !is_back {
-                    let fork_bus_y = fork_bus_map.get(from).copied();
-                    let join_bus_y = join_bus_map.get(to).copied();
+                    let bypass_lane_x = forward_bypass_x.get(&(from.clone(), to.clone())).copied();
+                    let fork_bus_y = edge_fork_bus
+                        .get(&(from.clone(), to.clone()))
+                        .copied()
+                        .or_else(|| {
+                            if bypass_lane_x.is_some() {
+                                let has_backward_breakout =
+                                    backward_edge_list.iter().any(|(bf, _)| {
+                                        node_positions
+                                            .get(bf)
+                                            .map(|p| (p.1 - y1).abs() < 5.0)
+                                            .unwrap_or(false)
+                                    });
+                                if has_backward_breakout {
+                                    Some(y1 + node_height + 24.0)
+                                } else {
+                                    None
+                                }
+                            } else {
+                                None
+                            }
+                        });
+                    let join_bus_y = edge_join_bus.get(&(from.clone(), to.clone())).copied();
+                    let omit_source_trunk =
+                        edge_omit_src_trunk.contains(&(from.clone(), to.clone()));
+                    let omit_target_drop = edge_omit_dst_drop.contains(&(from.clone(), to.clone()));
+
                     Some(routing::EdgeBusOptions {
                         fork_bus_y,
                         join_bus_y,
-                        bypass_lane_x: None,
+                        bypass_lane_x,
+                        gutter_x: None,
+                        breakout_obstructed: false,
+                        drop_in_obstructed: false,
+                        omit_source_trunk,
+                        omit_target_drop,
                     })
                 } else {
-                    None
+                    let assigned_gutter = gutter_assignments.get(&(from.clone(), to.clone()));
+                    let gutter_x = assigned_gutter.map(|g| g.gutter_x);
+                    let breakout_obstructed = assigned_gutter
+                        .map(|g| g.breakout_obstructed)
+                        .unwrap_or(false);
+                    let drop_in_obstructed = assigned_gutter
+                        .map(|g| g.drop_in_obstructed)
+                        .unwrap_or(false);
+                    let fork_bus_y = if breakout_obstructed {
+                        Some(y1 + node_height + 6.0)
+                    } else {
+                        None
+                    };
+                    Some(routing::EdgeBusOptions {
+                        fork_bus_y,
+                        join_bus_y: None,
+                        bypass_lane_x: None,
+                        gutter_x,
+                        breakout_obstructed,
+                        drop_in_obstructed,
+                        omit_source_trunk: false,
+                        omit_target_drop: false,
+                    })
                 };
 
                 let routed = routing::route_orthogonal_edge_with_bus(
@@ -327,9 +1075,25 @@ impl Renderer {
                     8.0,
                     bus_options.as_ref(),
                 );
+                let with_arrow = !bus_options.map(|b| b.omit_target_drop).unwrap_or(false);
+                routed_edges.push((routed, with_arrow, label.as_ref()));
+            }
+        }
 
-                svg.add_path(&routed.path_data, &theme::default_edge_style());
+        // 在水平连线跨越其他边垂直线段处插入半圆跳线拱桥 (Arc Hop)
+        let mut hop_path_datas: Vec<String> = routed_edges
+            .iter()
+            .map(|(r, _, _)| r.path_data.clone())
+            .collect();
+        routing::apply_arc_hops(&mut hop_path_datas);
+        for (i, (routed, _, _)) in routed_edges.iter_mut().enumerate() {
+            routed.path_data = hop_path_datas[i].clone();
+        }
 
+        for (routed, with_arrow, edge_label) in &routed_edges {
+            svg.add_path(&routed.path_data, &theme::default_edge_style());
+
+            if *with_arrow {
                 let (tip_x, tip_y, dx, dy) = routed.arrow;
                 svg.add_directional_arrow(
                     tip_x,
@@ -338,14 +1102,15 @@ impl Renderer {
                     dy,
                     &format!("fill:{};stroke:none", theme::default_arrowhead_fill()),
                 );
+            }
 
-                if let Some(edge_label) = label {
-                    let text_chars = edge_label.chars().count() as f32;
-                    let lw = (text_chars * 12.0 + 14.0).max(36.0);
-                    let label_x = routed.label_pos.0 - lw / 2.0;
-                    let label_y = routed.label_pos.1 - 9.0;
-                    svg.add_rect(label_x, label_y, lw, 18.0, &theme::default_pill_style());
-                    svg.add_text(
+            if let Some(edge_label) = edge_label {
+                let text_chars = edge_label.chars().count() as f32;
+                let lw = (text_chars * 12.0 + 14.0).max(36.0);
+                let label_x = routed.label_pos.0 - lw / 2.0;
+                let label_y = routed.label_pos.1 - 9.0;
+                svg.add_rect(label_x, label_y, lw, 18.0, &theme::default_pill_style());
+                svg.add_text(
                         routed.label_pos.0,
                         routed.label_pos.1 + 4.0,
                         edge_label,
@@ -354,7 +1119,6 @@ impl Renderer {
                             theme::default_pill_text_fill()
                         ),
                     );
-                }
             }
         }
 

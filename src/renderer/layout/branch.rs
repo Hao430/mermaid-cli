@@ -228,6 +228,7 @@ pub struct BranchAnalyzer {
     pub reservations: Vec<LaneReservation>,
     pub back_edges: HashSet<(String, String)>,
     pub forward_adj: HashMap<String, Vec<String>>,
+    pub edge_to_lane: HashMap<(String, String), usize>,
 }
 
 impl BranchAnalyzer {
@@ -299,7 +300,7 @@ impl BranchAnalyzer {
         _subgraphs: &[Subgraph],
     ) -> Self {
         // Step 1: DFS cycle back-edge elimination and fork/join identification
-        let fwd = ForwardGraph::build(node_ids, edges);
+        let mut fwd = ForwardGraph::build(node_ids, edges);
 
         // Step 2: Layer mapping lookup
         let mut node_to_layer: HashMap<String, usize> = HashMap::new();
@@ -354,7 +355,18 @@ impl BranchAnalyzer {
         // Step 4: Symmetric Lane Slot Assignment & Downstream Propagation
         let mut lanes: Vec<BranchLane> = Vec::new();
         let mut node_to_lane: HashMap<String, usize> = HashMap::new();
-        let mut fork_branch_map: HashMap<String, Vec<usize>> = HashMap::new();
+        let mut fork_branch_map: HashMap<String, Vec<(usize, String)>> = HashMap::new();
+        let mut edge_to_lane: HashMap<(String, String), usize> = HashMap::new();
+
+        // Build fast layer position lookup: node_id -> index within its layer
+        let mut node_to_pos: HashMap<String, usize> = HashMap::new();
+        if !layers.is_empty() {
+            for layer in layers {
+                for (pos, id) in layer.iter().enumerate() {
+                    node_to_pos.insert(id.clone(), pos);
+                }
+            }
+        }
 
         let mut sorted_forks: Vec<String> = fwd.fork_nodes.iter().cloned().collect();
         sorted_forks.sort_by_key(|f| (node_to_layer.get(f).copied().unwrap_or(0), f.clone()));
@@ -365,7 +377,6 @@ impl BranchAnalyzer {
                 _ => continue,
             };
 
-            // For nested forks, prioritize the forward continuation child that leads to a join node
             let parent_slot = node_to_slot.get(&fork_id).copied().unwrap_or(0.0);
             if parent_slot.abs() > 1e-4 {
                 let reaches_join = |start: &str| -> bool {
@@ -391,10 +402,73 @@ impl BranchAnalyzer {
                 out_neighbors.sort_by_key(|child| {
                     (is_direct_join(child), !reaches_join(child), child.clone())
                 });
+            } else if !layers.is_empty() {
+                // Milestone 1 (R3A): Sort top-level fork outgoing branches by downstream layer position
+                let u_layer = node_to_layer.get(&fork_id).copied().unwrap_or(0);
+
+                // Find primary child layer (minimum layer among children, typically u_layer + 1)
+                let min_child_layer = out_neighbors
+                    .iter()
+                    .filter_map(|c| node_to_layer.get(c).copied())
+                    .min()
+                    .unwrap_or(u_layer + 1);
+
+                let is_primary = |c: &str| -> bool {
+                    node_to_layer.get(c).copied() == Some(min_child_layer)
+                        && !fwd.join_nodes.contains(c)
+                };
+
+                let primary_indices: Vec<usize> = out_neighbors
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(idx, c)| if is_primary(c) { Some(idx) } else { None })
+                    .collect();
+
+                if !primary_indices.is_empty() {
+                    let first_primary = *primary_indices.first().unwrap();
+                    let last_primary = *primary_indices.last().unwrap();
+
+                    let mut left_bypasses: Vec<String> = Vec::new();
+                    let mut primary_children: Vec<String> = Vec::new();
+                    let mut right_bypasses: Vec<String> = Vec::new();
+
+                    for (idx, c) in out_neighbors.into_iter().enumerate() {
+                        if idx < first_primary {
+                            left_bypasses.push(c);
+                        } else if idx > last_primary {
+                            right_bypasses.push(c);
+                        } else if is_primary(&c) {
+                            primary_children.push(c);
+                        } else {
+                            // Direct bypass declared between primary children defaults to right
+                            right_bypasses.push(c);
+                        }
+                    }
+
+                    // Sort primary parallel children strictly by their horizontal rank in layers[min_child_layer]
+                    primary_children
+                        .sort_by_key(|c| node_to_pos.get(c).copied().unwrap_or(usize::MAX));
+
+                    let mut reordered = left_bypasses;
+                    reordered.extend(primary_children);
+                    reordered.extend(right_bypasses);
+                    out_neighbors = reordered;
+                } else {
+                    // All children are at different layers or direct joins: sort by layer position with AST tie-break
+                    let mut indexed: Vec<(usize, String)> =
+                        out_neighbors.into_iter().enumerate().collect();
+                    indexed.sort_by_key(|&(orig_idx, ref c)| {
+                        (node_to_pos.get(c).copied().unwrap_or(usize::MAX), orig_idx)
+                    });
+                    out_neighbors = indexed.into_iter().map(|(_, c)| c).collect();
+                }
             }
 
+            // Update fwd.adj to guarantee consistent iteration order across downstream passes
+            fwd.adj.insert(fork_id.clone(), out_neighbors.clone());
+
             let k = out_neighbors.len();
-            let mut branch_ids = Vec::with_capacity(k);
+            let mut branch_entries = Vec::with_capacity(k);
 
             for (i, child) in out_neighbors.iter().enumerate() {
                 let slot_offset = if parent_slot != 0.0 {
@@ -404,7 +478,8 @@ impl BranchAnalyzer {
                 };
 
                 let branch_id = lanes.len();
-                branch_ids.push(branch_id);
+                branch_entries.push((branch_id, child.clone()));
+                edge_to_lane.insert((fork_id.clone(), child.clone()), branch_id);
 
                 let mut lane = BranchLane {
                     branch_id,
@@ -435,6 +510,7 @@ impl BranchAnalyzer {
 
                         if let Some(next_nodes) = fwd.adj.get(&curr) {
                             for nxt in next_nodes {
+                                edge_to_lane.insert((curr.clone(), nxt.clone()), branch_id);
                                 // HALT propagation at Join Nodes (d_in^+ >= 2)
                                 if fwd.join_nodes.contains(nxt) {
                                     continue;
@@ -453,22 +529,20 @@ impl BranchAnalyzer {
                 lanes.push(lane);
             }
 
-            fork_branch_map.insert(fork_id, branch_ids);
+            fork_branch_map.insert(fork_id, branch_entries);
         }
 
         // Step 5: Virtual Lane Reservations for Unbalanced Branches
         let mut reservations: Vec<LaneReservation> = Vec::new();
 
-        for (fork_id, b_ids) in fork_branch_map {
+        for (fork_id, branch_entries) in fork_branch_map {
             let u_layer = *node_to_layer.get(&fork_id).unwrap_or(&0);
-            let out_neighbors = fwd.adj.get(&fork_id).cloned().unwrap_or_default();
 
             // Compute depth range and reachable nodes for each branch before hitting any join
             let mut branch_spans: Vec<(usize, usize, HashSet<usize>)> =
-                Vec::with_capacity(b_ids.len());
+                Vec::with_capacity(branch_entries.len());
 
-            for (idx, &bid) in b_ids.iter().enumerate() {
-                let child = &out_neighbors[idx];
+            for (_bid, ref child) in &branch_entries {
                 let mut reachable_before_join = HashSet::new();
 
                 if !fwd.join_nodes.contains(child) {
@@ -504,7 +578,6 @@ impl BranchAnalyzer {
                 };
 
                 branch_spans.push((min_l, max_l, occupied_layers));
-                let _ = bid; // used below
             }
 
             let d_max = branch_spans
@@ -514,7 +587,9 @@ impl BranchAnalyzer {
                 .unwrap_or(u_layer);
 
             // Update depth_span and generate reservations
-            for (&bid, (min_l, _, occupied_layers)) in b_ids.iter().zip(branch_spans) {
+            for ((bid, _), (min_l, _, occupied_layers)) in
+                branch_entries.into_iter().zip(branch_spans)
+            {
                 lanes[bid].depth_span = (min_l, d_max.max(min_l));
 
                 if d_max >= min_l {
@@ -559,6 +634,7 @@ impl BranchAnalyzer {
             reservations,
             back_edges: fwd.back_edges,
             forward_adj: fwd.adj,
+            edge_to_lane,
         }
     }
 
@@ -566,6 +642,37 @@ impl BranchAnalyzer {
     #[inline]
     pub fn slot_for_node(&self, node_id: &str) -> f32 {
         self.node_to_slot.get(node_id).copied().unwrap_or(0.0)
+    }
+
+    /// Returns the reserved lane slot offset for a bypass edge spanning across intermediate layers.
+    pub fn bypass_slot_for_edge(
+        &self,
+        from: &str,
+        to: &str,
+        from_layer: usize,
+        to_layer: usize,
+    ) -> Option<f32> {
+        if to_layer <= from_layer + 1 {
+            return None;
+        }
+
+        let branch_id = self
+            .edge_to_lane
+            .get(&(from.to_string(), to.to_string()))
+            .copied()
+            .or_else(|| self.node_to_lane.get(from).copied())?;
+
+        // 1. Check explicit reservation in intermediate layers
+        if let Some(res) = self
+            .reservations
+            .iter()
+            .find(|r| r.branch_id == branch_id && r.layer > from_layer && r.layer < to_layer)
+        {
+            return Some(res.slot_offset);
+        }
+
+        // 2. Fall back to branch lane slot offset
+        self.lanes.get(branch_id).map(|lane| lane.slot_offset)
     }
 
     /// Returns whether the node is a fork node (forward out_degree >= 2).
@@ -616,6 +723,14 @@ impl BranchAnalyzer {
     /// Returns the forward outgoing neighbors of a node.
     pub fn forward_neighbors(&self, node_id: &str) -> Option<&[String]> {
         self.forward_adj.get(node_id).map(|v| v.as_slice())
+    }
+
+    /// Returns cycle back-edges detected by DFS traversal.
+    pub fn detect_back_edges(
+        node_ids: &[String],
+        edges: &[(String, String)],
+    ) -> HashSet<(String, String)> {
+        ForwardGraph::build(node_ids, edges).back_edges
     }
 }
 
@@ -1051,5 +1166,19 @@ mod tests {
         assert_eq!(analyzer.slot_for_node("B"), -0.5);
         assert_eq!(analyzer.slot_for_node("C"), 0.5);
         assert_eq!(analyzer.slot_for_node("D"), 0.0);
+    }
+
+    #[test]
+    fn test_fork_out_neighbors_sorted_by_downstream_layer_position() {
+        // F declared with Right first, then Left in AST
+        let nodes = to_s(&["F", "Right", "Left"]);
+        let edges = to_edges(&[("F", "Right"), ("F", "Left")]);
+        // Crossing minimizer established Left at pos 0, Right at pos 1 in layer 1
+        let layers = to_layers(&[&["F"], &["Left", "Right"]]);
+
+        let analyzer = BranchAnalyzer::analyze(&nodes, &edges, &layers, &[]);
+
+        assert_eq!(analyzer.slot_for_node("Left"), -0.5);
+        assert_eq!(analyzer.slot_for_node("Right"), 0.5);
     }
 }
