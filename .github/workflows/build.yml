@@ -20,13 +20,13 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Cargo dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry/
@@ -41,7 +41,7 @@ jobs:
         run: cargo build --release --verbose
 
       - name: Upload binary (release)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mermaid-cli-${{ matrix.os }}
           path: target/release/mermaid-cli*
