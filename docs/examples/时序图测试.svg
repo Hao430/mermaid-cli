@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2420" height="3533" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <style>
+    :root {
+      --mermaid-bg: transparent;
+      --mermaid-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --mermaid-node-bg: #ffffff;
+      --mermaid-node-border: #334155;
+      --mermaid-node-border-width: 1.5px;
+      --mermaid-text-primary: #0f172a;
+      --mermaid-text-muted: #64748b;
+      --mermaid-edge-stroke: #475569;
+      --mermaid-edge-width: 1.5px;
+      --mermaid-arrowhead-fill: #475569;
+      --mermaid-pill-bg: #ffffff;
+      --mermaid-pill-border: #cbd5e1;
+      --mermaid-subgraph-bg: #f8fafc;
+      --mermaid-subgraph-border: #cbd5e1;
+      --mermaid-subgraph-title: #475569;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --mermaid-node-bg: #1e293b;
+        --mermaid-node-border: #475569;
+        --mermaid-text-primary: #f8fafc;
+        --mermaid-text-muted: #94a3b8;
+        --mermaid-edge-stroke: #94a3b8;
+        --mermaid-arrowhead-fill: #94a3b8;
+        --mermaid-pill-bg: #0f172a;
+        --mermaid-pill-border: #334155;
+        --mermaid-subgraph-bg: rgba(15, 23, 42, 0.6);
+        --mermaid-subgraph-border: #334155;
+        --mermaid-subgraph-title: #94a3b8;
+      }
+    }
+
+    text { font-family: Arial, sans-serif; font-size: 14px; }
+  </style>
+  <rect width="100%" height="100%" fill="white"/>
+  <rect x="40" y="108" width="2360" height="1047" style="fill:rgb(235,245,255);stroke:none;"/>
+  <rect x="60" y="115" width="560" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="340" y="133" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">阶段一 · 下单请求与风控</text>
+  <line x1="120" y1="175" x2="340" y2="175" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="340,175 333,171 333,179" style="fill:#334155"/>
+  <rect x="186" y="166" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="178" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">点击提交订单</text>
+  <text x="230" y="165" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">1</text>
+  <path d="M 340 220 L 374 220 L 374 242 L 340 242" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="340,242 346,238.5 346,245.5" style="fill:#334155"/>
+  <text x="380" y="234" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">前端校验(地址/优惠券/发票)</text>
+  <text x="336" y="214" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">2</text>
+  <line x1="340" y1="265" x2="560" y2="265" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="560,265 553,261 553,269" style="fill:#334155"/>
+  <rect x="310" y="256" width="280" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="268" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">POST /api/order/create</text>
+  <text x="450" y="255" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">3</text>
+  <path d="M 560 310 L 594 310 L 594 332 L 560 332" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="560,332 566,328.5 566,335.5" style="fill:#334155"/>
+  <text x="600" y="324" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">JWT 鉴权 + 限流</text>
+  <text x="556" y="304" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">4</text>
+  <rect x="40" y="337" width="2360" height="802" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <line x1="560" y1="355" x2="340" y2="355" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="340,355 347,351 347,359" style="fill:#334155"/>
+  <rect x="346" y="346" width="208" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="358" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">401 Unauthorized</text>
+  <text x="450" y="345" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">5</text>
+  <line x1="340" y1="400" x2="120" y2="400" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="120,400 127,396 127,404" style="fill:#334155"/>
+  <rect x="180" y="391" width="100" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="403" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">提示登录已失效</text>
+  <text x="230" y="390" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">6</text>
+  <line x1="560" y1="445" x2="780" y2="445" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,445 773,441 773,449" style="fill:#334155"/>
+  <rect x="614" y="436" width="112" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="670" y="448" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">转发创建订单请求</text>
+  <text x="670" y="435" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">7</text>
+  <path d="M 780 490 L 814 490 L 814 512 L 780 512" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,512 786,508.5 786,515.5" style="fill:#334155"/>
+  <text x="820" y="504" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">幂等校验(requestId)</text>
+  <text x="776" y="484" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">8</text>
+  <line x1="780" y1="535" x2="1000" y2="535" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1000,535 993,531 993,539" style="fill:#334155"/>
+  <rect x="798" y="526" width="184" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="890" y="538" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">风控评分(用户/设备/IP)</text>
+  <text x="890" y="525" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">9</text>
+  <line x1="1000" y1="580" x2="780" y2="580" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="780,580 787,576 787,584" style="fill:#334155"/>
+  <rect x="840" y="571" width="100" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="890" y="583" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">评分与风险等级</text>
+  <text x="890" y="570" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">10</text>
+  <rect x="40" y="607" width="2360" height="500" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <line x1="780" y1="625" x2="560" y2="625" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="560,625 567,621 567,629" style="fill:#334155"/>
+  <rect x="620" y="616" width="100" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="670" y="628" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">订单转人工审核</text>
+  <text x="670" y="615" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">11</text>
+  <line x1="560" y1="670" x2="340" y2="670" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="340,670 347,666 347,674" style="fill:#334155"/>
+  <rect x="400" y="661" width="100" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="673" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">返回待审核状态</text>
+  <text x="450" y="660" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">12</text>
+  <line x1="340" y1="715" x2="120" y2="715" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="120,715 127,711 127,719" style="fill:#334155"/>
+  <rect x="186" y="706" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="718" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">提示等待审核</text>
+  <text x="230" y="705" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">13</text>
+  <line x1="780" y1="760" x2="1220" y2="760" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1220,760 1213,756 1213,764" style="fill:#334155"/>
+  <rect x="920" y="751" width="160" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="763" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">预占库存(SKU/数量)</text>
+  <text x="1000" y="750" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">14</text>
+  <line x1="1220" y1="805" x2="780" y2="805" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="780,805 787,801 787,809" style="fill:#334155"/>
+  <rect x="968" y="796" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="808" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">预占结果</text>
+  <text x="1000" y="795" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">15</text>
+  <rect x="40" y="832" width="2360" height="63" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <path d="M 780 850 L 814 850 L 814 872 L 780 872" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,872 786,868.5 786,875.5" style="fill:#334155"/>
+  <text x="820" y="864" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">生成缺货子订单</text>
+  <text x="776" y="844" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">16</text>
+  <rect x="40" y="832" width="85" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="843" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">alt [库存不足]</text>
+  <line x1="780" y1="911" x2="1880" y2="911" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1880,911 1873,907 1873,915" style="fill:#334155"/>
+  <rect x="1214" y="902" width="232" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1330" y="914" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">发布 OrderCreated 事件</text>
+  <text x="1330" y="901" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">17</text>
+  <line x1="780" y1="956" x2="560" y2="956" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="560,956 567,952 567,960" style="fill:#334155"/>
+  <rect x="614" y="947" width="112" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="670" y="959" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">订单号与待付金额</text>
+  <text x="670" y="946" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">18</text>
+  <line x1="560" y1="1001" x2="340" y2="1001" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="340,1001 347,997 347,1005" style="fill:#334155"/>
+  <rect x="406" y="992" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="1004" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">200 OK</text>
+  <text x="450" y="991" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">19</text>
+  <line x1="340" y1="1046" x2="120" y2="1046" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="120,1046 127,1042 127,1050" style="fill:#334155"/>
+  <rect x="192" y="1037" width="76" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="1049" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">跳转收银台</text>
+  <text x="230" y="1036" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">20</text>
+  <line x1="40" y1="742" x2="2400" y2="742" style="stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5"/>
+  <rect x="40" y="742" width="107.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="753" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">else [风险等级正常]</text>
+  <rect x="40" y="607" width="137.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="618" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">alt [风险等级 ≥ 高危阈值]</text>
+  <line x1="40" y1="427" x2="2400" y2="427" style="stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5"/>
+  <rect x="40" y="427" width="92.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="438" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">else [鉴权通过]</text>
+  <rect x="40" y="337" width="85" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="348" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">alt [鉴权失败]</text>
+  <rect x="40" y="1145" width="2360" height="774" style="fill:rgb(255,248,235);stroke:none;"/>
+  <rect x="60" y="1152" width="1660" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="890" y="1170" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">阶段二 · 支付发起与轮询</text>
+  <line x1="120" y1="1212" x2="340" y2="1212" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="340,1212 333,1208 333,1216" style="fill:#334155"/>
+  <rect x="168" y="1203" width="124" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="1215" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">选择支付方式并确认</text>
+  <text x="230" y="1202" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">21</text>
+  <line x1="340" y1="1257" x2="560" y2="1257" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="560,1257 553,1253 553,1261" style="fill:#334155"/>
+  <rect x="322" y="1248" width="256" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="1260" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">POST /api/pay/submit</text>
+  <text x="450" y="1247" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">22</text>
+  <line x1="560" y1="1302" x2="1440" y2="1302" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1440,1302 1433,1298 1433,1306" style="fill:#334155"/>
+  <rect x="962" y="1293" width="76" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="1305" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">创建支付单</text>
+  <text x="1000" y="1292" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">23</text>
+  <line x1="1440" y1="1347" x2="1660" y2="1347" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1660,1347 1653,1343 1653,1351" style="fill:#334155"/>
+  <rect x="1494" y="1338" width="112" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1550" y="1350" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">调用三方支付下单</text>
+  <text x="1550" y="1337" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">24</text>
+  <line x1="1660" y1="1392" x2="1440" y2="1392" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="1440,1392 1447,1388 1447,1396" style="fill:#334155"/>
+  <rect x="1494" y="1383" width="112" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1550" y="1395" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">支付链接与二维码</text>
+  <text x="1550" y="1382" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">25</text>
+  <line x1="1440" y1="1437" x2="560" y2="1437" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="560,1437 567,1433 567,1441" style="fill:#334155"/>
+  <rect x="968" y="1428" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="1440" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">支付单号</text>
+  <text x="1000" y="1427" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">26</text>
+  <line x1="560" y1="1482" x2="340" y2="1482" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="340,1482 347,1478 347,1486" style="fill:#334155"/>
+  <rect x="406" y="1473" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="1485" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">返回支付凭证</text>
+  <text x="450" y="1472" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">27</text>
+  <line x1="340" y1="1527" x2="120" y2="1527" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="120,1527 127,1523 127,1531" style="fill:#334155"/>
+  <rect x="192" y="1518" width="76" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="1530" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">展示二维码</text>
+  <text x="230" y="1517" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">28</text>
+  <rect x="40" y="1554" width="2360" height="349" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <line x1="340" y1="1572" x2="560" y2="1572" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="560,1572 553,1568 553,1576" style="fill:#334155"/>
+  <rect x="328" y="1563" width="244" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="1575" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">GET /api/pay/status</text>
+  <text x="450" y="1562" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">29</text>
+  <line x1="560" y1="1617" x2="1440" y2="1617" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1440,1617 1433,1613 1433,1621" style="fill:#334155"/>
+  <rect x="956" y="1608" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="1620" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">查询支付状态</text>
+  <text x="1000" y="1607" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">30</text>
+  <line x1="1440" y1="1662" x2="1660" y2="1662" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1660,1662 1653,1658 1653,1666" style="fill:#334155"/>
+  <rect x="1506" y="1653" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1550" y="1665" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">查询三方状态</text>
+  <text x="1550" y="1652" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">31</text>
+  <line x1="1660" y1="1707" x2="1440" y2="1707" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="1440,1707 1447,1703 1447,1711" style="fill:#334155"/>
+  <rect x="1518" y="1698" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1550" y="1710" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">返回状态</text>
+  <text x="1550" y="1697" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">32</text>
+  <line x1="1440" y1="1752" x2="560" y2="1752" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="560,1752 567,1748 567,1756" style="fill:#334155"/>
+  <rect x="968" y="1743" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="1755" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">返回状态</text>
+  <text x="1000" y="1742" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">33</text>
+  <line x1="560" y1="1797" x2="340" y2="1797" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="340,1797 347,1793 347,1801" style="fill:#334155"/>
+  <rect x="418" y="1788" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="1800" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">返回状态</text>
+  <text x="450" y="1787" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">34</text>
+  <rect x="40" y="1824" width="2360" height="63" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <rect x="260" y="1827" width="160" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="340" y="1845" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">停止轮询</text>
+  <rect x="40" y="1824" width="137.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="1835" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">opt [状态为 SUCCESS]</text>
+  <rect x="40" y="1554" width="175" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="1565" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">loop [每 3 秒轮询，最多 10 次]</text>
+  <rect x="40" y="1909" width="2360" height="806" style="fill:rgb(235,255,240);stroke:none;"/>
+  <rect x="1600" y="1916" width="340" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="1770" y="1934" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">阶段三 · 异步回调与履约</text>
+  <line x1="1660" y1="1976" x2="1440" y2="1976" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1440,1976 1447,1972 1447,1980" style="fill:#334155"/>
+  <rect x="1476" y="1967" width="148" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1550" y="1979" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">异步回调 notify</text>
+  <text x="1550" y="1966" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">35</text>
+  <path d="M 1440 2021 L 1474 2021 L 1474 2043 L 1440 2043" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1440,2043 1446,2039.5 1446,2046.5" style="fill:#334155"/>
+  <text x="1480" y="2035" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">验签 + 金额校验</text>
+  <text x="1436" y="2015" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">36</text>
+  <rect x="40" y="2048" width="2360" height="169" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <path d="M 1440 2066 L 1474 2066 L 1474 2088 L 1440 2088" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1440,2088 1446,2084.5 1446,2091.5" style="fill:#334155"/>
+  <text x="1480" y="2080" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">更新支付单状态</text>
+  <text x="1436" y="2060" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">37</text>
+  <line x1="1440" y1="2111" x2="1880" y2="2111" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1880,2111 1873,2107 1873,2115" style="fill:#334155"/>
+  <rect x="1538" y="2102" width="244" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1660" y="2114" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">发布 PaymentSucceeded</text>
+  <text x="1660" y="2101" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">38</text>
+  <path d="M 1440 2156 L 1474 2156 L 1474 2178 L 1440 2178" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1440,2178 1446,2174.5 1446,2181.5" style="fill:#334155"/>
+  <text x="1480" y="2170" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">记录告警日志</text>
+  <text x="1436" y="2150" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">39</text>
+  <line x1="40" y1="2138" x2="2400" y2="2138" style="stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5"/>
+  <rect x="40" y="2138" width="107.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="2149" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">option [校验失败]</text>
+  <rect x="40" y="2048" width="152.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="2059" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">critical [幂等与事务一致性]</text>
+  <line x1="1440" y1="2233" x2="1660" y2="2233" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="1660,2233 1653,2229 1653,2237" style="fill:#334155"/>
+  <rect x="1482" y="2224" width="136" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1550" y="2236" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">返回 success</text>
+  <text x="1550" y="2223" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">40</text>
+  <line x1="1440" y1="2278" x2="780" y2="2278" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,2278 787,2274 787,2282" style="fill:#334155"/>
+  <rect x="1060" y="2269" width="100" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1110" y="2281" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">通知订单已支付</text>
+  <text x="1110" y="2268" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">41</text>
+  <path d="M 780 2323 L 814 2323 L 814 2345 L 780 2345" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,2345 786,2341.5 786,2348.5" style="fill:#334155"/>
+  <text x="820" y="2337" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">订单状态更新为已支付</text>
+  <text x="776" y="2317" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">42</text>
+  <line x1="780" y1="2368" x2="1880" y2="2368" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1880,2368 1873,2364 1873,2372" style="fill:#334155"/>
+  <rect x="1232" y="2359" width="196" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1330" y="2371" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">发布 OrderPaid 事件</text>
+  <text x="1330" y="2358" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">43</text>
+  <rect x="40" y="2395" width="2360" height="304" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <line x1="1880" y1="2413" x2="2100" y2="2413" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="2100,2413 2093,2409 2093,2417" style="fill:#334155"/>
+  <rect x="1910" y="2404" width="160" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1990" y="2416" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">消费 OrderPaid</text>
+  <text x="1990" y="2403" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">44</text>
+  <path d="M 2100 2458 L 2134 2458 L 2134 2480 L 2100 2480" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="2100,2480 2106,2476.5 2106,2483.5" style="fill:#334155"/>
+  <text x="2140" y="2472" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">生成拣货单</text>
+  <text x="2096" y="2452" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">45</text>
+  <line x1="2100" y1="2503" x2="1880" y2="2503" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="1880,2503 1887,2499 1887,2507" style="fill:#334155"/>
+  <rect x="1964" y="2494" width="52" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1990" y="2506" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">ACK</text>
+  <text x="1990" y="2493" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">46</text>
+  <line x1="1880" y1="2548" x2="2320" y2="2548" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="2320,2548 2313,2544 2313,2552" style="fill:#334155"/>
+  <rect x="2020" y="2539" width="160" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="2100" y="2551" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">消费 OrderPaid</text>
+  <text x="2100" y="2538" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">47</text>
+  <path d="M 2320 2593 L 2354 2593 L 2354 2615 L 2320 2615" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="2320,2615 2326,2611.5 2326,2618.5" style="fill:#334155"/>
+  <text x="2360" y="2607" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">预约运单</text>
+  <text x="2316" y="2587" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">48</text>
+  <line x1="2320" y1="2638" x2="1880" y2="2638" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="1880,2638 1887,2634 1887,2642" style="fill:#334155"/>
+  <rect x="2074" y="2629" width="52" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="2100" y="2641" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">ACK</text>
+  <text x="2100" y="2628" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">49</text>
+  <line x1="40" y1="2530" x2="2400" y2="2530" style="stroke:#94a3b8;stroke-width:1;stroke-dasharray:5,5"/>
+  <rect x="40" y="2530" width="32.5" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="2541" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">and</text>
+  <rect x="40" y="2395" width="100" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="2406" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">par [并行下游处理]</text>
+  <rect x="40" y="2705" width="2360" height="414" style="fill:rgb(255,235,235);stroke:none;"/>
+  <rect x="720" y="2712" width="560" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="1000" y="2730" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">阶段四 · 超时与补偿</text>
+  <rect x="40" y="2754" width="2360" height="243" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <line x1="780" y1="2772" x2="1220" y2="2772" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1220,2772 1213,2768 1213,2776" style="fill:#334155"/>
+  <rect x="956" y="2763" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="2775" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">释放预占库存</text>
+  <text x="1000" y="2762" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">50</text>
+  <line x1="1220" y1="2817" x2="780" y2="2817" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="780,2817 787,2813 787,2821" style="fill:#334155"/>
+  <rect x="968" y="2808" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="2820" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">释放成功</text>
+  <text x="1000" y="2807" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">51</text>
+  <path d="M 780 2862 L 814 2862 L 814 2884 L 780 2884" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,2884 786,2880.5 786,2887.5" style="fill:#334155"/>
+  <text x="820" y="2876" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">关闭订单</text>
+  <text x="776" y="2856" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">52</text>
+  <line x1="780" y1="2907" x2="1880" y2="2907" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1880,2907 1873,2903 1873,2911" style="fill:#334155"/>
+  <rect x="1238" y="2898" width="184" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1330" y="2910" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">发布 OrderClosed</text>
+  <text x="1330" y="2897" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">53</text>
+  <line x1="1880" y1="2952" x2="120" y2="2952" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="120,2952 127,2948 127,2956" style="fill:#334155"/>
+  <rect x="956" y="2943" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1000" y="2955" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">推送关单通知</text>
+  <text x="1000" y="2942" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">54</text>
+  <rect x="40" y="2754" width="175" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="2765" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">break [支付超时(30 分钟未支付)]</text>
+  <rect x="40" y="2995" width="2360" height="108" style="fill:#f8fafc;fill-opacity:0.5;stroke:#94a3b8;stroke-width:1;rx:4;ry:4"/>
+  <path d="M 780 3013 L 814 3013 L 814 3035 L 780 3035" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,3035 786,3031.5 786,3038.5" style="fill:#334155"/>
+  <text x="820" y="3027" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">写入本地消息表待补偿</text>
+  <text x="776" y="3007" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">55</text>
+  <rect x="700" y="3043" width="160" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="780" y="3061" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">定时任务按指数退避重试</text>
+  <rect x="40" y="2995" width="115" height="16" style="fill:#f1f5f9;stroke:#cbd5e1;stroke-width:1;rx:3"/>
+  <text x="44" y="3006" style="text-anchor:start;font-size:10px;fill:#475569;font-weight:bold;font-family:Arial, sans-serif">opt [库存服务调用异常]</text>
+  <rect x="40" y="3109" width="2360" height="382" style="fill:rgb(245,245,255);stroke:none;"/>
+  <rect x="60" y="3116" width="2320" height="36" style="fill:#fffde7;stroke:#e6c300;stroke-width:1;rx:4;"/>
+  <text x="1220" y="3134" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;font-family:Arial">阶段五 · 配送签收与结算</text>
+  <line x1="2320" y1="3176" x2="120" y2="3176" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="120,3176 127,3172 127,3180" style="fill:#334155"/>
+  <rect x="1176" y="3167" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1220" y="3179" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">推送物流轨迹</text>
+  <text x="1220" y="3166" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">56</text>
+  <line x1="120" y1="3221" x2="340" y2="3221" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="340,3221 333,3217 333,3225" style="fill:#334155"/>
+  <rect x="198" y="3212" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="230" y="3224" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">确认收货</text>
+  <text x="230" y="3211" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">57</text>
+  <line x1="340" y1="3266" x2="560" y2="3266" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="560,3266 553,3262 553,3270" style="fill:#334155"/>
+  <rect x="304" y="3257" width="292" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="450" y="3269" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">POST /api/order/confirm</text>
+  <text x="450" y="3256" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">58</text>
+  <line x1="560" y1="3311" x2="780" y2="3311" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,3311 773,3307 773,3315" style="fill:#334155"/>
+  <rect x="638" y="3302" width="64" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="670" y="3314" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">确认收货</text>
+  <text x="670" y="3301" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">59</text>
+  <path d="M 780 3356 L 814 3356 L 814 3378 L 780 3378" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="780,3378 786,3374.5 786,3381.5" style="fill:#334155"/>
+  <text x="820" y="3370" style="text-anchor:start;dominant-baseline:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">订单状态更新为已完成</text>
+  <text x="776" y="3350" style="text-anchor:end;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">60</text>
+  <line x1="780" y1="3401" x2="1880" y2="3401" style="stroke:#334155;stroke-width:1.5;fill:none"/>
+  <polygon points="1880,3401 1873,3397 1873,3405" style="fill:#334155"/>
+  <rect x="1220" y="3392" width="220" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="1330" y="3404" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">发布 OrderCompleted</text>
+  <text x="1330" y="3391" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">61</text>
+  <line x1="1880" y1="3446" x2="2320" y2="3446" style="stroke:#334155;stroke-width:1.5;stroke-dasharray:6,4;fill:none"/>
+  <polygon points="2320,3446 2313,3442 2313,3450" style="fill:#334155"/>
+  <rect x="2056" y="3437" width="88" height="18" style="fill:#ffffff;stroke:none;"/>
+  <text x="2100" y="3449" style="text-anchor:middle;font-size:11px;fill:#1e293b;font-family:Arial, sans-serif">下发结算指令</text>
+  <text x="2100" y="3436" style="text-anchor:middle;font-size:10px;font-weight:600;fill:#64748b;font-family:Arial, sans-serif">62</text>
+  <rect x="48" y="4" width="364" height="90" style="fill:rgb(232,240,254);fill-opacity:0.5;stroke:rgb(232,240,254);stroke-width:1;rx:6;ry:6"/>
+  <text x="56" y="18" style="text-anchor:start;font-size:11px;font-weight:600;fill:#475569;font-family:Arial, sans-serif">用户侧</text>
+  <rect x="488" y="4" width="144" height="90" style="fill:rgb(255,247,230);fill-opacity:0.5;stroke:rgb(255,247,230);stroke-width:1;rx:6;ry:6"/>
+  <text x="496" y="18" style="text-anchor:start;font-size:11px;font-weight:600;fill:#475569;font-family:Arial, sans-serif">接入层</text>
+  <rect x="708" y="4" width="804" height="90" style="fill:rgb(232,248,238);fill-opacity:0.5;stroke:rgb(232,248,238);stroke-width:1;rx:6;ry:6"/>
+  <text x="716" y="18" style="text-anchor:start;font-size:11px;font-weight:600;fill:#475569;font-family:Arial, sans-serif">业务服务</text>
+  <rect x="1588" y="4" width="804" height="90" style="fill:rgb(245,235,255);fill-opacity:0.5;stroke:rgb(245,235,255);stroke-width:1;rx:6;ry:6"/>
+  <text x="1596" y="18" style="text-anchor:start;font-size:11px;font-weight:600;fill:#475569;font-family:Arial, sans-serif">外部与异步链路</text>
+  <line x1="120" y1="100" x2="120" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="340" y1="100" x2="340" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="560" y1="100" x2="560" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="780" y1="100" x2="780" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="1000" y1="100" x2="1000" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="1220" y1="100" x2="1220" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="1440" y1="100" x2="1440" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="1660" y1="100" x2="1660" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="1880" y1="100" x2="1880" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="2100" y1="100" x2="2100" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <line x1="2320" y1="100" x2="2320" y2="3513" style="stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:6,4"/>
+  <rect x="60" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="120" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">用户</text>
+  <rect x="280" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="340" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">前端App</text>
+  <rect x="500" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="560" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">API网关</text>
+  <rect x="720" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="780" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">订单服务</text>
+  <rect x="940" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="1000" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">风控服务</text>
+  <rect x="1160" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="1220" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">库存服务</text>
+  <rect x="1380" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="1440" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">支付服务</text>
+  <rect x="1600" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="1660" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">第三方支付</text>
+  <rect x="1820" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="1880" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">消息队列</text>
+  <rect x="2040" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="2100" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">仓储服务</text>
+  <rect x="2260" y="40" width="120" height="40" style="fill:#f8fafc;stroke:#64748b;stroke-width:1.5;rx:6"/>
+  <text x="2320" y="61" style="text-anchor:middle;dominant-baseline:middle;font-size:13px;font-weight:600;fill:#0f172a;font-family:Arial, sans-serif">物流服务</text>
+</svg>
