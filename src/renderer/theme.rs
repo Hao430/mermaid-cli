@@ -76,3 +76,134 @@ pub fn default_subgraph_style() -> String {
 pub fn default_subgraph_title_style() -> String {
     "text-anchor:start;dominant-baseline:middle;font-size:13px;font-weight:bold;fill:var(--mermaid-subgraph-title, #475569);font-family:Arial, sans-serif".to_string()
 }
+
+/// Resolve CSS custom properties in inline styles to concrete values.
+///
+/// resvg/usvg (used for PNG output) does not support CSS custom properties,
+/// so `fill:var(--mermaid-node-bg, #ffffff)` is dropped and shapes fall back
+/// to black. This rewrites every `var(--name[, fallback])` expression using
+/// the values declared in the document's first `:root` block.
+///
+/// SVG output keeps the variables (browsers support them and can switch
+/// themes via `prefers-color-scheme`); only the raster pipeline flattens.
+pub fn inline_css_variables(svg: &str) -> String {
+    let vars = root_variables(svg);
+    if vars.is_empty() {
+        return svg.to_string();
+    }
+
+    let mut out = String::with_capacity(svg.len());
+    let mut rest = svg;
+
+    while let Some(pos) = rest.find("var(") {
+        out.push_str(&rest[..pos]);
+        let after = &rest[pos + 4..];
+
+        // Find the matching ')' so nested calls (e.g. rgb(...)) survive.
+        let mut depth = 1usize;
+        let mut end = None;
+        for (i, ch) in after.char_indices() {
+            match ch {
+                '(' => depth += 1,
+                ')' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = Some(i);
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let Some(end) = end else {
+            // Unterminated expression: leave the remainder untouched.
+            out.push_str(&rest[pos..]);
+            return out;
+        };
+
+        let inner = &after[..end];
+        let (name, fallback) = match inner.split_once(',') {
+            Some((n, f)) => (n.trim(), Some(f.trim())),
+            None => (inner.trim(), None),
+        };
+        let value = vars
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, v)| v.as_str())
+            .or(fallback);
+
+        match value {
+            Some(v) => out.push_str(v),
+            None => out.push_str(&rest[pos..pos + 4 + end + 1]),
+        }
+        rest = &after[end + 1..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// Collect `--name: value` declarations from the document's first `:root` block.
+fn root_variables(svg: &str) -> Vec<(String, String)> {
+    let Some(start) = svg.find(":root") else {
+        return Vec::new();
+    };
+    let Some(open_rel) = svg[start..].find('{') else {
+        return Vec::new();
+    };
+    let open = start + open_rel;
+    let Some(close_rel) = svg[open..].find('}') else {
+        return Vec::new();
+    };
+    svg[open + 1..open + close_rel]
+        .split(';')
+        .filter_map(|decl| {
+            let (name, value) = decl.split_once(':')?;
+            let name = name.trim();
+            let value = value.trim();
+            if name.starts_with("--") && !value.is_empty() {
+                Some((name.to_string(), value.to_string()))
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn inline_resolves_variable_from_root() {
+        let svg = r#"<svg><style>:root { --mermaid-node-bg: #ffffff; }</style>
+            <rect style="fill:var(--mermaid-node-bg, #000000)"/></svg>"#;
+        let out = inline_css_variables(svg);
+        assert!(out.contains("fill:#ffffff"));
+        assert!(!out.contains("var("));
+    }
+
+    #[test]
+    fn inline_uses_fallback_for_unknown_variable() {
+        let svg = r#"<svg><style>:root { --known: #111111; }</style>
+            <rect style="stroke:var(--missing, #abcdef)"/></svg>"#;
+        let out = inline_css_variables(svg);
+        assert!(out.contains("stroke:#abcdef"));
+    }
+
+    #[test]
+    fn inline_leaves_unknown_variable_without_fallback() {
+        let svg = r#"<svg><style>:root { --known: #111111; }</style>
+            <rect style="stroke:var(--missing)"/></svg>"#;
+        let out = inline_css_variables(svg);
+        assert!(out.contains("var(--missing)"));
+    }
+
+    #[test]
+    fn inline_ignores_dark_media_query_overrides() {
+        let svg = r#"<svg><style>:root { --mermaid-node-bg: #ffffff; }
+            @media (prefers-color-scheme: dark) { :root { --mermaid-node-bg: #1e293b; } }</style>
+            <rect style="fill:var(--mermaid-node-bg, #000000)"/></svg>"#;
+        let out = inline_css_variables(svg);
+        assert!(out.contains("fill:#ffffff"));
+    }
+}

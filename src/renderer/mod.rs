@@ -3060,6 +3060,10 @@ impl Renderer {
         let svg_data = svg_data
             .replace("font-family:Arial", "font-family:Arial, sans-serif")
             .replace("font-family: Arial", "font-family: Arial, sans-serif");
+        // resvg/usvg does not understand CSS custom properties: flatten
+        // `var(--mermaid-*, fallback)` to concrete colors before rasterizing,
+        // otherwise every shape falls back to black.
+        let svg_data = theme::inline_css_variables(&svg_data);
 
         // Load system fonts for text rendering in PNG output
         let mut fontdb = usvg::fontdb::Database::new();
