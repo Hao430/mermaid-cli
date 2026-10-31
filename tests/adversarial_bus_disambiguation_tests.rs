@@ -591,8 +591,10 @@ fn test_adv_bus_19_order_flow_fillet_distance_characterization() {
         d
     );
     assert!(
-        (f1.cx - 337.5).abs() < 2.0 && (f2.cx - 337.5).abs() < 2.0,
-        "Close pair must be at X=337.5"
+        (f1.cx - f2.cx).abs() < 1.0,
+        "Close pair must share the same column (C10 breakout vs C7 drop-in), got {:.1} vs {:.1}",
+        f1.cx,
+        f2.cx
     );
 }
 

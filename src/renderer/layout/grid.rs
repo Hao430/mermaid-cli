@@ -289,7 +289,7 @@ impl LayoutGrid {
             .max(global_layers_width)
             .max(slot_width)
             .max(canvas_width as f32);
-        let effective_width = required_width;
+        let mut effective_width = required_width;
         let canvas_center_x = effective_width / 2.0;
 
         // Construct SubgraphColumnGrids
@@ -425,6 +425,80 @@ impl LayoutGrid {
             }
         }
 
+        // Step 4.5: Staircase alignment — shift each phase subgraph so that its
+        // entry nodes line up with the actual outgoing positions of the previous
+        // phase, instead of every phase snapping back to the canvas centerline.
+        let mut sg_drift: HashMap<usize, f32> = HashMap::new();
+        for sg_idx in 0..subgraphs.len() {
+            let mut acc = 0.0f32;
+            let mut count = 0usize;
+            for prev_idx in 0..sg_idx {
+                let prev_nodes = match sg_nodes.get(&prev_idx) {
+                    Some(n) => n,
+                    None => continue,
+                };
+                let prev_drift = sg_drift.get(&prev_idx).copied().unwrap_or(0.0);
+                for u in prev_nodes {
+                    let xu = match node_positions.get(u) {
+                        Some(&(x, _)) => x + NODE_WIDTH / 2.0,
+                        None => continue,
+                    };
+                    if let Some(neighbors) = branch_analyzer.forward_neighbors(u) {
+                        for v in neighbors {
+                            if node_to_sg.get(v).copied() == Some(sg_idx) {
+                                if let Some(&(xv, _)) = node_positions.get(v) {
+                                    acc += (xu + prev_drift) - (xv + NODE_WIDTH / 2.0);
+                                    count += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            let drift = if count > 0 {
+                acc / count as f32
+            } else {
+                sg_drift
+                    .get(&sg_idx.saturating_sub(1))
+                    .copied()
+                    .unwrap_or(0.0)
+            };
+            let max_drift = 3.0 * (NODE_WIDTH + HORIZONTAL_SPACING);
+            sg_drift.insert(sg_idx, drift.clamp(-max_drift, max_drift));
+        }
+
+        for (nid, pos) in node_positions.iter_mut() {
+            if let Some(&sg_idx) = node_to_sg.get(nid) {
+                if let Some(&drift) = sg_drift.get(&sg_idx) {
+                    pos.0 += drift;
+                }
+            }
+        }
+
+        // Re-resolve layer collisions introduced by the staircase shift without
+        // re-centering the layer (that would cancel the stagger).
+        for layer_nodes in layers.iter() {
+            let mut positioned: Vec<(String, f32)> = layer_nodes
+                .iter()
+                .filter_map(|id| node_positions.get(id).map(|&(x, _)| (id.clone(), x)))
+                .collect();
+            if positioned.len() < 2 {
+                continue;
+            }
+            positioned.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+            for i in 1..positioned.len() {
+                let min_allowed = positioned[i - 1].1 + NODE_WIDTH + HORIZONTAL_SPACING;
+                if positioned[i].1 < min_allowed {
+                    positioned[i].1 = min_allowed;
+                }
+            }
+            for (nid, x) in positioned {
+                if let Some(pos) = node_positions.get_mut(&nid) {
+                    pos.0 = x;
+                }
+            }
+        }
+
         // Step 5: Compute initial subgraph bounding boxes (F10)
         let mut subgraph_bounds: HashMap<String, (f32, f32, f32, f32)> = HashMap::new();
 
@@ -462,7 +536,8 @@ impl LayoutGrid {
 
             let grid_width = sg_widths.get(&sg_idx).copied().unwrap_or(0.0);
             let mut sg_w = grid_width.max(max_node_x - min_node_x + 2.0 * SUBGRAPH_PADDING_X);
-            let mut sg_x = canvas_center_x - sg_w / 2.0;
+            let sg_center = canvas_center_x + sg_drift.get(&sg_idx).copied().unwrap_or(0.0);
+            let mut sg_x = sg_center - sg_w / 2.0;
 
             // Ensure bounds fully enclose all internal nodes
             if min_node_x - SUBGRAPH_PADDING_X < sg_x {
@@ -483,6 +558,31 @@ impl LayoutGrid {
                     subgraph_bounds.insert(title.clone(), (sg_x, sg_y, sg_w, sg_h));
                 }
             }
+        }
+
+        // Step 5.5: Normalize horizontal bounds after staircase shifts.
+        let mut min_x = f32::INFINITY;
+        let mut max_x = f32::NEG_INFINITY;
+        for &(x, _) in node_positions.values() {
+            min_x = min_x.min(x);
+            max_x = max_x.max(x + NODE_WIDTH);
+        }
+        for &(x, _, w, _) in subgraph_bounds.values() {
+            min_x = min_x.min(x);
+            max_x = max_x.max(x + w);
+        }
+        if min_x < CANVAS_PADDING {
+            let dx = CANVAS_PADDING - min_x;
+            for pos in node_positions.values_mut() {
+                pos.0 += dx;
+            }
+            for b in subgraph_bounds.values_mut() {
+                b.0 += dx;
+            }
+            max_x += dx;
+        }
+        if max_x + CANVAS_PADDING > effective_width {
+            effective_width = max_x + CANVAS_PADDING;
         }
 
         // Step 6: Vertical Phase Stacking & Zero Collision Guarantee (F11)
