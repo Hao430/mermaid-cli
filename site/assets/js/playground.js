@@ -435,8 +435,11 @@ export function downloadPng() {
       parseFloat(svg.getAttribute('height')) ||
       svg.clientHeight ||
       600;
+    // 小图允许 2x 高清导出；大图保持 1:1 固有尺寸，
+    // 避免把 872x3168 的图放大成 1127x4096（会误以为画布超过 3300px 预算）。
     const maxDimension = 4096;
-    const scale = Math.min(2, maxDimension / Math.max(intrinsicW, intrinsicH));
+    const scale =
+      Math.max(intrinsicW, intrinsicH) * 2 <= maxDimension ? 2 : 1;
     const width = Math.max(1, Math.round(intrinsicW * scale));
     const height = Math.max(1, Math.round(intrinsicH * scale));
 
