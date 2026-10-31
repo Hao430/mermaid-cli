@@ -112,9 +112,6 @@ jobs:
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
     steps:
       - uses: actions/checkout@v5
 
@@ -131,10 +128,13 @@ jobs:
         run: cargo clippy -- -D warnings
         continue-on-error: true
 
-      - name: Security audit
-        uses: rustsec/audit-check@v2.0.0
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tool: cargo-audit
+
+      - name: Security audit
+        run: cargo audit
 
   # 生成性能报告
   report:
