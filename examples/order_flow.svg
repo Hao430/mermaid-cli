@@ -139,17 +139,17 @@
   <polygon points="465.0,1292.0 460.5,1284.0 469.5,1284.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <rect x="446" y="1270.5" width="38" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
   <text x="465" y="1283.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">成功</text>
-  <path d="M 380.0 1717.0 L 380.0 1723.2 Q 380.0 1729.5 373.8 1729.5 L 109.0 1729.5 Q 101.0 1729.5 101.0 1737.5 L 101.0 2126.5 Q 101.0 2134.5 109.0 2134.5 L 380.0 2134.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <rect x="64" y="1923" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="101" y="1936" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓有货</text>
+  <path d="M 380.0 1717.0 L 380.0 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <polygon points="380.0,2192.0 375.5,2184.0 384.5,2184.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <rect x="311" y="1945.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="348" y="1958.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓有货</text>
   <path d="M 380.0 1729.5 L 458.8 1729.5 Q 465.0 1729.5 465.0 1735.8 L 465.0 1742.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="465.0,1742.0 460.5,1734.0 469.5,1734.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <rect x="475.5" y="1720.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
-  <text x="512.5" y="1733.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓缺货</text>
+  <rect x="379.5" y="1720.5" width="74" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
+  <text x="416.5" y="1733.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">本地仓缺货</text>
   <path d="M 465.0 1807.0 L 465.0 1832.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="465.0,1832.0 460.5,1824.0 469.5,1824.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 1909.5 L 669.5 1909.5 Q 677.5 1909.5 677.5 1917.5 L 677.5 2120.5 Q 677.5 2128.5 669.5 2128.5 L 388.0 2128.5 Q 380.0 2128.5 380.0 2136.5 L 380.0 2192.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
-  <polygon points="380.0,2192.0 375.5,2184.0 384.5,2184.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
+  <path d="M 465.0 1909.5 L 669.5 1909.5 Q 677.5 1909.5 677.5 1917.5 L 677.5 2120.5 Q 677.5 2128.5 669.5 2128.5 L 380.0 2128.5" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <rect x="510.75" y="2119.5" width="36" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
   <text x="528.75" y="2132.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">是</text>
   <path d="M 465.0 1897.0 L 465.0 1922.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
@@ -158,7 +158,7 @@
   <text x="465" y="1913.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">否</text>
   <path d="M 465.0 1987.0 L 465.0 2012.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="465.0,2012.0 460.5,2004.0 469.5,2004.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
-  <path d="M 465.0 2077.0 L 465.0 2083.2 Q 465.0 2089.5 458.8 2089.5 L 301.2 2089.5 Q 295.0 2089.5 295.0 2095.8 L 295.0 2102.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
+  <path d="M 465.0 2077.0 L 465.0 2083.2 Q 465.0 2089.5 458.8 2089.5 L 385.0 2089.5 A 5.0 5.0 0 0 0 375.0 2089.5 L 301.2 2089.5 Q 295.0 2089.5 295.0 2095.8 L 295.0 2102.0" style="fill:none;stroke:var(--mermaid-edge-stroke, #475569);stroke-width:var(--mermaid-edge-width, 1.5)"/>
   <polygon points="295.0,2102.0 290.5,2094.0 299.5,2094.0" style="fill:var(--mermaid-arrowhead-fill, #475569);stroke:none"/>
   <rect x="355" y="2080.5" width="50" height="18" style="fill:var(--mermaid-pill-bg, #ffffff);stroke:var(--mermaid-pill-border, #cbd5e1);stroke-width:1;rx:4;ry:4"/>
   <text x="380" y="2093.5" style="text-anchor:middle;dominant-baseline:middle;font-size:11px;fill:var(--mermaid-text-primary, #475569);font-family:Arial, sans-serif">不接受</text>

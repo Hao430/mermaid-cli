@@ -338,9 +338,35 @@ impl Renderer {
             if !is_back {
                 if let (Some(&l1), Some(&l2)) = (node_to_layer.get(from), node_to_layer.get(to)) {
                     if l2 > l1 + 1 {
-                        if let (Some(&(x1, y1)), Some(&(_x2, y2))) =
+                        if let (Some(&(x1, y1)), Some(&(x2, y2))) =
                             (node_positions.get(from), node_positions.get(to))
                         {
+                            let cx_from = x1 + node_width / 2.0;
+                            let cx_to = x2 + node_width / 2.0;
+                            let y_min = y1 + node_height;
+                            let y_max = y2;
+
+                            // If both endpoints share the same column and the
+                            // straight vertical corridor is free, keep it straight
+                            // instead of detouring through a branch bypass lane.
+                            if (cx_from - cx_to).abs() < 1.0 {
+                                let corridor_clear =
+                                    node_positions.iter().all(|(nid, &(nx, ny))| {
+                                        if nid == from || nid == to {
+                                            return true;
+                                        }
+                                        if ny + node_height > y_min + 2.0 && ny < y_max - 2.0 {
+                                            let n_cx = nx + node_width / 2.0;
+                                            return (n_cx - cx_from).abs()
+                                                >= node_width / 2.0 + 8.0;
+                                        }
+                                        true
+                                    });
+                                if corridor_clear {
+                                    continue;
+                                }
+                            }
+
                             let slot_opt = branch_analyzer.bypass_slot_for_edge(from, to, l1, l2);
                             let canvas_center_x = layout_grid.effective_width / 2.0;
                             let sg_center_x = node_to_sg_id
@@ -356,9 +382,6 @@ impl Renderer {
                                         + slot * (node_width + layout::LayoutGrid::H_SPACING)
                                 })
                                 .unwrap_or(x1 + node_width / 2.0);
-
-                            let y_min = y1 + node_height;
-                            let y_max = y2;
 
                             // 检查候选列在中间层是否穿透任何节点
                             let mut obstructed = false;
